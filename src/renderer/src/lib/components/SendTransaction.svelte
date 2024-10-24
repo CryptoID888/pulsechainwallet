@@ -1,0 +1,145 @@
+<script lang="ts">
+  import Icon from '@iconify/svelte'
+  import { type Hex, type SendTransactionParameters, isAddress } from 'viem'
+  import { Tab, TabGroup } from '@skeletonlabs/skeleton'
+  import { config } from '$lib/config'
+  import { wallet } from '$lib/api'
+
+  import Prep from '$lib/components/transaction/Prep.svelte'
+  import Pay from '$lib/components/transaction/Pay.svelte'
+  import { loading } from '$lib/loading'
+  import { type PrepConfig, type ViemRawTransaction } from '$lib/transactions'
+  import { Action } from '$lib/action'
+  import BroadcastTransaction from '$lib/components/transaction/Broadcast.svelte'
+  import { currentAccount as account } from '$lib/wallets'
+  import { onMount } from 'svelte'
+  import type { TransactionAction } from '$common/types'
+
+  export let action!: TransactionAction
+
+  export const updatePrep = async () => {
+    const formData = new FormData(form)
+    prep = [...formData.entries()].reduce((inputs, [key, value]) => {
+      if (key === 'to-address') {
+        if (!isAddress(value as string)) {
+          return inputs
+        }
+        inputs.to = value as Hex
+      } else if (key === 'from-address') {
+        if (!isAddress(value as string)) {
+          throw new Error('from address invalid')
+        }
+        if (value !== $account?.address) {
+          throw new Error('account not loaded')
+        }
+        inputs.from = $account
+      } else if (key === 'value') {
+        inputs.value = BigInt(value as string)
+      } else if (key === 'data') {
+        inputs.data = value as Hex
+      }
+      return inputs
+    }, {} as Partial<PrepConfig>) as PrepConfig
+    // console.log([...formData.entries()], prep)
+  }
+  const setToValue = (value: number) => {
+    if (value < tabSet) {
+      tabSet = value
+    }
+  }
+  const handleConfirm = async (e: CustomEvent) => {
+    const payconfig = e.detail as ViemRawTransaction
+    pay = payconfig
+    tabSet = 2
+    const chainId = $config.chainId
+    hash = await wallet.sendTransaction(chainId, $account, payconfig as unknown as SendTransactionParameters, action)
+  }
+  const emptyBytes = '0x'
+
+  export let prep: PrepConfig | null = null
+  export let pay: ViemRawTransaction | null = null
+
+  let tabSet: number = 0
+  const increment = () => loading.increment('transaction')
+  const decrement = () => loading.decrement('transaction')
+  $: if (tabSet > 0) {
+    if (!$loading.categories.transaction) {
+      // presumes we are the only one in control of this
+      increment()
+    }
+  } else {
+    decrement()
+  }
+  onMount(() => () => {
+    if (!$loading.isResolved('transaction')) {
+      return
+    }
+    decrement()
+  })
+
+  let hash: Hex = emptyBytes
+  let form!: HTMLFormElement
+  $: prepSubmitDisabled = !isAddress((prep?.to || '') as unknown as Hex)
+</script>
+
+<div class="flex w-full px-4">
+  <TabGroup class="flex w-full flex-col">
+    <Tab padding="p-0" bind:group={tabSet} name="tab1" value={0}>
+      <button on:click={() => setToValue(0)} type="button" class="flex flex-row gap-2 px-4 py-2">
+        <Icon icon="system-uicons:write" height={24} />
+        <span>Prepare</span>
+      </button>
+    </Tab>
+    <Tab padding="p-0" bind:group={tabSet} name="tab2" value={1}>
+      <button
+        on:click={() => setToValue(1)}
+        type="button"
+        class="flex flex-row gap-2 px-4 py-2"
+        class:text-neutral-400={tabSet < 1}>
+        <Icon icon="mdi:gas" height={24} />
+        <span>Pay</span>
+      </button>
+    </Tab>
+    <Tab padding="p-0" bind:group={tabSet} name="tab3" value={2}>
+      <button
+        on:click={() => setToValue(2)}
+        type="button"
+        class="flex flex-row gap-2 px-4 py-2"
+        class:text-neutral-400={tabSet < 2}>
+        <Icon icon="ph:broadcast" height={24} />
+        <span>Broadcast</span>
+      </button>
+    </Tab>
+    <svelte:fragment slot="panel">
+      {#if tabSet === 0}
+        <div class="w-full">
+          <div class="flex flex-col gap-4">
+            <form bind:this={form} class="contents">
+              <Prep
+                account={$account}
+                disabled={prepSubmitDisabled}
+                on:submit={() => {
+                  tabSet = 1
+                }}><slot {prep} {updatePrep} /></Prep>
+            </form>
+          </div>
+        </div>
+      {:else if tabSet === 1 && prep}
+        <div class="w-full">
+          <Pay
+            action={prep.data === '0x' ? Action.NATIVE_TRANSFER : Action.ERC20_TRANSFER}
+            {prep}
+            estimateGas
+            on:confirm={handleConfirm}
+            on:back={() => {
+              tabSet = 0
+            }} />
+        </div>
+      {:else if tabSet === 2}
+        <div class="w-full">
+          <BroadcastTransaction bind:hash />
+        </div>
+      {/if}
+    </svelte:fragment>
+  </TabGroup>
+</div>

@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  override themes here to make them more coherent
+*/
+:root {
+  --handle-focus: var(--color-primary-400);
+  --range-handle-focus: var(--color-primary-400);
+
+  [data-theme='wintry'] {
+    --theme-rounded-base: 4px;
+    --theme-font-family-heading: Quicksand, sans-serif;
+  }
+}
+
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  overflow: auto;
+}
+
+#app {
+  display: contents;
+}
+
+.btn {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+  &:active {
+    --tw-scale-x: 100%;
+    --tw-scale-y: 100%;
+    @apply shadow-inner;
+  }
+}
+
+.btn-sm {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
