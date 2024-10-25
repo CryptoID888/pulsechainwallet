@@ -22,10 +22,9 @@ let preparedQueries: null | Record<QueryKeys, BetterSqlite3.Statement> = null
 
 import walletMigrationUp from './migrations/V000__wallet.up.sql?asset'
 import accountMigrationUp from './migrations/V001__account.up.sql?asset'
-import transactionMigrationUp from './migrations/V002__transaction.up.sql?asset'
+import transactionMigrationUp from './migrations/V002__chain-transaction.up.sql?asset'
 import contactMigrationUp from './migrations/V003__contact.up.sql?asset'
 import proofMigrationUp from './migrations/V004__proof.up.sql?asset'
-import chainTransactionMigrationUp from './migrations/V005__chain-transaction.up.sql?asset'
 import { Account, WalletMetadata } from '$common/wallets';
 import { Hex } from 'viem';
 import { setTimeout } from 'timers/promises';
@@ -36,7 +35,6 @@ const migrationsUp = [
   transactionMigrationUp,
   contactMigrationUp,
   proofMigrationUp,
-  chainTransactionMigrationUp,
 ]
 
 const migrate = (db: BetterSqlite3.Database, migrationPaths: string[]) => (

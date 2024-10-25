@@ -1,9 +1,13 @@
 <script lang="ts">
   import Icon from '@iconify/svelte'
   import TokenWithImage from './TokenWithImage.svelte'
-  import { tokensOnActiveChain, type Erc20Token } from '$lib/tokens'
+  import type { Erc20Token } from '$common/token'
+  import { tokensOnActiveChain } from '$lib/tokens'
   import { writable } from 'svelte/store'
   import { getDrawerStore } from '@skeletonlabs/skeleton'
+  import { createEventDispatcher } from 'svelte'
+
+  const dispatch = createEventDispatcher()
   let entering = false
 
   export let token!: Erc20Token
@@ -15,6 +19,7 @@
     const current = writable(token)
     current.subscribe((tkn) => {
       token = tkn
+      dispatch('change', tkn)
     })
     drawerStore.open({
       id: 'token',
@@ -31,8 +36,7 @@
   type="button"
   {disabled}
   class="token-selector btn flex flex-row items-center rounded-none leading-6 transition-all"
-  on:click={openDrawer}
->
+  on:click={openDrawer}>
   <TokenWithImage {token} />
   <span class="flex">
     <Icon icon="mdi:chevron-down" height={20} width={20} />

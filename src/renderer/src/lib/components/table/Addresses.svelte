@@ -1,22 +1,21 @@
 <script lang="ts">
-  //Import local datatable components
   import ThFilter from '$lib/components/table/ThFilter.svelte'
   import Search from '$lib/components/table/Search.svelte'
   import RowsPerPage from '$lib/components/table/RowsPerPage.svelte'
   import RowCount from '$lib/components/table/RowCount.svelte'
   import Pagination from '$lib/components/table/Pagination.svelte'
+  import Copy from '$lib/components/Copy.svelte'
+  import Back from '$lib/components/Back.svelte'
 
   import { DataHandler } from '@vincjo/datatables'
-  import { walletAccountsUnder } from '$lib/wallets'
   import { SlideToggle } from '@skeletonlabs/skeleton'
-  import Copy from '../Copy.svelte'
-  import { contactByAddress } from '$lib/contacts'
   import type { Hex } from 'viem'
-  import Back from '../Back.svelte'
-  import { push as goto } from 'svelte-spa-router'
+  import { pop } from 'svelte-spa-router'
   import Portal from 'svelte-portal'
-  import { stickyFilledOnMount } from '$lib/ui'
   import { onMount } from 'svelte'
+
+  import { contactByAddress } from '$lib/contacts'
+  import { stickyFilledOnMount } from '$lib/ui'
   import { wallet } from '$lib/api'
   import type { Account } from '$common/wallets'
 
@@ -33,12 +32,8 @@
       if (val) adds.add(+id)
       else adds.delete(+id)
     }
-    // const updates = {
-    //   added: [...adds.values()],
-    // }
-    // updateWallet(index, updates)
     await wallet.updateAddedAccounts(walletId, [...adds.values()])
-    goto('/account')
+    pop()
   }
   const updateLocalContactName = (e: Event, address: Hex) => {
     const target = e.target as HTMLSpanElement
@@ -58,13 +53,12 @@
 
   let indices: Account[] = []
   let addedList: Account[] = []
-  // $: {
-  //   // console.log('walletId', walletId)
-  // }
-  walletAccountsUnder(walletId).then((accounts) => {
-    indices = accounts
-    addedList = accounts.filter((addr) => addr.added)
-  })
+  $: {
+    wallet.accountsUnder(walletId).then((accounts) => {
+      indices = accounts
+      addedList = accounts.filter((addr) => addr.added)
+    })
+  }
   $: added = new Set<number>(addedList.map(({ address_index }) => address_index))
   $: addedInputs = (addedList || []).reduce(
     (mapping, val) => {
@@ -83,7 +77,6 @@
       localName,
     }
   })
-  // $: console.log('addressesWithDerivedInfo', addressesWithDerivedInfo)
   $: handler = new DataHandler(addressesWithDerivedInfo, { rowsPerPage: 20 })
   $: rows = handler.getRows()
 

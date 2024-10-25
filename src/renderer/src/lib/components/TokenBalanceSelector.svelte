@@ -40,7 +40,6 @@
     }
   }
 
-  export let clear = 0
   export let disableInput = false
   export let offset: Offsets = Offsets.Neutral
   export let showBalance = false
@@ -52,11 +51,8 @@
   export let step = 1n
   export let showSteps = false
 
-  let amountDecimal = ''
+  export let amountDecimal = ''
   let price = oneEther
-  $: if (clear) {
-    amountDecimal = ''
-  }
 
   $: decimals = token.metadata!.decimals || 18
   $: if (limit !== null) {
@@ -73,6 +69,10 @@
   // price is always formatted with 18 decimals when int
   $: totalValueUSD = price * amount
   $: value = parseUnits(sanitizeDecimal(amountDecimal), decimals)
+
+  const handleTokenChange = (e: CustomEvent<Erc20Token>) => {
+    token = e.detail
+  }
 </script>
 
 {#if $currentAccount}
@@ -99,7 +99,7 @@
       </span>
     {/if}
     <div class="flex w-full flex-grow">
-      <TokenSelector bind:token disabled={disableSelector} />
+      <TokenSelector bind:token on:change={handleTokenChange} disabled={disableSelector} />
       <div class="variant-soft-rec input-group input-group-divider flex grid-cols-[auto_1fr_auto] items-center">
         {#if showSteps}
           <StepIncrementor {decrementDisabled} {incrementDisabled} on:change={handleStepChange} />

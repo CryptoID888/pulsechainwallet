@@ -9,7 +9,7 @@ let statusFailedCounter = 0
 export const fetchStatus = () => {
   query<StatusResponse>('STATUS')
     .catch(async (error) => {
-      if (error.response.status >= 500) {
+      if (error.response?.status >= 500) {
         console.log('indexer status failed, retrying...')
         return await query<StatusResponse>('STATUS')
       }

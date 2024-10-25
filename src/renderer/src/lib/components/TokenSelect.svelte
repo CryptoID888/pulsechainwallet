@@ -1,6 +1,6 @@
 <script lang="ts">
   import TokenWithImage from './TokenWithImage.svelte'
-  import type { Erc20Token } from '$lib/tokens'
+  import type { Erc20Token } from '$common/token'
   import { type Writable } from 'svelte/store'
   import Select from './Select.svelte'
 
@@ -21,8 +21,7 @@
             current.set(token)
             // reflow the each loop
             tokens = tokens
-          }}
-        >
+          }}>
           <!-- <span class="flex flex-grow-[3]"></span> -->
           <span class="flex flex-grow-[1]">
             <Select show={matches(token)} />

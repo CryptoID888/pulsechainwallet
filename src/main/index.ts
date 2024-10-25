@@ -14,6 +14,7 @@ import { get } from 'svelte/store'
 async function createWindow(): Promise<void> {
   // Create the browser window.
   indexer.start()
+  // console.log('using props', get(mainProps))
   const mainWindow = new BrowserWindow({
     ...get(mainProps),
     autoHideMenuBar: true,
@@ -21,7 +22,7 @@ async function createWindow(): Promise<void> {
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
-      devTools: process.env.PRODUCTION !== 'true',
+      devTools: process.env.NODE_ENV_ELECTRON_VITE === 'development',
     },
   })
   main.set(mainWindow)
@@ -42,12 +43,13 @@ async function createWindow(): Promise<void> {
   }
   mainWindow.on('resized', saveBounds)
   mainWindow.on('moved', saveBounds)
-  mainWindow.on('app-command', (_, command) => {
-    console.log('app-command', command)
-    if (command === 'zoom') {
-      // mainWindow.setZoomLevel(mainWindow.getZoomLevel() + 1)
-    }
-  })
+  mainWindow.on('close', saveBounds)
+  // mainWindow.on('app-command', (_, command) => {
+  //   console.log('app-command', command)
+  //   if (command === 'zoom') {
+  //     // mainWindow.setZoomLevel(mainWindow.getZoomLevel() + 1)
+  //   }
+  // })
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.

@@ -106,7 +106,7 @@ export const crumbs = {
     iconSize: 16,
   } as Crumb,
   transactions: {
-    text: 'Transactions',
+    text: 'Activity',
     link: '/account/transactions',
     icon: 'bi:activity',
     iconSize: 24,

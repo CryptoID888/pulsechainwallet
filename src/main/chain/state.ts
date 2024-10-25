@@ -3,7 +3,8 @@ import type { Erc20Token } from '$common/token';
 import { chainIdToChain, getPublicClient } from ".";
 import { getContract, type ChainContract, parseAbi, zeroAddress, parseUnits, Hex, erc20Abi, Block } from "viem";
 import { binding } from "$main/handler";
-
+import * as sql from '$main/sql';
+import type { ChainTransaction } from '$common/types';
 const poolAbi = parseAbi(['function getReserves() view returns((uint112,uint112,uint32))'])
 const factoryAbi = parseAbi(['function getPair(address, address) view returns(address)'])
 
@@ -26,8 +27,12 @@ ipcMain.handle('state:transaction:wait', async (_event, chainId: number, hash: H
   return await client.waitForTransactionReceipt({ hash })
 })
 
+ipcMain.handle('state:transactions', async (_event) => {
+  return sql.query.all<ChainTransaction>('ALL_TRANSACTIONS', [])
+})
+
 ipcMain.handle('state:transaction:data', async (_event, chainId: number, hash: Hex) => {
-  const chain = chainIdToChain.get(chainId)!
+  const chain = chainIdToChain.get(+chainId)!
   const client = getPublicClient(chain)
   let block: Block | null = null
   const [transaction, receipt] = await Promise.all([

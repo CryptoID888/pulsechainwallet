@@ -58,12 +58,12 @@
     })
     tick().then(dispatchChange)
   }
-  let clear = 0
+  let amountDecimal = ''
   const dispatchPowerChange = (e: CustomEvent<{ value: number }>) => {
     api.config.set(`byChain.${$config.chainId}.poolPower`, e.detail.value)
     power = e.detail.value
     amount = 0n
-    clear++
+    amountDecimal = ''
   }
 </script>
 
@@ -78,7 +78,7 @@
     {token}
     {limit}
     disableSelector
-    bind:clear
+    bind:amountDecimal
     bind:offset
     step={incrementIn}
     bind:amount

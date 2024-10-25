@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS wallet(
   -- type of the seed - pk, phrase, read-only
   type TEXT NOT NULL,
   -- path type - m/44'/60'/0'/0/0
-  path_type TEXT NOT NULL,
+  path_type INTEGER NOT NULL,
   -- decrypted secret -- bad idea to let anyone see this
   encrypted JSONB NOT NULL,
   -- name provided by the user

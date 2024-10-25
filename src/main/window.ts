@@ -11,7 +11,7 @@ export type WindowConfig = {
 }
 
 const defaultWindowConfig: WindowConfig = {
-  show: false,
+  show: true,
   width: 800,
   height: 600,
   x: 0,

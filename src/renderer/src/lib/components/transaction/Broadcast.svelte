@@ -7,6 +7,7 @@
   import { push as goto } from 'svelte-spa-router'
   import { onMount } from 'svelte'
   import { pulsechainV4 } from 'viem/chains'
+  import { state } from '$lib/api'
 
   const emptyHash = '0x'
   let receipt: TransactionReceipt | null = null
@@ -14,16 +15,26 @@
   export let gotoAccount = () => {
     goto('/account')
   }
-  const handler = (_, r: TransactionReceipt) => {
+  export let gotoDetails = () => {
+    goto(`/account/transactions/${$chain.id}/${hash}`)
+  }
+  const handler = (r: TransactionReceipt) => {
+    console.log('handler', r)
     if (r.transactionHash === hash) {
       receipt = r
       cleanup()
     }
   }
   let id: Timer | null = null
-  let cleanup = () => {}
+  let cleanup = () => {
+    clearTimeout(id)
+    id = null
+  }
   $: if (hash !== emptyHash) {
-    cleanup = window.electron.ipcRenderer.on('state:receipt', handler)
+    state
+      .transactionWait($chain.id, hash)
+      .catch(() => state.transactionData($chain.id, hash))
+      .then(handler)
     id = setTimeout(() => {
       if (receipt) {
         return
@@ -34,7 +45,6 @@
   }
   onMount(() => () => {
     cleanup()
-    clearTimeout(id)
   })
   $: url = `${$chain.blockExplorers?.default.url}${$chain.id === pulsechainV4.id ? '/#' : ''}/tx/${hash}`
 </script>
@@ -56,12 +66,13 @@
   {:else}
     <a href={url} target="_blank" rel="noopener noreferrer" class="flex flex-row items-center justify-center">
       <span>Transaction mined</span>
-      <Icon icon="majesticons:open-line" height={24} />
+      <!-- <Icon icon="majesticons:open-line" height={24} /> -->
     </a>
   {/if}
 </div>
 <Portal target="#sticky-portal">
   <div class="flex flex-row items-center gap-2 bg-primary-50 px-4 py-2 shadow-inner">
     <button class="variant-ghost-primary btn w-full" on:click={gotoAccount}>Continue</button>
+    <button class="variant-filled-primary btn w-full" on:click={gotoDetails}>Details</button>
   </div>
 </Portal>

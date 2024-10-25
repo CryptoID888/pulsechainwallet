@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { push as goto } from 'svelte-spa-router'
+  import { push } from 'svelte-spa-router'
   import AccountList from '$lib/components/AccountList.svelte'
   import Crumb from '$lib/components/Crumb.svelte'
   import { crumbs } from '$lib/navigation'
@@ -19,7 +19,10 @@
     })
   }
   const navToAddAddresses = () => {
-    goto(`/account/addresses/${selectedWallet.id}/toggle`)
+    push(`/account/addresses/${selectedWallet.id}/toggle`)
+  }
+  const navToAddWallet = () => {
+    push(`/account/more`)
   }
   const drawerStore = getDrawerStore()
   const showPhrase = () => {
@@ -39,24 +42,29 @@
     id: string
   }
 
-  let selectedWallet: WalletMetadata | null = null
   let accounts: Account[] = []
   let secretMetadata: WalletMetadata | null = null
   let icons: Icon[] = []
   let selectedIcon: Icon | null = null
 
+  let selectedWallet = $wallets.find((w) => w.id === $config.walletId) || $wallets[0]
+  const handleSelectWallet = (e: CustomEvent<WalletMetadata>) => {
+    selectedWallet = e.detail
+  }
+  $: if (!selectedWallet) {
+    selectedWallet = $wallets[0]
+  }
   $: if ($config && $wallets.length) {
-    selectedWallet = $wallets.find((w) => w.id === $config.walletId)
-
-    accounts = $addedAccountsByWalletId[selectedWallet.id] || []
-    secretMetadata = $wallets?.[selectedWallet.id]
-
-    icons = $wallets.map((metadata) => ({
-      badge: $addedAccountsByWalletId[selectedWallet.id]?.length || 0,
-      type: metadata.type,
-      id: metadata.id,
-    }))
-    selectedIcon = icons.find((i) => i.id === selectedWallet.id)
+    if (selectedWallet) {
+      accounts = $addedAccountsByWalletId[selectedWallet.id] || []
+      secretMetadata = $wallets?.[selectedWallet.id]
+      icons = $wallets.map((metadata) => ({
+        badge: $addedAccountsByWalletId[metadata.id]?.length || 0,
+        type: metadata.type,
+        id: metadata.id,
+      }))
+      selectedIcon = icons.find((i) => i.id === selectedWallet.id)
+    }
   }
 </script>
 
@@ -65,8 +73,8 @@
 
 <div class="flex flex-col gap-2 p-4">
   <div class="flex flex-row">
-    <IconList {icons} selected={selectedIcon} />
-    <button type="button" class="btn">
+    <IconList {icons} selected={selectedIcon} on:select={handleSelectWallet} />
+    <button type="button" class="btn" on:click={navToAddWallet}>
       <Icon icon="mdi:wallet-add-outline" height={24} />
     </button>
   </div>

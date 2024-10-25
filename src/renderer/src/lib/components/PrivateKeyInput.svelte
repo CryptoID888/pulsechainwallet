@@ -17,8 +17,8 @@
   let input!: HTMLInputElement
   $: type = show ? 'text' : 'password'
   const submit = async () => {
-    const metadata = await addWalletUnderCurrent(value as Hex)
-    goto(`/account/addresses/${metadata.id}/toggle`)
+    const id = await addWalletUnderCurrent(value as Hex)
+    goto(`/account/addresses/${id}/toggle`)
   }
   const updateValue = () => {
     value = input.value

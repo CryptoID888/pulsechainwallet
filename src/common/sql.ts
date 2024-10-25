@@ -61,6 +61,8 @@ SELECT * FROM contact WHERE address = @address`,
 INSERT INTO chain_transaction (hash, chain_id, action)
 VALUES (@hash, @chain_id, @action)
 ON CONFLICT (hash, chain_id) DO NOTHING`,
+  ALL_TRANSACTIONS: `
+SELECT * FROM chain_transaction`,
 }
 
 export const backendOnlyQueries = {

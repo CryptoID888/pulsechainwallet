@@ -51,7 +51,7 @@
   routes.set('/shield', AccountShield as unknown as SvelteComponent)
   routes.set('/transactions', AccountTransactions as unknown as SvelteComponent)
   routes.set('/security/change-password', AccountChangePassword as unknown as SvelteComponent)
-  routes.set('/transactions/:hash', AccountTransactionsDetail as unknown as SvelteComponent)
+  routes.set('/transactions/:chainId/:hash', AccountTransactionsDetail as unknown as SvelteComponent)
 
   routes.set('/shield/broadcast', AccountShieldBroadcast as unknown as SvelteComponent)
 

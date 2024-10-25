@@ -1,7 +1,7 @@
 import { Phrase, PK, PrivateWalletInfo, WalletMetadata, type Account, type UpdateableWalletMetadata } from '$common/wallets'
 import { ipcMain, safeStorage } from 'electron'
 import { addWallet, password, nullifyAndSetAdded, query } from './sql'
-import { Chain, concatBytes, createWalletClient, fromHex, HDAccount, Hex, hexToBytes, isHex, keccak256, numberToHex, SendTransactionParameters, stringToBytes, toHex, type PublicClient } from 'viem'
+import { Chain, concatBytes, createWalletClient, fromHex, HDAccount, Hex, hexToBytes, isHex, keccak256, numberToHex, PrivateKeyAccount, SendTransactionParameters, stringToBytes, toHex, type PublicClient } from 'viem'
 import { paths, PathTypes } from '$common/path'
 import { mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
 import { chainIdToChain, getPublicClient, transportByChain } from './chain';
@@ -18,6 +18,7 @@ const derivePath = (pathType: PathTypes, isPK: boolean, $index: number) => {
     return null
   }
   const deriver = paths.get(pathType || PathTypes.BIP44)
+  console.log('deriver', deriver)
   if (!deriver) {
     return null
   }
@@ -35,13 +36,14 @@ export const walletMetadata = ($wallet: WalletMetadata, index: number) => {
   } as const
 }
 
-const deriveAccountFromSecret = (pathType: PathTypes, wallet: PrivateWalletInfo, index: number) => {
+const deriveAccountFromSecret = (pathType: PathTypes, wallet: PrivateWalletInfo, index: number): HDAccount | PrivateKeyAccount => {
   if (pathType === PathTypes.UNKNOWN) {
     const pkWallet = wallet as PK
     const account = privateKeyToAccount(pkWallet)
     return account
   }
   const mnemonicWallet = wallet as Phrase
+  console.log(derivePath(pathType, false, index)!)
   const account = mnemonicToAccount(mnemonicWallet, {
     path: derivePath(pathType, false, index)!,
   })
@@ -131,7 +133,7 @@ export const methods = {
     return await query.all<Account>('ALL_ACCOUNTS_UNDER', [{ id }])
   },
   reveal: async (pass: string, id: Hex, addressIndex?: number) => {
-    if (!password.check(pass)) {
+    if (!(await password.check(pass))) {
       throw new Error('Invalid password')
     }
     const $wallet = await query.get<Wallet>('WALLET_GET', [{ id }])
@@ -145,13 +147,16 @@ export const methods = {
         ? (revealed as PK)
         : (revealed as Phrase)
     }
+    // the encrypted secret on the wallet is the only secret we have
     if (isHex(revealed)) {
       return revealed
     }
-    const pk = mnemonicToAccount(revealed, {
-      path: derivePath($wallet.path_type, false, addressIndex)!,
-    })
-    return toHex(pk.getHdKey().privateKey!, { size: 32 })
+    // derive the account from the secret and return the private key
+    // this path is only reached if
+    // 1) the wallet is a phrase
+    // 2) the caller has provided an address index
+    const hdAccount = deriveAccountFromSecret($wallet.path_type, revealed, addressIndex) as HDAccount
+    return toHex(hdAccount.getHdKey().privateKey!, { size: 32 })
   },
   derive: async (id: Hex, indices: number[]) => {
     const $wallet = await query.get<Wallet>('WALLET_GET', [id])
@@ -188,7 +193,6 @@ export const methods = {
       chain,
       transport: transportByChain(chain),
     })
-    console.log('input', input)
     const hash = await walletClient.sendTransaction(input)
     await query.run('CHAIN_TRANSACTION_INSERT', [{
       hash,

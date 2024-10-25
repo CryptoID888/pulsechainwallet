@@ -55,3 +55,9 @@ export type TransactionData = {
   receipt: TransactionReceipt,
   block: Block,
 }
+
+export type ChainTransaction = {
+  chain_id: number
+  hash: Hex
+  action: TransactionAction
+}

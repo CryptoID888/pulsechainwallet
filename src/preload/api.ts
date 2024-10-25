@@ -1,12 +1,12 @@
 import { ipcRenderer } from 'electron'
 import type { Account, UpdateableWalletMetadata, WalletMetadata } from '$common/wallets'
-import type { SendTransactionParameters, Hex, Chain, GetEnsAddressReturnType, Block, Transaction } from 'viem'
+import type { SendTransactionParameters, Hex, Chain, GetEnsAddressReturnType, Block, Transaction, TransactionReceipt } from 'viem'
 import { PathTypes } from '$common/path'
 import type { Config } from '$common/config'
 import { Erc20Token } from '$common/token'
 import { QueryKey } from '$common/indexer'
 import type { RunResult } from 'better-sqlite3';
-import { TransactionData } from '$common/types'
+import { ChainTransaction, TransactionData } from '$common/types'
 
 export type Key = null | string | string[]
 
@@ -30,11 +30,14 @@ export const api = {
     transaction: async (chainId: number, hash: Hex) => (
       await ipcRenderer.invoke('state:transaction', chainId, hash) as Transaction
     ),
+    transactions: async () => (
+      await ipcRenderer.invoke('state:transactions') as ChainTransaction[]
+    ),
     transactionData: async (chainId: number, hash: Hex) => (
       await ipcRenderer.invoke('state:transaction:data', chainId, hash) as Partial<TransactionData>
     ),
     transactionWait: async (chainId: number, hash: Hex) => (
-      await ipcRenderer.invoke('state:transaction:wait', chainId, hash) as TransactionData
+      await ipcRenderer.invoke('state:transaction:wait', chainId, hash) as TransactionReceipt
     ),
     block: async (chainId: number) => (
       await ipcRenderer.invoke('state:block', chainId) as Block | null
