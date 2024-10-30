@@ -13,7 +13,7 @@
   let power = $poolPower || 15
   let action: TransactionAction = 'shield'
   let sendButtonText = 'Send'
-  let canDeposit = true
+  let canDeposit: boolean | null = null
   $: {
     if (canDeposit) {
       action = 'shield' as TransactionAction

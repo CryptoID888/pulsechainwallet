@@ -41,6 +41,7 @@
       class="input text-center leading-6"
       placeholder="***"
       type="password"
+      tabindex="0"
       bind:value={pass} />
 
     <div class="mt-4 grid grid-cols-2 gap-2">

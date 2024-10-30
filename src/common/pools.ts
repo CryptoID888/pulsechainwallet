@@ -19,11 +19,13 @@ export const allPossiblePowers = (new Array(maxPower))
   .fill(0)
   .map((_v, i) => BigInt(i))
 
+export type ProofWorkState = 'waiting' | 'working' | 'broadcasted' | 'mined'
+
 export type InsertableProof = {
   chain_id: ChainIds
   pool_id: Hex
   leaf_index: number
-  work_state: string
+  work_state: ProofWorkState
   user_inputs: string
   secret: Hex
 }

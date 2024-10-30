@@ -1,4 +1,0 @@
-export enum Action {
-  NATIVE_TRANSFER = 'NATIVE_TRANSFER',
-  ERC20_TRANSFER = 'ERC20_TRANSFER',
-}

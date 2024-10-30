@@ -57,7 +57,7 @@ export const latestPoolUnderPower = derived<Stores, PrivacyPool | null>([config,
   const poolAddress = $poolsUnderPower[$poolsUnderPower.length - 1]
   if (!$block || !poolAddress) {
     set(null)
-    return () => { }
+    return _.noop
   }
   let cancelled = false
   const cleanup = () => {
@@ -80,7 +80,7 @@ export const nullifiedCommitmentsUnderPool = derived<Stores, bigint[]>(
     let cancelled = false
     if (!$power || !$account) {
       set([])
-      return () => { }
+      return _.noop
     }
     loading.increment('pools')
     const cleanup = () => {
@@ -113,7 +113,7 @@ export const commitmentsUnderPool = derived<Stores, Hex[]>(
     let cancelled = false
     if (!$power || !$account) {
       set([])
-      return () => { }
+      return _.noop
     }
     loading.increment('pools')
     const cleanup = () => {
@@ -142,11 +142,11 @@ export const deposits = derived(
     let cancelled = false
     if (!$power) {
       set({})
-      return () => { }
+      return _.noop
     }
     if (!$commitments.length) {
       set({})
-      return () => { }
+      return _.noop
     }
     loading.increment('pools')
     const cleanup = () => {

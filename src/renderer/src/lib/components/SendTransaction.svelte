@@ -9,7 +9,6 @@
   import Pay from '$lib/components/transaction/Pay.svelte'
   import { loading } from '$lib/loading'
   import { type PrepConfig, type ViemRawTransaction } from '$lib/transactions'
-  import { Action } from '$lib/action'
   import BroadcastTransaction from '$lib/components/transaction/Broadcast.svelte'
   import { currentAccount as account } from '$lib/wallets'
   import { onMount, tick } from 'svelte'
@@ -132,7 +131,6 @@
       {:else if tabSet === 1 && prep}
         <div class="w-full">
           <Pay
-            action={prep.data === emptyHex ? Action.NATIVE_TRANSFER : Action.ERC20_TRANSFER}
             {prep}
             on:confirm={handleConfirm}
             on:back={() => {

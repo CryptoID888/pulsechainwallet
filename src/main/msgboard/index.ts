@@ -79,8 +79,7 @@ const startWork = async (proof: Proof) => {
       log('complete hash=%o@%o nonce=%o pool=%o leaf=%o',
         truncateHash(work.hash), work.block.number, work.nonce, truncateHash(poolId), leafIndex,
       )
-      const tx = sql.sendWork()
-      await tx(poolId, leafIndex, async () => {
+      await sql.transactions.sendWork(poolId, leafIndex, async () => {
         return await b.add(work.toRLP())
       })
       workCache.delete(key)

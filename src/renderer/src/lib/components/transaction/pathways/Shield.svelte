@@ -4,12 +4,12 @@
 
   import PowerSelector from '$lib/components/PowerSelector.svelte'
   import TokenBalanceSelector from '$lib/components/TokenBalanceSelector.svelte'
-  import { poolPower, latestPoolUnderPower } from '$lib/pools'
+  import { poolPower, latestPoolUnderPower, factory } from '$lib/pools'
   import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
   import { tokensOnActiveChain } from '$lib/tokens'
   import { Offsets } from '$lib/unit'
   import { currentAccount as account } from '$lib/wallets'
-  import { chain } from '$lib/chain-state'
+  import { chain, currentBlock } from '$lib/chain-state'
   import { updatePower } from '$lib/config'
   import * as api from '$lib/api'
   import type { ChainIds } from '$common/config'
@@ -44,7 +44,7 @@
   export let amount = 0n
   export let offset: Offsets = Offsets.Neutral
   export let power = $poolPower || 15
-  export let canDeposit = false
+  export let canDeposit: boolean | null = null
 
   $: {
     power = $poolPower || 15
@@ -60,10 +60,16 @@
     truncatedBalance < incrementIn * depositLimit
       ? truncatedBalance - (truncatedBalance % incrementIn)
       : incrementIn * depositLimit
-  $: canDeposit = !!poolAddress && depositLimit > 0n
+  $: {
+    canDeposit = !!poolAddress && depositLimit > 0n
+    dispatchChange()
+  }
+  $: if ($currentBlock) {
+    dispatchChange()
+  }
 
   let commitment: Hex | null = null
-  $: if (poolAddress && amount) {
+  $: if (poolAddress) {
     // move this to a store
     generateCommitment(poolAddress).then((c) => {
       commitment = c
@@ -83,7 +89,6 @@
     })
     tick().then(dispatchChange)
   }
-  const factoryAddress = zeroAddress
   $: tokenAddress = token.address === zeroAddress ? native : token.address
   $: deployData = encodeFunctionData({
     abi: PrivacyPoolFactoryAbi,
@@ -112,9 +117,9 @@
     <svelte:fragment slot="input">
       <div class="absolute hidden">
         {#if !canDeposit}
-          <input type="hidden" name="to-address" id="to-address" value={factoryAddress} />
+          <input type="hidden" name="to-address" id="to-address" value={$factory.address} />
           <input type="hidden" name="value" id="value" value={0n} />
-          <input type="hidden" name="gas" id="gas" value={3_000_000} />
+          <input type="hidden" name="gas" id="gas" value={6_000_000} />
           <input type="hidden" id="data" name="data" value={deployData} />
         {:else if poolAddress && commitment}
           <input type="hidden" name="to-address" id="to-address" value={toAddress} />

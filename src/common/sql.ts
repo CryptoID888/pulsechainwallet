@@ -90,7 +90,7 @@ WHERE pool_id = @pool_id
   AND leaf_index = @leaf_index`,
   MARK_PROOF_AS_BROADCASTED: /* sql */`
 UPDATE proof
-SET work_state = 'broadcast',
+SET work_state = 'broadcasted',
   last_work_broadcast_time = CURRENT_TIMESTAMP
 WHERE pool_id = @pool_id
   AND leaf_index = @leaf_index`,

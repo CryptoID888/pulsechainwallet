@@ -131,8 +131,6 @@
     []
   $: selected = icons[0]
 
-  // $: updatePower(power)
-
   $: denomination = 10n ** BigInt(power)
   $: feePerCommitment = (denomination * feeBasisPoints) / 10_000n
   $: total = denomination * BigInt(commitments.size)

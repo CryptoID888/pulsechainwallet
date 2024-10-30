@@ -14,7 +14,6 @@
   import Number from '../Number.svelte'
   import { delimiter } from '$lib/modifiers/delimiter'
   import { addDecimalDelimiter, sanitize, sanitizeDecimal } from '$lib/number'
-  import { Action } from '$lib/action'
   import { createEventDispatcher, onMount } from 'svelte'
   import PriceFetch from '../PriceFetch.svelte'
   import { nativeTokenOn } from '$lib/tokens'
@@ -29,11 +28,6 @@
 
   type PresetSpeed = 0 | 1 | 2
   type FeeSpeed = PresetSpeed | 3
-
-  enum GasLimitPerAction {
-    NATIVE_TRANSFER = 25_200,
-    ERC20_TRANSFER = 50_000,
-  }
 
   const k10 = 10_000n
   const lowBoundBaseFee = 7n
@@ -58,7 +52,7 @@
   }
   const reflowGasLimitInput = () => {
     const name = 'gas-limit'
-    gasLimitInput = recheckNumber(name, `${estimatedGas || gasLimitExternal || gasLimitByAction}`)
+    gasLimitInput = recheckNumber(name, `${estimatedGas || gasLimitExternal}`)
   }
   const reflowMaxBaseFeeInput = () => {
     const name = 'max-base-fee'
@@ -130,11 +124,9 @@
   export let estimateGas = false
   export let simulate = false
   export let feeSpeed: FeeSpeed = 0
-  export let action!: Action
   export { gasLimitExternal as gasLimit }
   export { maxBaseFeeExternal as maxBaseFee }
   export { maxPriorityFeeExternal as maxPriorityFee }
-  let gasLimitByAction = GasLimitPerAction[action] as number
   let estimatedGas: bigint | null = null
   let saveDefaults = false
   let nonceInput: string | null = null

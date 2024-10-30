@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { ipcMain } from 'electron'
 // for some reason i couldn't get this package to work appropriately. kept getting
 // errors about the file not being a database file.
-import BetterSqlite3, { SqliteError, Transaction } from 'better-sqlite3-multiple-ciphers'
+import BetterSqlite3, { SqliteError } from 'better-sqlite3-multiple-ciphers'
 // import BetterSqlite3 from 'better-sqlite3'
 
 import { paths } from '$main/paths';
@@ -287,47 +287,63 @@ export const addSetupTask = (task: Task) => {
 //
 // the unique characteristic about these transactions is that they first return a function as they are being prepared
 //
-export const addWallet = () => db!.transaction((wallet: InsertableWalletMetadata, accounts: Account[] = []) => {
-  const result = query.get<{ count: number }>('WALLET_COUNT', [])
-  if (!result) {
-    throw new Error('no result from WALLET_COUNT')
-  }
-  const { count } = result
-  const w = { ...wallet, user_order: count } as WalletMetadata
-  query.run('WALLET_INSERT', [w])
-  accounts.map((account) => query.run('ACCOUNT_INSERT', [{
-    ...account,
-    // this is because the db does not actually understand boolean types
-    added: account.added ? 1 : 0,
-  }]))
-  return count
-}) as Transaction<(a: InsertableWalletMetadata, b: Account[]) => number>
+type VariableArgFunction = (...params: any[]) => unknown;
+type ArgumentTypes<F extends VariableArgFunction> = F extends (...args: infer A) => unknown ? A : never;
+const futureTransaction = <T extends VariableArgFunction, P extends ArgumentTypes<T>>(fn: T) => {
+  return (...args: P) => (db!.transaction(fn) as BetterSqlite3.Transaction<T>)(...args)
+}
 
-export const nullifyAndSetAdded = () => db!.transaction((walletId: Hex, added: number[]) => {
-  query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
-  added.map((i) => query.run<Account>('ACCOUNT_SET_ADDED', [{
-    wallet_id: walletId,
-    address_index: i,
-  }]))
-}) as Transaction<(a: Hex, b: number[]) => void>
+export const transactions = {
+  addWallet: futureTransaction((
+    wallet: InsertableWalletMetadata,
+    accounts: Account[] = [],
+  ) => {
+    const result = query.get<{ count: number }>('WALLET_COUNT', [])
+    if (!result) {
+      throw new Error('no result from WALLET_COUNT')
+    }
+    const { count } = result
+    const w = { ...wallet, user_order: count } as WalletMetadata
+    query.run('WALLET_INSERT', [w])
+    accounts.map((account) => query.run('ACCOUNT_INSERT', [{
+      ...account,
+      // this is because the db does not actually understand boolean types
+      added: account.added ? 1 : 0,
+    }]))
+    return count
+  }),
 
-export const insertProofs = (proofs: InsertableProof[]) => (db!.transaction((proofs: InsertableProof[]) => {
-  proofs.map((proof) => query.run('PROOF_INSERT', [proof]))
-}) as Transaction<(a: InsertableProof[]) => void>)(proofs)
+  nullifyAndSetAdded: futureTransaction((
+    walletId: Hex,
+    added: number[],
+  ) => {
+    query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
+    added.map((i) => query.run<Account>('ACCOUNT_SET_ADDED', [{
+      wallet_id: walletId,
+      address_index: i,
+    }]))
+  }),
 
-export const sendWork = () => db!.transaction(async (poolId: string, leafIndex: number, fn: () => Promise<Hex>) => {
-  // run a query locally first to reduce the chance of
-  // local failing after the work has been sent
-  query.run('UPDATE_WORK_STATE', [{
-    pool_id: poolId,
-    leaf_index: leafIndex,
-    work_state: 'broadcasted',
-  }])
-  const id = await fn()
-  query.run('UPDATE_MSG_ID', [{
-    pool_id: poolId,
-    leaf_index: leafIndex,
-    message_hash: id,
-  }])
-  return id
-}) as Transaction<(a: string, b: number, c: () => Promise<Hex>) => Promise<Hex>>
+  insertProofs: futureTransaction((proofs: InsertableProof[]) => {
+    proofs.map((proof) => query.run('PROOF_INSERT', [proof]))
+  }),
+
+  sendWork: futureTransaction(async (
+    poolId: string, leafIndex: number,
+    fn: () => Promise<Hex>,
+  ) => {
+    // run a query locally first to reduce the chance of
+    // local failing after the work has been sent
+    query.run('MARK_PROOF_AS_BROADCASTED', [{
+      pool_id: poolId,
+      leaf_index: leafIndex,
+    }])
+    const id = await fn()
+    query.run('UPDATE_MSG_ID', [{
+      pool_id: poolId,
+      leaf_index: leafIndex,
+      message_hash: id,
+    }])
+    return id
+  }),
+}

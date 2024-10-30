@@ -1,7 +1,7 @@
 import { concatBytes, createWalletClient, HDAccount, Hex, hexToBytes, isHex, keccak256, PrivateKeyAccount, SendTransactionParameters, stringToBytes, toHex, type PublicClient } from 'viem'
 import { mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
 import type { NonceData, InsertableWalletMetadata, Phrase, PK, PrivateWalletInfo, WalletMetadata, Account, UpdateableWalletMetadata } from '$common/wallets'
-import { addWallet, password, nullifyAndSetAdded, query } from '$main/sql'
+import { transactions, password, query } from '$main/sql'
 import { paths, PathTypes } from '$common/path'
 import { chainIdToChain, getPublicClient, transportByChain } from '$main/chain';
 import { config } from '$main/config'
@@ -82,8 +82,7 @@ export const methods = {
       encrypted,
       address_index: 0,
     }
-    const tx = addWallet()
-    const count = tx(row, accounts)
+    const count = transactions.addWallet(row, accounts)
     const total = count + 1
     if (count === 0) {
       // if this was the first wallet, then set the config to use it
@@ -150,7 +149,7 @@ export const methods = {
     // return await query.all('ACCOUNT_GET', [walletIndex, indices])
   },
   updateAddedAccounts: async (walletId: Hex, added: number[]) => {
-    nullifyAndSetAdded()(walletId, added)
+    transactions.nullifyAndSetAdded(walletId, added)
     return added
   },
   sendTransaction: async (chainId: ChainIds, accountInput: Account, input: SendTransactionParameters, action: string) => {
@@ -212,10 +211,6 @@ handle('wallet:updateAddedAccounts', methods.updateAddedAccounts)
 handle('wallet:sendTransaction', methods.sendTransaction)
 
 handle('wallet:estimateGas', methods.estimateGas)
-
-// handle('wallet:commitmentFromAccountSignature', methods.commitmentFromAccountSignature)
-
-// handle('wallet:generateProofsAndCache', methods.generateProofsAndCache)
 
 handle('wallet:nonces', async (chainId, address) => {
   const chain = chainIdToChain.get(chainId)!

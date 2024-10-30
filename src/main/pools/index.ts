@@ -365,11 +365,11 @@ export const cacheProofs = async (info: Awaited<ReturnType<typeof getProofInfo>>
     chain_id: chainId,
     pool_id: pool.id as Hex,
     leaf_index: +leafIndex,
-    work_state: 'waiting',
+    work_state: 'waiting' as const,
     secret,
     user_inputs: valueToJSON.stringify(shared),
   }))
-  sql.insertProofs(serializedProofs)
+  sql.transactions.insertProofs(serializedProofs)
 }
 
 export const generateProofsAndCache = async (

@@ -15,6 +15,7 @@
   export let gotoAccount = () => {
     goto('/account')
   }
+  /** go to the transaction details page for the transaction that has just been mined */
   export let gotoDetails = () => {
     goto(`/account/transactions/${$chain.id}/${hash}`)
   }
