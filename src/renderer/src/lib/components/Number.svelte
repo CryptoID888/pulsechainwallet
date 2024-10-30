@@ -1,14 +1,14 @@
 <script lang="ts">
   import { addDelimiter, joinNumber } from '$lib/number'
-  import { settings } from '$lib/settings'
+  import { config } from '$lib/config'
   import { formatUnits } from 'viem'
 
   const setSize = 3
 
   export let x = 0n
   export let decimals = 18
-  export let delimiter = $settings.digitGroupSeparator
-  export let maxDelimiterSets = $settings.maxDelimiterSets
+  export let delimiter = $config.digitGroupSeparator
+  export let maxDelimiterSets = $config.maxDelimiterSets
   export let maxDecimalDigits = setSize * maxDelimiterSets
   export let truncateZeros = false
 

@@ -8,7 +8,7 @@
   import Icon from '@iconify/svelte'
   import AccountSummary from '$lib/components/account/Summary.svelte'
   import { type FeeValuesType, parseUnits, formatUnits, type Hex } from 'viem'
-  import { feeTypes, settings } from '$lib/settings'
+  import { config } from '$lib/config'
   import { currentAccount as account, nonces } from '$lib/wallets'
   import { wallet } from '$lib/api'
   import Number from '../Number.svelte'
@@ -22,7 +22,7 @@
   import * as jsonreplacer from '$lib/serializers/json'
   import type { RawTransaction } from '$lib/transactions'
   import Loader from '../Loader.svelte'
-  import { emptyHex, type ChainIds } from '$common/config'
+  import { emptyHex, type ChainIds, feeTypes } from '$common/config'
 
   const dispatch = createEventDispatcher()
 
@@ -100,8 +100,8 @@
     dispatch('confirm', viemTx)
   }
 
-  let feeType: FeeValuesType = $settings.defaultTransactionFeeType
-  let baseFeeValidityRange = $settings.baseFeeValidityRange
+  let feeType: FeeValuesType = $config.defaultTransactionFeeType
+  let baseFeeValidityRange = $config.baseFeeValidityRange
   let maxBaseFeePerGas = 0n
   let maxPriorityFeePerGas = 0n
   let gasSpeedMultiplierIndex = 0
@@ -132,7 +132,7 @@
   let nonceInput: string | null = null
   let price = 0n
   let rawDataPanelOpen = false
-  let showNumbers = $settings.numbersOverHex
+  let showNumbers = $config.numbersOverHex
 
   $: visualChain = chainById.get($chain.id)!
   $: feeTypeChecked = feeType === feeTypes.EIP1559
@@ -200,7 +200,7 @@
   $: if (block) {
     const blockBaseFee = block.baseFeePerGas as bigint
     maxBaseFeePerGas = (baseFeeNumerator * blockBaseFee) / baseFeeDenominator
-    maxPriorityFeePerGas = (blockBaseFee * (k10 + BigInt($settings.defaultPriorityFeeAdditive))) / k10 - blockBaseFee
+    maxPriorityFeePerGas = (blockBaseFee * (k10 + BigInt($config.defaultPriorityFeeAdditive))) / k10 - blockBaseFee
   }
   $: minNonce = BigInt($nonces?.latest || 0n)
   $: nonce =

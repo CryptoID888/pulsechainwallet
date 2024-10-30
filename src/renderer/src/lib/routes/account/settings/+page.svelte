@@ -1,6 +1,6 @@
 <script lang="ts">
   import Label from '$lib/components/Label.svelte'
-  import { settings } from '$lib/settings'
+  import { config } from '$lib/config'
   import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton'
   import { defaultAddress, truncatedAddress } from '$lib/address'
   import { formatUnits, parseUnits } from 'viem'
@@ -10,31 +10,31 @@
   import StepIncrementor from '$lib/components/StepIncrementor.svelte'
   import { emptyHex } from '$common/config'
 
-  let digitGroupSeparator = $settings.digitGroupSeparator
-  let decimalSeparator = $settings.decimalSeparator
-  let maxDelimiterSets = $settings.maxDelimiterSets
-  let addressTruncation = $settings.addressTruncation
-  let defaultTransactionTypeIsEIP1559 = $settings.defaultTransactionFeeType === 'eip1559'
-  let defaultGasLimitMultiplierInput = formatUnits(BigInt($settings.defaultGasLimitMultiplier), 4)
-  let autoReplaceUnderpriced = $settings.autoReplaceUnderpriced
-  let numbersOverHex = $settings.numbersOverHex
-  let baseFeeValidityRange = $settings.baseFeeValidityRange
-  let defaultPriorityFeeAdditiveInput = formatUnits(BigInt($settings.defaultPriorityFeeAdditive), 2)
-  let defaultPriorityFeeRetryAdditiveInput = formatUnits(BigInt($settings.defaultPriorityFeeRetryAdditive), 2)
-  let showTestnets = !!$settings.showTestnets
+  let digitGroupSeparator = $config.digitGroupSeparator
+  let decimalSeparator = $config.decimalSeparator
+  let maxDelimiterSets = $config.maxDelimiterSets
+  let addressTruncation = $config.addressTruncation
+  let defaultTransactionTypeIsEIP1559 = $config.defaultTransactionFeeType === 'eip1559'
+  let defaultGasLimitMultiplierInput = formatUnits(BigInt($config.defaultGasLimitMultiplier), 4)
+  let autoReplaceUnderpriced = $config.autoReplaceUnderpriced
+  let numbersOverHex = $config.numbersOverHex
+  let baseFeeValidityRange = $config.baseFeeValidityRange
+  let defaultPriorityFeeAdditiveInput = formatUnits(BigInt($config.defaultPriorityFeeAdditive), 2)
+  let defaultPriorityFeeRetryAdditiveInput = formatUnits(BigInt($config.defaultPriorityFeeRetryAdditive), 2)
+  let showTestnets = !!$config.showTestnets
   $: defaultGasLimitMultiplier = defaultGasLimitMultiplierInput
     ? parseUnits(defaultGasLimitMultiplierInput, 4)
-    : BigInt($settings.defaultGasLimitMultiplier)
+    : BigInt($config.defaultGasLimitMultiplier)
   $: defaultPriorityFeeAdditive = defaultPriorityFeeAdditiveInput
     ? parseUnits(defaultPriorityFeeAdditiveInput, 2)
-    : BigInt($settings.defaultPriorityFeeAdditive)
+    : BigInt($config.defaultPriorityFeeAdditive)
   $: defaultPriorityFeeRetryAdditive = defaultPriorityFeeRetryAdditiveInput
     ? parseUnits(defaultPriorityFeeRetryAdditiveInput, 2)
-    : BigInt($settings.defaultPriorityFeeRetryAdditive)
+    : BigInt($config.defaultPriorityFeeRetryAdditive)
 
-  $: settings.update(($settings) => {
+  $: config.update(($config) => {
     return {
-      ...$settings,
+      ...$config,
       addressTruncation,
       digitGroupSeparator,
       decimalSeparator,
@@ -193,6 +193,10 @@
         disabled
         bind:checked={autoReplaceUnderpriced} />
       <span class="text-sm italic">Replaces a transaction when the base fee moves too quickly against you.</span>
+    </li>
+    <!-- broadcast settings -->
+    <li class="flex w-full">
+      <h3 class="h3">Broadcast</h3>
     </li>
     <!-- dev settings -->
     <li class="flex w-full">

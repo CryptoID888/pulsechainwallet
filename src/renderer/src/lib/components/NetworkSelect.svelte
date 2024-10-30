@@ -4,7 +4,7 @@
   import NetworkImage from './NetworkImage.svelte'
   import type { Chain } from '$common/token'
   import { chainIdToChain } from '$lib/chain-state'
-  import { settings } from '$lib/settings'
+  import { config } from '$lib/config'
 
   export let current: Writable<Chain | null> = writable(null)
   export let chains: Chain[] = []
@@ -15,7 +15,7 @@
   <h3 class="h3 mb-4">Select Network</h3>
   <ol class="list">
     {#each chains as chain}
-      {#if $settings.showTestnets || chain.id !== 943}
+      {#if $config.showTestnets || chain.id !== 943}
         <li class="flex w-full items-center">
           <button
             type="button"

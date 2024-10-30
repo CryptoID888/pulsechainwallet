@@ -13,6 +13,8 @@ import _ from 'lodash'
 import { loopWork, memoizeWithTTL, truncateHash, log } from '$common/utils'
 import { Worker } from 'worker_threads'
 import { proofToWithdrawalStruct } from '$main/pools'
+import { config } from '$main/config'
+import { get } from 'svelte/store'
 
 const board = (chainId: ChainIds) => {
   const chain = chainIdToChain.get(chainId)
@@ -273,7 +275,9 @@ const stateHandler = {
     }
     const work_block_number = BigInt(work.blockNumber)
     const latest = await latestBlock(chainId)
-    const cacheThroughBlockNumber = latest.number - 50n
+    const $config = get(config)
+    const blockDelay = $config.broadcastMessageCutoffBlockDelay
+    const cacheThroughBlockNumber = latest.number - BigInt(blockDelay)
     if (work_block_number < cacheThroughBlockNumber) {
       resetWorkState(poolId, leaf_index, 'cached work block number too old')
       return null
@@ -281,7 +285,8 @@ const stateHandler = {
     state.outstanding++
     log('work is broadcasted, waiting...', truncateHash(poolId), leaf_index)
     const broadcastedAt = new Date(sqliteDate(last_work_broadcast_time!))
-    const cacheThroughTimestamp = +state.now + 5 * 60 * 1_000
+    const timeDelay = $config.broadcastMessageCutoffTimeDelay
+    const cacheThroughTimestamp = +state.now + timeDelay
     // make this constraint more flexible to allow the user to change how quickly their funds flow
     if (+broadcastedAt > cacheThroughTimestamp) {
       return waitTime.LONG

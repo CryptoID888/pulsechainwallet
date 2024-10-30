@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
-import { settings } from './settings'
+import { config } from './config'
 
-export const addDelimiter = (x: bigint, delimiter: string = get(settings).digitGroupSeparator) => {
+export const addDelimiter = (x: bigint, delimiter: string = get(config).digitGroupSeparator) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, delimiter)
 }
 

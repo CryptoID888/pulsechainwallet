@@ -1,7 +1,7 @@
 import type { Hex, TransactionRequestEIP1559, TransactionRequestLegacy } from 'viem'
 import type { Account } from '$common/wallets'
 import { persisted } from 'svelte-persisted-store'
-import type { FeeType } from './settings'
+import type { FeeType } from '$common/config'
 import _ from 'lodash'
 
 type Transaction = {
