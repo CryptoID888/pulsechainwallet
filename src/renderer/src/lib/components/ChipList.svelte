@@ -1,14 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import Loader from './Loader.svelte'
-
-  export let chips: Set<bigint> = new Set()
-  export let selected: Set<bigint> = new Set()
-  export let disabled: Set<bigint> = new Set()
-  export let loading: Set<bigint> = new Set()
+  type Input = bigint | number | string
+  export let chips: Set<Input> = new Set()
+  export let selected: Set<Input> = new Set()
+  export let disabled: Set<Input> = new Set()
+  export let loading: Set<Input> = new Set()
   const dispatch = createEventDispatcher()
 
-  const toggleSelected = (leafIndex: bigint) => {
+  const toggleSelected = (leafIndex: Input) => {
     dispatch('toggle', leafIndex)
   }
 </script>
@@ -25,8 +25,7 @@
         class:variant-soft-primary={!isSelected}
         class:variant-filled-primary={isSelected}
         disabled={isDisabled}
-        on:click={() => toggleSelected(leafIndex)}
-      >
+        on:click={() => toggleSelected(leafIndex)}>
         {#if isLoading}
           <Loader size={16} />
         {/if}

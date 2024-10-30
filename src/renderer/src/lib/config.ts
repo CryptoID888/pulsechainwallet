@@ -1,4 +1,4 @@
-import { writable } from "./event-store";
+import { writable } from "$lib/event-store";
 import { type Config } from "$common/config";
 import { get } from "svelte/store";
 import * as api from '$lib/api'

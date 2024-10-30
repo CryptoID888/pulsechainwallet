@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { SeedType } from '$common/wallets'
+  import type { Icon } from '$common/types'
   import SeedBox from './account/SeedBox.svelte'
   import { createEventDispatcher } from 'svelte'
   const dispatch = createEventDispatcher()
 
   export let selected: any = null
-  export let icons: { title?: string; badge: number; type: SeedType }[] = []
+  export let icons: Icon[] = []
   const selectWallet = (target: any) => {
     selected = target
     dispatch('select', target)

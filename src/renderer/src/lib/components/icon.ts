@@ -21,4 +21,5 @@ export const allIconKeys = new Map<string, Set<string>>(Object.entries({
   'bx': new Set(['data']),
   'ic': new Set(['baseline-plus']),
   'bi': new Set(['activity']),
+  'arcticons': new Set(['mapassist']),
 }))

@@ -1,4 +1,11 @@
 import type { Hex, Abi, Block, TransactionReceipt, Transaction } from 'viem'
+import type { SeedType } from './wallets'
+
+export type Contact = {
+  name: string
+  address: Hex
+  note: string | null
+}
 
 export type Call = {
   allowFailure?: boolean
@@ -33,31 +40,36 @@ export type MessageData = {
 }
 
 export type WithdrawalProofStruct = {
-  accessType: Hex
-  nullifier: Hex
-  flatProof: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex]
+  accessType: number
+  bitLength: number
+  subsetData: Hex
+  flatProof: readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]
   root: Hex
   subsetRoot: Hex
+  nullifier: Hex
   recipient: Hex
-  refund: Hex
+  refund: bigint
   relayer: Hex
-  fee: Hex
-  deadline: Hex
-  bitLength: Hex
-  subsetData: Hex
+  fee: bigint
+  deadline: bigint
 }
 
-export type TransactionAction = 'send' | 'shield' | 'unshield' | 'swap' | 'approve' | 'stake' | 'unstake'
-
+export type TransactionAction = 'send' | 'shield' | 'swap' | 'approve' | 'stake' | 'unstake' | 'assist' | 'deploy'
 
 export type TransactionData = {
   transaction: Transaction,
-  receipt: TransactionReceipt,
-  block: Block,
+  receipt: TransactionReceipt | null,
+  block: Block | null,
 }
 
 export type ChainTransaction = {
   chain_id: number
   hash: Hex
   action: TransactionAction
+}
+
+export type Icon = {
+  title: string
+  badge: number
+  type: SeedType
 }

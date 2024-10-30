@@ -39,6 +39,8 @@ export const defaultSettings = {
   defaultPriorityFeeRetryAdditive: 1_000,
   /** show testnets in the network dropdown */
   showTestnets: false,
+  /** use iso when showing timestamps */
+  useISOTime: true,
 }
 
 export const settings = persisted('settings', defaultSettings, {

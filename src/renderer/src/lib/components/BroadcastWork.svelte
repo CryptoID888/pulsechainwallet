@@ -1,4 +1,5 @@
-<script lang="ts">
+<!-- <script lang="ts">
+  import * as msgboard from '@pulsechain/msgboard'
   import { proofs } from '$lib/db/proofs'
   import { onMount } from 'svelte'
   import { getWithdrawal } from '$lib/ponder'
@@ -176,4 +177,4 @@
   onMount(watchProofs)
 </script>
 
-<slot />
+<slot /> -->

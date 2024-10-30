@@ -1,12 +1,13 @@
 import { readable } from '$lib/event-store'
 import { push as goto } from 'svelte-spa-router'
-import type { Account, ChainState, UpdateableWalletMetadata, WalletMetadata } from '$common/wallets'
+import type { Account, NonceData, UpdateableWalletMetadata, WalletMetadata } from '$common/wallets'
 import { derived, get, type Stores } from 'svelte/store'
 import { config } from '$lib/config'
-import type { Chain, Hex } from 'viem'
+import type { Hex } from 'viem'
 import { PathTypes } from '$common/path'
-import { chain } from './chain-state'
+import { chain, currentBlock } from './chain-state'
 import * as api from '$lib/api'
+import type { ChainIds } from '$common/config'
 /**
  * the wallets that should be available to the app
  * this is a read only store, so we only pass the event that we want to listen to
@@ -79,12 +80,12 @@ export const addWalletUnderCurrent = async (value: Hex | string) => {
   return await api.wallet.add(value, PathTypes.UNKNOWN)
 }
 
-export const nonces = derived<Stores, ChainState>([chain, currentAccount], ([$chain, $account], set) => {
+export const nonces = derived<Stores, NonceData>([chain, currentBlock, currentAccount], ([$chain, _$currentBlock, $account], set) => {
   api.wallet.nonces($chain.id, $account.address).then(set)
 })
 
-export const commitmentFromAccountSignature = async (account: Account, $chain: Chain, $poolAddress: Hex) => {
-  return await api.wallet.commitmentFromAccountSignature(account, $chain, $poolAddress)
+export const commitmentFromAccountSignature = async (account: Account, chainId: ChainIds, $poolAddress: Hex) => {
+  return await api.pool.commitmentFromAccountSignature(account, chainId, $poolAddress)
 }
 
 export const checkWallets = () => {

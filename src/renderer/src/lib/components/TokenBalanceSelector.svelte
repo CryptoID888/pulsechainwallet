@@ -50,6 +50,7 @@
   export let disableSelector = false
   export let step = 1n
   export let showSteps = false
+  export let maxTitle = ''
 
   export let amountDecimal = ''
   let price = oneEther
@@ -88,6 +89,7 @@
         <span>
           <button
             type="button"
+            title={maxTitle}
             class="flex flex-row items-center gap-2 px-2 uppercase text-primary-700 hover:text-primary-500"
             on:click={useMax}>
             <span>Max</span>

@@ -5,6 +5,7 @@
 
   password.logout()
   onMount(() => {
+    console.log('logout /locked')
     goto('/locked')
   })
 </script>

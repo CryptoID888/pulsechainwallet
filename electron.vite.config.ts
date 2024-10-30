@@ -5,8 +5,13 @@ import tailwindcss from 'tailwindcss'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import topLevelAwait from 'vite-plugin-top-level-await'
-// import commonjs from '@rollup/plugin-commonjs'
-// import wasm from 'vite-plugin-wasm'
+// import { esbuildCommonjs } from '@originjs/vite-plugin-commonjs'
+import wasm from 'vite-plugin-wasm'
+// import cjsImport from 'rollup-plugin-cjs-import';
+
+// import topLevelAwaitWorker from 'vite-plugin-top-level-await-worker'
+
+Error.stackTraceLimit = Infinity
 
 export default defineConfig({
   main: {
@@ -14,15 +19,26 @@ export default defineConfig({
       watch: {
         include: ['src/main/**/*'],
       },
+      rollupOptions: {
+        preserveEntrySignatures: 'strict',
+        input: {
+          index: path.resolve(__dirname, 'src', 'main', 'index.ts'),
+          worker: path.resolve(__dirname, 'src', 'main', 'worker.ts'),
+        },
+        external: ['url', 'brotli-wasm', 'viem', 'viem/chains'],
+      },
     },
     plugins: [
-      externalizeDepsPlugin(),
+      externalizeDepsPlugin({
+        include: ['brotli-wasm'],
+      }),
+      wasm(),
     ],
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src/common'),
-        '$main': path.resolve(__dirname, 'src/main'),
-        '$preload': path.resolve(__dirname, 'src/preload'),
+        '$common': path.resolve(__dirname, 'src', 'common'),
+        '$main': path.resolve(__dirname, 'src', 'main'),
+        '$preload': path.resolve(__dirname, 'src', 'preload'),
         '$root': path.resolve(__dirname),
       },
     },
@@ -36,7 +52,7 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src/common'),
+        '$common': path.resolve(__dirname, 'src', 'common'),
       },
     },
   },
@@ -48,8 +64,8 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src/common'),
-        '$preload': path.resolve(__dirname, 'src/preload'),
+        '$common': path.resolve(__dirname, 'src', 'common'),
+        '$preload': path.resolve(__dirname, 'src', 'preload'),
       },
     },
     plugins: [
@@ -69,8 +85,5 @@ export default defineConfig({
         plugins: [tailwindcss()],
       },
     },
-    // optimizeDeps: {
-    //   exclude: ['brotli-wasm'],
-    // },
   },
 })

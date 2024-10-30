@@ -1,32 +1,33 @@
 <script lang="ts">
-  import { encodeFunctionData, type Hex } from 'viem'
+  import { zeroAddress, encodeFunctionData, type Hex } from 'viem'
+  import { createEventDispatcher, tick } from 'svelte'
+
   import PowerSelector from '$lib/components/PowerSelector.svelte'
   import TokenBalanceSelector from '$lib/components/TokenBalanceSelector.svelte'
-  import { lastPool, poolPower } from '$lib/pools'
+  import { poolPower, latestPoolUnderPower } from '$lib/pools'
   import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
   import { tokensOnActiveChain } from '$lib/tokens'
   import { Offsets } from '$lib/unit'
-  import { commitmentFromAccountSignature, currentAccount as account } from '$lib/wallets'
+  import { currentAccount as account } from '$lib/wallets'
   import { chain } from '$lib/chain-state'
-  import { createEventDispatcher, tick } from 'svelte'
-  import { config } from '$lib/config'
+  import { updatePower } from '$lib/config'
   import * as api from '$lib/api'
+  import type { ChainIds } from '$common/config'
+  import { PrivacyPoolFactoryAbi } from '$common/abis/PrivacyPoolFactory'
+  import { maxTotalDeposits, native } from '$common/pools'
+
   const dispatch = createEventDispatcher()
 
-  export let token = $tokensOnActiveChain[0]
-  export let balance = 0n
-  export let amount = 0n
-  export let offset: Offsets = Offsets.Neutral
-  export let power = $poolPower || 15
-
-  $: poolAddress = $lastPool[power]
-  $: disabled = !poolAddress
-  $: token = $tokensOnActiveChain[0]
-  $: incrementIn = 10n ** BigInt(power)
-  $: limit = balance < incrementIn * 10n ? balance - (balance % incrementIn) : incrementIn * 10n
-
-  const generateCommitment = async (poolAddress: Hex, _amount: bigint) => {
-    const commitment = await commitmentFromAccountSignature($account!, $chain!, poolAddress!)
+  const dispatchChange = () => {
+    dispatch('change')
+  }
+  const dispatchPowerChange = (e: CustomEvent<{ value: number }>) => {
+    updatePower(e.detail.value)
+    amount = 0n
+    amountDecimal = ''
+  }
+  const generateCommitment = async (poolAddress: Hex) => {
+    const commitment = await api.pool.commitmentFromAccountSignature($account!, $chain.id as ChainIds, poolAddress!)
     return commitment
   }
   const calldataFromCommitment = (amount: bigint, commitment: Hex | null) => {
@@ -37,19 +38,43 @@
     const n = amount / denomination
     return new Array<Hex>(Number(n)).fill(commitment)
   }
+
+  export let token = $tokensOnActiveChain[0]
+  export let balance = 0n
+  export let amount = 0n
+  export let offset: Offsets = Offsets.Neutral
+  export let power = $poolPower || 15
+  export let canDeposit = false
+
+  $: {
+    power = $poolPower || 15
+  }
+
+  $: token = $tokensOnActiveChain[0]
+  $: incrementIn = 10n ** BigInt(power)
+  $: truncatedBalance = balance - (balance % incrementIn)
+  $: maxDeposits = $latestPoolUnderPower ? maxTotalDeposits - BigInt($latestPoolUnderPower.leafIndex) : 10n
+  $: poolAddress = ($latestPoolUnderPower?.address as Hex) || null
+  $: depositLimit = maxDeposits < 10n ? maxDeposits : 10n
+  $: limit =
+    truncatedBalance < incrementIn * depositLimit
+      ? truncatedBalance - (truncatedBalance % incrementIn)
+      : incrementIn * depositLimit
+  $: canDeposit = !!poolAddress && depositLimit > 0n
+
   let commitment: Hex | null = null
   $: if (poolAddress && amount) {
-    generateCommitment(poolAddress, amount).then((c) => {
+    // move this to a store
+    generateCommitment(poolAddress).then((c) => {
       commitment = c
     })
   }
-  const dispatchChange = () => {
-    dispatch('change')
-  }
   let data: Hex | null = null
   let toAddress: Hex | null = null
+  let commitments: Hex[] = []
+  let amountDecimal = ''
   $: {
-    const commitments = calldataFromCommitment(amount, commitment)
+    commitments = calldataFromCommitment(amount, commitment)
     toAddress = commitments.length ? poolAddress : null
     data = encodeFunctionData({
       abi: PrivacyPoolAbi,
@@ -58,21 +83,22 @@
     })
     tick().then(dispatchChange)
   }
-  let amountDecimal = ''
-  const dispatchPowerChange = (e: CustomEvent<{ value: number }>) => {
-    api.config.set(`byChain.${$config.chainId}.poolPower`, e.detail.value)
-    power = e.detail.value
-    amount = 0n
-    amountDecimal = ''
-  }
+  const factoryAddress = zeroAddress
+  $: tokenAddress = token.address === zeroAddress ? native : token.address
+  $: deployData = encodeFunctionData({
+    abi: PrivacyPoolFactoryAbi,
+    functionName: 'createPool',
+    args: [tokenAddress, BigInt(power)],
+  })
 </script>
 
 <div class="flex w-full flex-row justify-start justify-items-start">
-  <PowerSelector bind:power on:change={dispatchPowerChange} unit={token.metadata.symbol} />
+  <PowerSelector {power} on:change={dispatchPowerChange} unit={token.metadata.symbol} />
 </div>
-<div class="flex flex-row justify-center" class:pointer-events-none={disabled} class:opacity-60={disabled}>
+<div class="flex flex-row justify-center" class:pointer-events-none={!canDeposit} class:opacity-60={!canDeposit}>
   <TokenBalanceSelector
     on:balance
+    maxTitle="Max that can be shielded in one transaction"
     showSteps
     showBalance
     {token}
@@ -85,10 +111,16 @@
     bind:balance>
     <svelte:fragment slot="input">
       <div class="absolute hidden">
-        {#if poolAddress && commitment}
+        {#if !canDeposit}
+          <input type="hidden" name="to-address" id="to-address" value={factoryAddress} />
+          <input type="hidden" name="value" id="value" value={0n} />
+          <input type="hidden" name="gas" id="gas" value={3_000_000} />
+          <input type="hidden" id="data" name="data" value={deployData} />
+        {:else if poolAddress && commitment}
           <input type="hidden" name="to-address" id="to-address" value={toAddress} />
           <input type="hidden" name="value" value={amount} />
-          <input id="data" name="data" type="hidden" value={data} />
+          <input type="hidden" name="gas" id="gas" value={1_000_000 * commitments.length} />
+          <input type="hidden" id="data" name="data" value={data} />
         {/if}
       </div>
     </svelte:fragment>

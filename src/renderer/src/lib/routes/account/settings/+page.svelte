@@ -8,6 +8,7 @@
   import { crumbs } from '$lib/navigation'
   import Crumb from '$lib/components/Crumb.svelte'
   import StepIncrementor from '$lib/components/StepIncrementor.svelte'
+  import { emptyHex } from '$common/config'
 
   let digitGroupSeparator = $settings.digitGroupSeparator
   let decimalSeparator = $settings.decimalSeparator
@@ -110,7 +111,7 @@
     </li>
     <li class="flex w-full flex-col">
       <Label text="Prefer Numbers or Hexadecimal"
-        ><span class="font-mono">{numbersOverHex ? '' : '0x'}{(123456789).toString(numbersOverHex ? 10 : 16)}</span
+        ><span class="font-mono">{numbersOverHex ? '' : emptyHex}{(123456789).toString(numbersOverHex ? 10 : 16)}</span
         ></Label>
       <div class="flex flex-row gap-2">
         <span class="font-mono">0x</span>

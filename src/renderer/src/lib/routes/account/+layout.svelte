@@ -10,7 +10,7 @@
   import { stickyFilled } from '$lib/ui'
   import Account from './+page.svelte'
 
-  import Router, { type WrappedComponent, location, push } from 'svelte-spa-router'
+  import Router, { type WrappedComponent } from 'svelte-spa-router'
 
   import AccountSecurity from './security/+page.svelte'
   import AccountAddressesManage from './addresses/manage/+page.svelte'
@@ -25,6 +25,8 @@
   import AccountSend from './send/+page.svelte'
   import AccountSettings from './settings/+page.svelte'
   import AccountShield from './shield/+page.svelte'
+  import AccountShieldWork from './shield/work/+page.svelte'
+  import AccountShieldAssist from './shield/assist/+page.svelte'
   import AccountTransactions from './transactions/+page.svelte'
   import AccountTransactionsDetail from './transactions/detail/+page.svelte'
   import AccountShieldBroadcast from './shield/broadcast/+page.svelte'
@@ -49,6 +51,9 @@
   routes.set('/send', AccountSend as unknown as SvelteComponent)
   routes.set('/settings', AccountSettings as unknown as SvelteComponent)
   routes.set('/shield', AccountShield as unknown as SvelteComponent)
+  routes.set('/shield/assist', AccountShieldAssist as unknown as SvelteComponent)
+  routes.set('/shield/work', AccountShieldWork as unknown as SvelteComponent)
+  routes.set('/shield/work/:poolId', AccountShieldWork as unknown as SvelteComponent)
   routes.set('/transactions', AccountTransactions as unknown as SvelteComponent)
   routes.set('/security/change-password', AccountChangePassword as unknown as SvelteComponent)
   routes.set('/transactions/:chainId/:hash', AccountTransactionsDetail as unknown as SvelteComponent)
@@ -57,15 +62,8 @@
 
   onMount(checkWallets)
 
-  const layoutLastLocation = 'account-layout:last-location'
-  let lastLocation = localStorage.getItem(layoutLastLocation)
-  if (lastLocation) {
-    push(lastLocation)
-  }
-  $: localStorage.setItem(layoutLastLocation, $location)
-
   // a default params to make the compiler happy
-  export const params = {}
+  export let params = {}
 </script>
 
 <LocationSaver prefix="account" />

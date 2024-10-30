@@ -3,14 +3,15 @@
   import TokenBalanceSelector from '$lib/components/TokenBalanceSelector.svelte'
   import type { Erc20Token } from '$common/token'
   import { isAddress, encodeFunctionData, erc20Abi, zeroAddress, type Hex } from 'viem'
-
-  const emptyBytes = '0x' as Hex
+  import { emptyHex } from '$common/config'
 
   export let toValue = ''
-  export let toAddress: Hex = emptyBytes
+  export let toAddress: Hex = emptyHex
   export let token: Erc20Token
   export let amount = 0n
   export let balance = 0n
+  const erc20GasLimit = 64_000
+  const nativeTransferGasLimit = 25_200
 </script>
 
 <ToAddressInput on:change bind:toAddress bind:toValue />
@@ -28,12 +29,18 @@
             value={token.address === zeroAddress ? toAddress : token.address} />
           <input type="hidden" id="value" name="value" value={token.address === zeroAddress ? amount : 0n} on:change />
           <input
+            type="hidden"
+            id="gas"
+            name="gas"
+            value={token.address === zeroAddress ? nativeTransferGasLimit : erc20GasLimit}
+            on:change />
+          <input
             id="data"
             name="data"
             type="hidden"
             on:change
             value={token.address === zeroAddress
-              ? emptyBytes
+              ? emptyHex
               : isAddress(toAddress)
                 ? encodeFunctionData({
                     abi: erc20Abi,

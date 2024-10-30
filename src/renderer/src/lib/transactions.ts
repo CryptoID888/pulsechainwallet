@@ -14,6 +14,7 @@ export type PrepConfig = {
   to: Hex
   data: Hex
   value: bigint
+  gas: bigint | null
 }
 
 const txHistory = persisted<Transaction[]>('txhistory', [])

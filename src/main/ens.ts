@@ -1,8 +1,9 @@
-import { ipcMain } from 'electron'
 import { chainIdToChain, getPublicClient } from './chain'
 import { Hex } from 'viem'
+import { ChainIds } from '$common/config'
+import { handle } from './ipc'
 
-export const getEnsAddress = async (chainId: number, name: string) => {
+export const getEnsAddress = async (chainId: ChainIds, name: string) => {
   const chain = chainIdToChain.get(chainId)
   if (!chain) {
     throw new Error(`Chain ${chainId} not found`)
@@ -13,7 +14,7 @@ export const getEnsAddress = async (chainId: number, name: string) => {
   })
 }
 
-export const getEns = async (chainId: number, address: Hex) => {
+export const getEns = async (chainId: ChainIds, address: Hex) => {
   const chain = chainIdToChain.get(chainId)
   if (!chain) {
     throw new Error(`Chain ${chainId} not found`)
@@ -24,9 +25,5 @@ export const getEns = async (chainId: number, address: Hex) => {
   })
 }
 
-ipcMain.handle('ens:getEnsAddress', async (_event, chainId: number, name: string) => {
-  return await getEnsAddress(chainId, name)
-})
-ipcMain.handle('ens:getEns', async (_event, chainId: number, address: Hex) => {
-  return await getEns(chainId, address)
-})
+handle('ens:getEnsAddress', getEnsAddress)
+handle('ens:getEns', getEns)

@@ -1,22 +1,24 @@
+import { API, HandlerFn } from "$common/api"
 import { ipcMain, type IpcMainInvokeEvent } from "electron"
 
 export type CancelFn = () => void
-export const binding = <T>(
-  eventName: string,
+export const binding = <K extends keyof API = any>(
+  eventName: K,
   setup: (
     event: IpcMainInvokeEvent,
-    respond: (result: T) => void,
-    ...args: any[]
-  ) => Promise<[any, CancelFn]>,
+    respond: (result: ReturnType<API[K]>) => void,
+    ...args: Parameters<API[K]>
+  ) => Promise<[ReturnType<API[K]>, CancelFn]>,
 ) => {
   let cancel: CancelFn = () => { }
-  ipcMain.handle(eventName, async (event, ...args) => {
+  const handler: HandlerFn<K> = async (event, ...args: Parameters<API[K]>) => {
     cancel()
-    const respond = (result: T) => {
+    const respond = (result: ReturnType<API[K]>) => {
       event.sender.send(eventName, result)
     }
     const [result, cancelFn] = await setup(event, respond, ...args)
     cancel = cancelFn
     return result
-  })
+  }
+  ipcMain.handle(eventName, handler)
 }

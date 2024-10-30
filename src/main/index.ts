@@ -3,10 +3,13 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import './sql'
-import './wallets'
+import './wallet'
+import * as pools from './pools'
 import './ens'
+import './contact'
 import * as indexer from './indexer'
 import './chain/state'
+import './msgboard'
 
 import { main, mainProps } from './window'
 import { get } from 'svelte/store'
@@ -14,7 +17,7 @@ import { get } from 'svelte/store'
 async function createWindow(): Promise<void> {
   // Create the browser window.
   indexer.start()
-  // console.log('using props', get(mainProps))
+  await pools.init()
   const mainWindow = new BrowserWindow({
     ...get(mainProps),
     autoHideMenuBar: true,
@@ -30,7 +33,9 @@ async function createWindow(): Promise<void> {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
-
+  mainWindow.on('closed', () => {
+    main.set(null)
+  })
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -44,13 +49,6 @@ async function createWindow(): Promise<void> {
   mainWindow.on('resized', saveBounds)
   mainWindow.on('moved', saveBounds)
   mainWindow.on('close', saveBounds)
-  // mainWindow.on('app-command', (_, command) => {
-  //   console.log('app-command', command)
-  //   if (command === 'zoom') {
-  //     // mainWindow.setZoomLevel(mainWindow.getZoomLevel() + 1)
-  //   }
-  // })
-
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -58,7 +56,9 @@ async function createWindow(): Promise<void> {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-  mainWindow.webContents.openDevTools()
+  try {
+    mainWindow.webContents.openDevTools()
+  } catch { }
 }
 
 // This method will be called when Electron has finished

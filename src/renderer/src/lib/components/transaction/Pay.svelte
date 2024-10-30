@@ -23,6 +23,7 @@
   import * as jsonreplacer from '$lib/serializers/json'
   import type { RawTransaction } from '$lib/transactions'
   import Loader from '../Loader.svelte'
+  import { emptyHex, type ChainIds } from '$common/config'
 
   const dispatch = createEventDispatcher()
 
@@ -119,7 +120,9 @@
   let usePendingNonce = true
 
   export let prep!: PrepConfig
-  // $: console.log(prep)
+  $: if (prep.gas) {
+    gasLimitExternal = BigInt(prep.gas)
+  }
   /**
    * requests that this module check the gas consumption of a call.
    * also implicitly check the success or failure status
@@ -156,12 +159,15 @@
   const runGasEstimation = () => {
     let cancelled = false
     wallet
-      .estimateGas($chain.id, {
-        account: prep.from.address as Hex,
-        to: prep.to as Hex,
-        value: prep.value,
-        data: prep.data as Hex,
-      } as any)
+      .estimateGas(
+        $chain.id as ChainIds,
+        {
+          account: prep.from.address as Hex,
+          to: prep.to as Hex,
+          value: prep.value,
+          data: prep.data as Hex,
+        } as any,
+      )
       .then((estimate) => {
         if (cancelled) return
         estimatedGas = BigInt(estimate)
@@ -213,7 +219,6 @@
       : !nonceInput
         ? window.Number(nonceInput as string)
         : Math.max(window.Number(nonceInput), window.Number(minNonce))
-  $: console.log(nonce)
   $: finalMaxBaseFeePerGas = max(parseUnits(sanitizeDecimal(maxBaseFeeInput), 9), lowBoundBaseFee)
   $: finalMaxPriorityFeePerGas = max(parseUnits(sanitizeDecimal(maxPriorityFeeInput), 9), lowBoundPriorityFee)
   $: gasSettings =
@@ -229,7 +234,7 @@
         }
 
   $: paySettings = {
-    gasLimit,
+    gas: gasLimit,
     nonce,
     ...gasSettings,
   }
@@ -248,6 +253,7 @@
       ? feeSpeedCalc(maxBaseFeePerGas, maxPriorityFeePerGas, priorityMultipliers[feeSpeed as PresetSpeed])
       : maxBaseFeePerGas + maxPriorityFeePerGas)
   $: costFiat = (costNative * price) / oneEther
+  $: disabled = nonce === null || !$nonces || !transactionJSON
 
   onMount(stickyFilledOnMount)
 </script>
@@ -275,7 +281,7 @@
             {#if rawDataPanelOpen}
               <button class="contents" on:click|stopPropagation>
                 <label for="show-numbers" class="contents">
-                  <span class="px-2 font-mono">{showNumbers ? '#' : '0x'}</span>
+                  <span class="px-2 font-mono">{showNumbers ? '#' : emptyHex}</span>
                   <SlideToggle
                     name="show-numbers"
                     id="show-numbers"
@@ -493,7 +499,7 @@
 </div>
 <Portal target="#sticky-portal">
   <div class="flex flex-row items-center gap-2 bg-primary-50 px-4 py-2 shadow-inner">
-    <button type="button" class="variant-filled-primary btn w-full" on:click={handleConfirm}>Confirm</button>
+    <button {disabled} type="button" class="variant-filled-primary btn w-full" on:click={handleConfirm}>Confirm</button>
     <button
       type="button"
       class="variant-ghost-primary btn"

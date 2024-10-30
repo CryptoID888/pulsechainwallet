@@ -5,7 +5,7 @@ import { ipcMain } from 'electron'
 import BetterSqlite3, { SqliteError, Transaction } from 'better-sqlite3-multiple-ciphers'
 // import BetterSqlite3 from 'better-sqlite3'
 
-import { paths } from '../paths';
+import { paths } from '$main/paths';
 import { AllQueryKeys, backendOnlyQueries, queries, type QueryKeys } from '$common/sql'
 import * as fs from 'fs';
 import path from 'path';
@@ -25,9 +25,11 @@ import accountMigrationUp from './migrations/V001__account.up.sql?asset'
 import transactionMigrationUp from './migrations/V002__chain-transaction.up.sql?asset'
 import contactMigrationUp from './migrations/V003__contact.up.sql?asset'
 import proofMigrationUp from './migrations/V004__proof.up.sql?asset'
-import { Account, WalletMetadata } from '$common/wallets';
+import { Account, InsertableWalletMetadata, WalletMetadata } from '$common/wallets';
 import { Hex } from 'viem';
 import { setTimeout } from 'timers/promises';
+import type { InsertableProof } from '$common/pools';
+import { handle } from '$main/ipc';
 
 const migrationsUp = [
   walletMigrationUp,
@@ -114,7 +116,7 @@ const prepare = (db: BetterSqlite3.Database) => {
  * @param fn a function to run in a try
  * @returns a true if the fn does not err
  */
-const boolReturn = (fn: (...args: any[]) => Promise<void | boolean> | boolean | void) => {
+const boolReturn = (fn: (...args: any[]) => Promise<boolean> | boolean) => {
   return async (...args: any[]) => {
     try {
       return await fn(...args)
@@ -130,9 +132,16 @@ const boolReturn = (fn: (...args: any[]) => Promise<void | boolean> | boolean | 
  */
 export const password = {
   check: boolReturn((pass: string) => {
-    // console.log('check')
-    createDb(Buffer.from(pass))
-    return true
+    try {
+      createDb(Buffer.from(pass))
+      return true
+    } catch (err: unknown) {
+      const e = err as { code: string }
+      if (e.code !== 'SQLITE_NOTADB') {
+        throw e
+      }
+      return false
+    }
   }),
   change: boolReturn(async (current: string, next: string) => {
     // console.log('change')
@@ -153,6 +162,7 @@ export const password = {
     // console.log('attempt')
     try {
       db = createDb(Buffer.from(attempt))
+      setupTasks.forEach((task) => task.up())
     } catch (err: unknown) {
       const e = err as { code: string }
       if (e.code !== 'SQLITE_NOTADB') {
@@ -173,6 +183,7 @@ export const password = {
     db.close()
     db = null
     preparedQueries = null
+    setupTasks.forEach((task) => task.down())
     await setTimeout(500)
     return true
   }),
@@ -182,10 +193,7 @@ ipcMain.handle('password:login', (_, pass: string) => {
   return password.login(pass)
 })
 
-ipcMain.handle('password:check', async (_, pass: string) => {
-  const result = await password.check(pass)
-  return result
-})
+handle('password:check', password.check)
 
 ipcMain.handle('password:change', (_, current: string, next: string) => {
   return password.change(current, next)
@@ -195,33 +203,45 @@ ipcMain.handle('password:logout', (_) => {
   return password.logout()
 })
 
-const statementFromQueryKey = async (queryKey: AllQueryKeys) => {
+const statementFromQueryKey = (queryKey: AllQueryKeys) => {
   preparedQueries = preparedQueries || prepare(db!)
   return preparedQueries[queryKey]
 }
 
-const queryCheck = (fn: (...args: any[]) => any) => {
-  return async <T>(queryKey: AllQueryKeys, params: any[]) => {
-    const stmt = await statementFromQueryKey(queryKey)
+const queryCheck = <
+  method extends 'run' | 'get' | 'all',
+  T = any,
+  R = method extends 'run'
+  ? BetterSqlite3.RunResult
+  : method extends 'get'
+  ? T | null
+  : T[]
+>(fn: (...args: any[]) => R) => {
+  return <T, R = method extends 'run'
+    ? BetterSqlite3.RunResult
+    : method extends 'get'
+    ? T | null
+    : T[]>(queryKey: AllQueryKeys, params: any[] = []) => {
+    const stmt = statementFromQueryKey(queryKey)
     try {
-      return await fn(stmt, params) as T
+      return fn(stmt, params) as unknown as R
     } catch (err) {
       console.log('failed', err)
-      console.log('inputs', queryKey, params)
+      // console.log('inputs', queryKey, params)
       throw err
     }
   }
 }
 
 export const query = {
-  run: queryCheck(async (stmt: BetterSqlite3.Statement, params: any[]) => {
-    return stmt.run(...params) as BetterSqlite3.RunResult
+  run: queryCheck<'run'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
+    return stmt.run(...params) as I
   }),
-  get: queryCheck(async <T>(stmt: BetterSqlite3.Statement, params: any[]) => {
-    return stmt.get(...params) as T | null
+  get: queryCheck<'get'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
+    return stmt.get(...params) as I | null
   }),
-  all: queryCheck(async <T>(stmt: BetterSqlite3.Statement, params: any[]) => {
-    return stmt.all(...params) as T[]
+  all: queryCheck<'all'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
+    return stmt.all(...params) as I[]
   }),
 }
 
@@ -246,24 +266,68 @@ ipcMain.handle("sql:all", async (_event: Electron.IpcMainInvokeEvent, queryKey: 
   return query.all(queryKey, params)
 });
 
+type Task = {
+  up: () => void
+  down: () => void
+}
+
+const setupTasks: Task[] = []
+
+export const addSetupTask = (task: Task) => {
+  setupTasks.push(task)
+  // should only happen when the db is decrypted, but
+  // if more handlers are added later, no need to wait
+  if (db) {
+    task.up()
+  }
+}
+
 //
 // transactions
 //
-export const addWallet = () => db!.transaction(async (wallet: WalletMetadata, accounts: Account[] = []) => {
-  const count = await query.get<{ count: number }>('WALLET_COUNT', [])
-  await query.run('WALLET_INSERT', [wallet])
-  await Promise.all(accounts.map((account) => query.run('ACCOUNT_INSERT', [{
+// the unique characteristic about these transactions is that they first return a function as they are being prepared
+//
+export const addWallet = () => db!.transaction((wallet: InsertableWalletMetadata, accounts: Account[] = []) => {
+  const result = query.get<{ count: number }>('WALLET_COUNT', [])
+  if (!result) {
+    throw new Error('no result from WALLET_COUNT')
+  }
+  const { count } = result
+  const w = { ...wallet, user_order: count } as WalletMetadata
+  query.run('WALLET_INSERT', [w])
+  accounts.map((account) => query.run('ACCOUNT_INSERT', [{
     ...account,
+    // this is because the db does not actually understand boolean types
     added: account.added ? 1 : 0,
-  }])))
-  return count.count
-}) as Transaction<(a: WalletMetadata, b: Account[]) => Promise<number>>
+  }]))
+  return count
+}) as Transaction<(a: InsertableWalletMetadata, b: Account[]) => number>
 
-export const nullifyAndSetAdded = () => db!.transaction(async (walletId: Hex, added: number[]) => {
-  await query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
-  await Promise.all(added.map((i) => query.run('ACCOUNT_SET_ADDED', [{
+export const nullifyAndSetAdded = () => db!.transaction((walletId: Hex, added: number[]) => {
+  query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
+  added.map((i) => query.run<Account>('ACCOUNT_SET_ADDED', [{
     wallet_id: walletId,
     address_index: i,
-  }])))
-}) as Transaction<(a: Hex, b: number[]) => Promise<void>>
+  }]))
+}) as Transaction<(a: Hex, b: number[]) => void>
 
+export const insertProofs = (proofs: InsertableProof[]) => (db!.transaction((proofs: InsertableProof[]) => {
+  proofs.map((proof) => query.run('PROOF_INSERT', [proof]))
+}) as Transaction<(a: InsertableProof[]) => void>)(proofs)
+
+export const sendWork = () => db!.transaction(async (poolId: string, leafIndex: number, fn: () => Promise<Hex>) => {
+  // run a query locally first to reduce the chance of
+  // local failing after the work has been sent
+  query.run('UPDATE_WORK_STATE', [{
+    pool_id: poolId,
+    leaf_index: leafIndex,
+    work_state: 'broadcasted',
+  }])
+  const id = await fn()
+  query.run('UPDATE_MSG_ID', [{
+    pool_id: poolId,
+    leaf_index: leafIndex,
+    message_hash: id,
+  }])
+  return id
+}) as Transaction<(a: string, b: number, c: () => Promise<Hex>) => Promise<Hex>>

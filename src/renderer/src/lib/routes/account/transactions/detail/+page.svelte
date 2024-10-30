@@ -6,15 +6,19 @@
   import Icon from '@iconify/svelte'
   import Crumb from '$lib/components/Crumb.svelte'
 
-  import { pulsechainV4 } from 'viem/chains'
+  import { pulsechainV4 } from '$common/chains'
 
-  export let params: { hash: string; chainId: number }
   import { chainIdToChain } from '$lib/chain-state'
   import { chainById } from '$lib/visual-chain'
   import { crumbs } from '$lib/navigation'
   import { state } from '$lib/api'
   import type { Hex } from 'viem'
   import type { TransactionData } from '$common/types'
+  import Date from '$lib/components/Date.svelte'
+  import { TimeUnit } from '$lib/time'
+  import { emptyHex } from '$common/config'
+
+  export let params: { hash: string; chainId: number }
 
   // $: console.log('params=%o', params)
   // let data: TransactionData | null = null
@@ -36,7 +40,7 @@
 </script>
 
 <Crumb {...crumbs.transactions} />
-<Crumb {...crumbs.transactionDetails(chaindata?.transaction?.hash || '0x')} />
+<Crumb {...crumbs.transactionDetails(chaindata?.transaction?.hash || emptyHex)} />
 {#if chaindata}
   <div class="flex px-4 flex-col gap-2">
     <div class="flex flex-row">
@@ -84,7 +88,7 @@
       </div>
     </div>
     <div class="flex w-full justify-between">
-      <span class="font-bold">Amount</span>
+      <span class="font-bold">Value</span>
       <span class="font-mono"
         ><Number decimals={18} x={chaindata?.transaction?.value || 0n} /> {chain?.nativeCurrency?.symbol}</span>
     </div>
@@ -115,6 +119,16 @@
     <div class="flex w-full justify-between">
       <span class="font-bold">Total Fee (<span class="uppercase">{visualChain?.gasUnit}</span>)</span>
       <span class="font-mono"><Number decimals={9} x={chaindata?.receipt?.effectiveGasPrice || 0n} /></span>
+    </div>
+    <div class="flex w-full justify-between">
+      <span class="font-bold">Block Number</span>
+      <span class="font-mono"
+        >{#if chaindata?.block?.number}<Number decimals={0} x={chaindata.block.number} />{/if}</span>
+    </div>
+    <div class="flex w-full justify-between">
+      <span class="font-bold">Block Timestamp</span>
+      <span class="font-mono"
+        >{#if chaindata?.block?.timestamp}<Date unit={TimeUnit.Second} value={chaindata.block.timestamp} />{/if}</span>
     </div>
   </div>
 {/if}

@@ -1,4 +1,4 @@
-import * as viemChains from 'viem/chains'
+import * as viemChains from '$common/chains'
 import mainnetLogo from '$lib/assets/chains/0x1.png'
 import pulsechainLogo from '$lib/assets/chains/0x171.png'
 import pulsechainTestnetV4Logo from '$lib/assets/chains/0x3af.png'

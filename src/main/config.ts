@@ -1,11 +1,10 @@
 import { writable } from './store'
 import { type Config, defaultConfig } from '$common/config'
 import { get } from 'svelte/store'
-import { ipcMain } from 'electron'
 import type { Key } from '$preload/api'
 import _ from 'lodash';
 import poolsConfig from '$common/pools-config.json'
-import { main } from './window'
+import { emit, handle } from './ipc'
 
 /**
  * The config store
@@ -21,13 +20,13 @@ export const config = writable<Config>('config', defaultConfig, (current) => {
   return current
 })
 config.subscribe((c) => {
-  get(main)?.webContents.send('config:update', c)
+  emit('config:update', c)
 })
 
-ipcMain.handle('config:get', () => {
+handle('config:get', () => {
   return get(config)
 })
-ipcMain.handle('config:set', (_event, k: Key, value: any) => {
+handle('config:set', (k: Key, value: any) => {
   if (k === null) {
     return
   }
@@ -38,6 +37,12 @@ ipcMain.handle('config:set', (_event, k: Key, value: any) => {
         ...value,
       }
     }
-    return _.set(_.cloneDeep($config), k, value)
+    let clone = _.cloneDeep($config)
+    const kSplit = Array.isArray(k) ? k : k.split('.')
+    const [zeroTh, first, second] = kSplit
+    if (zeroTh === 'byChain' && second === 'poolPower') {
+      clone = _.set(clone, [zeroTh, first, 'poolByPowerIndex', value], 0)
+    }
+    return _.set(clone, k, value)
   })
 })

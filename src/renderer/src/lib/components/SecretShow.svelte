@@ -8,9 +8,15 @@
   const cancelReveal = () => {
     drawerStore.close()
   }
+  let secretInvalidMessage = ''
   const checkPasswordAndReveal = async (e: CustomEvent) => {
     const password = e.detail
-    secret = (await wallet.reveal(password, walletId, addressIndex)) || ''
+    const shouldReveal = await wallet.reveal(password, walletId, addressIndex)
+    if (!shouldReveal) {
+      secretInvalidMessage = 'Invalid password'
+    } else {
+      secret = shouldReveal
+    }
   }
 
   export let walletId!: Hex
@@ -23,6 +29,7 @@
   {#if !!secret}
     <CodeBlock code={secret} />
   {:else}
+    {secretInvalidMessage}
     <PasswordGate on:cancel={cancelReveal} on:submit={checkPasswordAndReveal} />
   {/if}
 </div>

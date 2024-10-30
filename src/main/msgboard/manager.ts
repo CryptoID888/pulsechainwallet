@@ -1,6 +1,14 @@
 import { JsonRpcProvider } from 'ethers'
 import * as msgboard from '@pulsechain/msgboard'
-import type { ServiceWorkerMessage, MessageData } from '$lib/types'
+import workerpool from 'workerpool'
+import nodeWorker from '$main/worker?nodeWorker'
+import type { ServiceWorkerMessage } from '$common/types'
+import type { ChainIds } from '$common/config'
+
+// make this dependent on config so that user can control timeout
+export let pool = workerpool.pool({
+  workerTerminateTimeout: 120_000,
+})
 
 export const cancel = async (reg: ServiceWorkerRegistration) => {
   reg.active?.postMessage(
@@ -13,6 +21,7 @@ export const cancel = async (reg: ServiceWorkerRegistration) => {
 type Options = {
   rpcUrl: string
   category: string
+  chainId: ChainIds
   text: string
   cancel?: typeof cancel
   progress: (work: msgboard.Work) => void
@@ -23,104 +32,70 @@ type Options = {
 export const doWork = async ({
   rpcUrl,
   category,
+  chainId,
   text,
   cancel: _cancel = cancel,
   progress,
-  complete,
   logger,
+  complete,
 }: Options) => {
   let reg!: ServiceWorkerRegistration
   let rejected!: () => void
   let cancelled!: boolean
   const provider = new JsonRpcProvider(rpcUrl)
-  const worker = new msgboard.MsgBoard(provider, {
+  const board = new msgboard.MsgBoard(provider, {
     logger,
   })
-  const status = await worker.status()
-  const initMsg = JSON.stringify({
+  const status = await board.status()
+  const initMsg = {
     type: 'work',
     rpc: rpcUrl,
     category,
+    chainId,
     data: text,
     hardFactor: status.hardFactor.toString(),
     easyFactor: status.easyFactor.toString(),
-  } as ServiceWorkerMessage)
-  type Message = {
-    data: string
-  }
-  let catchHandler!: (msg: Message) => void
-  const unregister = () => {
-    navigator.serviceWorker.removeEventListener('message', catchHandler)
-  }
+  } as ServiceWorkerMessage
   return {
-    worker,
+    board,
     cancel: async () => {
       await _cancel(reg)
       cancelled = true
-      unregister()
       rejected()
     },
-    start: () =>
-      new Promise<ServiceWorker>((resolve, reject) => {
-        rejected = reject
-        catchHandler = (msg: Message) => {
-          try {
-            handle(JSON.parse(msg.data))
-          } catch (err) {
-            console.error(err)
+    start: async () => {
+      // const { port1, port2 } = new MessageChannelMain()
+      const worker = nodeWorker({
+        workerData: initMsg,
+      })
+      const eventHandlers = {
+        logger: (a: { log: string, args: unknown[] }) => {
+          logger?.(a.log, a.args)
+        },
+        progress: (msg: object) => {
+          if (cancelled) {
+            return
           }
-        }
-        // navigator.serviceWorker.addEventListener('controllerchange', (e) => {
-        //   console.log(e)
-        // })
-        navigator.serviceWorker.addEventListener('message', catchHandler)
-        let active!: ServiceWorker
-        console.log(navigator.serviceWorker)
-        navigator.serviceWorker.ready
-          .then((registration) => {
-            reg = registration
-            const serviceWorker = registration.active
-            console.log('serviceWorker', serviceWorker)
-            if (!serviceWorker) {
-              reject(new Error('no active service worker'))
-            }
-            active = serviceWorker!
-            active.postMessage(initMsg)
-          })
-          .catch((err) => {
-            console.log(err)
-            throw err
-          })
-        const handle = (msg: MessageData) => {
-          let work!: msgboard.Work
-          if (cancelled) return
-          console.log('handle', msg)
-          resolve(active)
-          switch (msg.type) {
-            // case 'log':
-            //   addToList(new Log(msg.log))
-            //   break
-            case 'progress':
-              work = msgboard.Work.fromJSON(msg.progress!)
-              // console.log('progress %o over %oms', work.iterations, work.duration)
-              // addToList(new Log(`progress ${work.iterations} over ${work.duration}ms`))
-              // lastProgress.update(() => work)
-              progress(work)
-              break
-            case 'complete':
-              work = msgboard.Work.fromJSON(msg.work!)
-              unregister()
-              complete(work)
-              // addToList(new Log(
-              //   `added work ${work.hash} at block ${work.block.number}`,
-              // ))
-              // noteWork(work)
-              break
-            default:
-              // console.log('unknown event %o', msg.type)
-              break
+          const work = msgboard.Work.fromObject(msg as msgboard.WorkResultObject)
+          progress(work)
+        },
+        complete: (msg: object) => {
+          if (cancelled) {
+            return
           }
+          const work = msgboard.Work.fromObject(msg as msgboard.WorkResultObject)
+          complete(work)
+        },
+      }
+      worker.on('message', (msg) => {
+        const { type, work } = msg as {
+          type: string
+          work: ServiceWorkerMessage
         }
-      }),
+        eventHandlers[type]?.(work)
+      })
+      worker.postMessage(initMsg)
+      return worker
+    }
   }
 }

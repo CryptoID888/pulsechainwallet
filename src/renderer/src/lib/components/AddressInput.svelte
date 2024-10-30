@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { tldToChainId, type TLD } from '$lib/ens'
-
   import * as viem from 'viem'
   import { normalize } from 'viem/ens'
-  import Copy from './Copy.svelte'
-  import AddContactButton from './AddContactButton.svelte'
   import Icon from '@iconify/svelte'
   import { createEventDispatcher } from 'svelte'
+
+  import { tldToChainId, type TLD } from '$lib/ens'
+  import Copy from '$lib/components/Copy.svelte'
+  import AddContactButton from '$lib/components/AddContactButton.svelte'
   import { ens } from '$lib/api'
+  import Address from '$lib/components/Address.svelte'
+  import { emptyHex, type ChainIds } from '$common/config'
 
   const noop = () => {}
   const dispatch = createEventDispatcher()
@@ -18,12 +20,12 @@
       return noop
     }
     const name = normalize($ens)
-    const getAddressFromEns = async (chainId: number) => {
+    const getAddressFromEns = async (chainId: ChainIds) => {
       return ens.getEnsAddress(chainId, name)
     }
     const update = (val: viem.GetEnsAddressReturnType) => {
       if (cancelled) return
-      address = val || null
+      address = viem.isAddress(val) ? viem.getAddress(val) : null
       dispatch('change', address)
     }
     const tld = value.slice(-4) as `.${string}`
@@ -38,10 +40,10 @@
   }
   const checkForAddressDerivation = () => {
     cancelFetchENS()
-    if (value.startsWith('0x') && value.length === 42) {
+    if (value.startsWith(emptyHex) && value.length === 42) {
       if (viem.isAddress(value)) {
         // do not show derived address if input is hex formatted address
-        address = value
+        address = viem.getAddress(value)
         dispatch('change', address)
         return
       }
@@ -55,6 +57,7 @@
   }
   export let value = ''
   export let address: viem.Hex | null = null
+  export let addContactButtonType: 'button' | 'submit' = 'button'
   let cancelFetchENS = noop
   $: addr = address && viem.isAddress(address) && value !== address ? address : ''
 </script>
@@ -72,7 +75,7 @@
   <div class="flex flex-row items-center gap-2">
     <Copy text={addr} let:copy let:copied>
       <button type="button" class="flex flex-row items-center" on:click={copy}>
-        <span class="flex text-sm leading-6">{addr}&nbsp;</span>
+        <span class="flex text-sm leading-6"><Address address={addr} />&nbsp;</span>
         {#if addr}
           {#if copied}
             <Icon icon="icon-park-outline:file-success-one" height={12} width={12} />
@@ -82,6 +85,6 @@
         {/if}
       </button>
     </Copy>
-    <AddContactButton {address} name={value !== address ? value : ''} />
+    <AddContactButton type={addContactButtonType} {address} name={value !== address ? value : ''} />
   </div>
 </label>

@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import path from 'path'
 import { paths } from './paths'
 import { writable as w } from 'svelte/store'
+import { valueToJSON } from './json'
 
 const io = {
   write: (key: string, value: object) => {
@@ -18,28 +19,6 @@ const io = {
     } catch (err) {
       return null
     }
-  },
-}
-
-const valueToJSON = {
-  stringify: (value: object) => {
-    return JSON.stringify(value, (_k, v) => {
-      if (typeof v === 'bigint') {
-        return {
-          type: 'bigint',
-          value: v.toString(),
-        }
-      }
-      return v
-    }, 2)
-  },
-  parse: (value: string) => {
-    return JSON.parse(value, (_k, v) => {
-      if (v && typeof v === 'object' && v.type === 'bigint' && typeof v.value === 'string') {
-        return BigInt(v.value)
-      }
-      return v
-    })
   },
 }
 

@@ -6,11 +6,12 @@
   import type { Hex } from 'viem'
   import Crumb from '$lib/components/Crumb.svelte'
   import { crumbs } from '$lib/navigation'
+  import { emptyHex } from '$common/config'
 
   let balance = 0n
   let amount = 0n
   let toValue = ''
-  let toAddress: Hex = '0x'
+  let toAddress: Hex = emptyHex
   let token: Erc20Token = whitelistedERC20[0]
 
   $: if ($tokensOnActiveChain) {

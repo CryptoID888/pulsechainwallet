@@ -7,8 +7,6 @@ CREATE TABLE IF NOT EXISTS account(
   address_index INTEGER NOT NULL,
   -- whether the account should be accessible as a signer to the front end
   added boolean,
-  -- name provided by the user
-  name TEXT,
   -- because a wallet and a private key of one of the accounts can have the same address
   PRIMARY KEY (address, wallet_id)
 );

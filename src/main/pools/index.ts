@@ -1,52 +1,88 @@
 import type { BigNumber } from '@ethersproject/bignumber'
 import * as snarkjs from 'snarkjs'
-import brotliPromise from 'brotli-wasm'
-import * as sql from '$main/sql'
-import { solidityPackedKeccak256 } from 'ethers'
+// import brotliPromise from 'brotli-wasm?asset'
+import { BigNumberish } from 'ethers'
 import {
-  bytesToHex,
+  // bytesToHex,
+  // bytesToHex,
   getAddress,
+  getContract,
   isAddress,
+  keccak256,
+  encodePacked,
   numberToHex,
   toHex,
   zeroAddress,
   type Hex,
 } from 'viem'
-import { AccessList, poseidon, subsetDataToBytes, toFE, MerkleTree } from '../resources/pools-ts'
-import { type Account } from '$common/wallets'
-import { secretFromAccountSignature } from '$main/wallets'
-import { type Deposit } from '$common/indexer'
-import { fetchLeavesUnderPool } from '$main/indexer/queries'
-import { derived, get } from 'svelte/store'
-import { chain } from '../chain'
+import { AccessList, poseidon, subsetDataToBytes, toFE, MerkleTree } from './pools-ts'
+import { WalletMetadata, type Account } from '$common/wallets'
 import type { WithdrawalProofStruct } from '$common/types'
-import { config } from '$main/config'
-import path from 'path'
-import * as fs from 'node:fs';
+import * as safe from '$main/safe'
+import { type Proof } from '$common/pools'
+
+import withdrawFromSubsetWasm from './pools-ts/withdraw_from_subset.wasm?asset'
+import withdrawFromSubsetZkey from './pools-ts/withdraw_from_subset_final.zkey?asset'
+// import withdrawFromSubsetVerifier from './pools-ts/withdraw_from_subset_verifier.json'
+
+import * as fs from 'fs'
+import * as sql from '$main/sql'
+import type { PrivacyPool, Deposit } from '$common/indexer/gql/graphql'
+import { fetchLeavesUnderPool } from '$main/indexer/queries'
+import { chainIdToChain, getPublicClient } from '$main/chain'
+import { ChainIds } from '$common/config'
+import { handle } from '$main/ipc'
+import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
+// import { memoizeWithTTL } from '$common/utils'
+// import { query } from '$main/indexer'
+import { allPoolsUnderChainId } from '$common/indexer'
+import { valueToJSON } from '$main/json'
+import { query } from '$main/indexer'
+import _ from 'lodash'
+import { truncateHash } from '$common/utils'
 
 let zkeyBytes!: Uint8Array
 let wasmBytes!: Uint8Array
 
-let brotli!: Awaited<typeof brotliPromise>
+// let brotli!: BrotliWasmType
 
-// TODO: refactor to only load wasm and key during use
+// type Options = {
+//   quality?: number
+// };
+
+// type BrotliWasmType = {
+//   decompress(buf: Uint8Array): Uint8Array;
+//   compress(buf: Uint8Array, options?: Options): Uint8Array;
+// }
+
 export const init = async () => {
-  brotli = await brotliPromise
-  const WASM_FNAME = path.join('resources', 'pools', 'withdraw_from_subset.wasm')
-  const ZKEY_FNAME = path.join('resources', 'pools', 'withdraw_from_subset_final.zkey')
-  const VERIFIER_FNAME = path.join('resources', 'pools', 'withdraw_from_subset_verifier.json')
-  wasmBytes = fs.readFileSync(WASM_FNAME)
-  zkeyBytes = fs.readFileSync(ZKEY_FNAME)
-  const verifierBytes = fs.readFileSync(VERIFIER_FNAME)
-  const verifier = JSON.parse(new TextDecoder().decode(verifierBytes))
-  console.log(verifier)
+  // brotli = await import(brotliPromise) as BrotliWasmType
+  // console.log(brotli)
+  zkeyBytes = await fs.promises.readFile(withdrawFromSubsetZkey)
+  wasmBytes = await fs.promises.readFile(withdrawFromSubsetWasm)
+  // const WASM_FNAME = await path.join('resources', 'pools', 'withdraw_from_subset.wasm')
+  // await Command.create('ls', ['-la', resourceDir]).execute()
+  // wasmBytes = await fs.readFile(WASM_FNAME, {
+  //   baseDir: fs.BaseDirectory.Resource,
+  // })
+  // const ZKEY_FNAME = await path.join('resources', 'pools', 'withdraw_from_subset_final.zkey')
+  // zkeyBytes = await fs.readFile(ZKEY_FNAME, {
+  //   baseDir: fs.BaseDirectory.Resource,
+  // })
+  // const VERIFIER_FNAME = await path.join('resources', 'pools', 'withdraw_from_subset_verifier.json')
+  // const verifierBytes = await fs.readFile(VERIFIER_FNAME, {
+  //   baseDir: fs.BaseDirectory.Resource,
+  // })
+  // const verifier = JSON.parse(new TextDecoder().decode(verifierBytes))
+  // console.log(verifier)
   // console.log('wasm=%o, zkey=%o', wasmBytes.length, zkeyBytes.length)
 }
 
 export const compress = async (bufferData: Uint8Array) => {
-  await brotliPromise
-  return bytesToHex(brotli.compress(bufferData))
-  // return bufferData
+  return bufferData
+  // await brotliPromise
+  // console.log(brotli)
+  // return bytesToHex(brotli.compress(bufferData))
 }
 
 // type DepositToWithdraw = {
@@ -63,7 +99,7 @@ export const generateAssetMetadata = (assetAddress: string, denomination: string
 )
 
 export const hashMod = (types: string[], values: unknown[]) => {
-  return toFE(BigInt(solidityPackedKeccak256(types, values)))
+  return toFE(BigInt(keccak256(encodePacked(types, values))))
 }
 
 export const toHexString = (number: bigint | string | Hex) => {
@@ -79,7 +115,54 @@ type UserDefinedInputs = {
   deadline?: bigint
 }
 
-export const createProof = async (
+export const proofToWithdrawalStruct = async (proof: Proof) => {
+  const poolId = proof.pool_id
+  const chainId = proof.chain_id
+  const allPoolsResult = await allPoolsUnderChainId(chainId)
+  const userInputs = valueToJSON.parse<UserDefinedInputs>(proof.user_inputs)
+  const pool = allPoolsResult.privacyPools.items.find((p) => p.id === poolId)
+  if (!pool) throw new Error('pool not found')
+  const leaves = await fetchLeavesUnderPool(poolId)
+  const depositTree = MerkleTree.fullEmpty({
+    treeLength: 0,
+    zeroString: 'empty',
+  })
+  for (const leaf of leaves) {
+    depositTree.insert(leaf)
+  }
+  const chain = chainIdToChain.get(chainId)!
+  const poolContract = getContract({
+    address: pool.address as Hex,
+    abi: PrivacyPoolAbi,
+    client: getPublicClient(chain),
+  })
+  const root = await poolContract.read.getLatestRoot()
+  const inMemoryRoot = depositTree.root.toHexString() as Hex
+  console.log('roots id=%o length=%o\n\tcontract=%o\n\tinmemory=%o', truncateHash(poolId), leaves.length, truncateHash(root), truncateHash(inMemoryRoot))
+  if (root !== inMemoryRoot) {
+    throw new Error('roots mismatch')
+  }
+  const isKnownRoot = await poolContract.read.isKnownRoot([inMemoryRoot])
+    .catch((e) => {
+      console.log('error', e)
+      return false
+    })
+  if (!isKnownRoot) {
+    throw new Error('root not known')
+  }
+  const blocklist = AccessList.fullEmpty({
+    accessType: 'blocklist',
+    subsetLength: depositTree.length,
+  })
+  // add block / allow list logic here when lists are implemented
+  const secretHex = safe.decrypt(proof.secret) as Hex
+  return await createProofCalldata(secretHex, pool.asset as Hex, pool.denomination, depositTree, blocklist, {
+    ...userInputs,
+    path: +proof.leaf_index,
+  })
+}
+
+const createProofCalldata = async (
   secret: Hex,
   assetAddress: Hex,
   denomination: bigint,
@@ -91,8 +174,7 @@ export const createProof = async (
   // proof -> WithdrawalStruct{proof}
   const subsetBytes = subsetDataToBytes(accessList.subsetData)
   const bufferData = Uint8Array.from(subsetBytes.data)
-  const subsetData = toHex(brotli.compress(bufferData))
-  // const subsetData = '0x'
+  const subsetData = toHex(await compress(bufferData))
   const withdrawalData = {
     accessType: asInt(accessList),
     bitLength: subsetBytes.bitLength,
@@ -133,8 +215,12 @@ export const createProof = async (
     withdrawMetadata: withdrawMetadata.toHexString(),
     secret,
     path: withdrawalData.path,
-    mainProof: proof.siblings.map((b) => b.toHexString()),
-    subsetProof: subsetProof.siblings.map((b) => b.toHexString())
+    mainProof: proof.siblings.map((b) => (
+      toHex(b.toBigInt(), { size: 32 })
+    )),
+    subsetProof: subsetProof.siblings.map((b) => (
+      toHex(b.toBigInt(), { size: 32 })
+    )),
   }
   const { proof: fullProof } = await snarkjs.groth16.fullProve(
     input,
@@ -158,78 +244,239 @@ export const createProof = async (
     ...withdrawalData,
   }
   const withdrawalStruct: WithdrawalProofStruct = {
-    accessType: toHex(solidityInput.accessType),
-    bitLength: toHex(solidityInput.bitLength),
+    accessType: solidityInput.accessType,
+    bitLength: solidityInput.bitLength,
     subsetData: solidityInput.subsetData,
-    flatProof: solidityInput.flatProof as WithdrawalProofStruct['flatProof'],
+    flatProof: solidityInput.flatProof.map((hex) => BigInt(hex)) as unknown as WithdrawalProofStruct['flatProof'],
     root: solidityInput.root,
     subsetRoot: solidityInput.subsetRoot,
     nullifier: solidityInput.nullifier,
     recipient: solidityInput.recipient,
-    refund: numberToHex(solidityInput.refund),
+    refund: solidityInput.refund,
     relayer: solidityInput.relayer,
-    fee: numberToHex(solidityInput.fee),
-    deadline: numberToHex(solidityInput.deadline),
+    fee: solidityInput.fee,
+    deadline: solidityInput.deadline,
   }
   return withdrawalStruct
 }
 
-export const generateProofs = async (account: Account, recipient: Hex, feePerCommitment: bigint, deposits: Deposit[]) => {
-  if (!account) return
-  if (!isAddress(recipient)) return
-  if (!deposits.length) return
-  const pool = deposits[0].pool
-  if (!pool) return
-  const secret = await secretFromAccountSignature(account, get(chain), pool.address)
-  if (!secret) return
-  const secretHex = numberToHex(secret.toBigInt(), { size: 32 })
-  const leaves = await fetchLeavesUnderPool(pool.id)
-  const depositTree = MerkleTree.fullEmpty({
-    treeLength: 0,
-    zeroString: 'empty',
-  })
-  for (const leaf of leaves) {
-    depositTree.insert(leaf)
-  }
-  // const depositTree = new MerkleTree(allDeposits.map((d) => d.leaf))
-  const blocklist = AccessList.fullEmpty({
-    accessType: 'blocklist',
-    subsetLength: depositTree.length,
-  })
-  const shared = {
-    recipient,
-    secret: secretHex,
-    fee: feePerCommitment,
+export const getProofInfo = async (
+  chainId: ChainIds, account: Account,
+  recipient: Hex, feePerCommitment: bigint,
+  pool: PrivacyPool, deposits: Deposit[],
+) => {
+  if (!account) console.log('no account')
+  if (!isAddress(recipient)) console.log('no recipient')
+  if (!deposits.length) console.log('no deposits')
+  if (!pool) console.log('no pool')
+  const poolAddress = getAddress(pool.address) as Hex
+  // const poolId = pool.id as Hex
+  const secret = await secretFromAccountSignature(account, chainId, poolAddress)
+  if (!secret) console.log('missing secret')
+  const secretHex = numberToHex(secret!.toBigInt(), { size: 32 })
+  const encryptedSecret = safe.encrypt(secretHex)
+  return {
+    chainId,
+    pool,
+    deposits,
+    secret: encryptedSecret,
+    shared: {
+      recipient,
+      fee: feePerCommitment,
+    } as UserDefinedInputs,
   } as const
-  const proofs = await Promise.all(deposits.map(async (deposit) => {
-    const calldata = await createProof(secretHex, pool.asset, pool.denomination, depositTree, blocklist, {
-      ...shared,
-      path: deposit.leafIndex,
-    })
-    return {
-      pool,
-      deposit,
-      calldata,
-      depositTree,
-    }
+  // return deposits.map((deposit) => {
+  // })
+  // const leaves = await fetchLeavesUnderPool(poolId)
+  // const depositTree = MerkleTree.fullEmpty({
+  //   treeLength: 0,
+  //   zeroString: 'empty',
+  // })
+  // for (const leaf of leaves) {
+  //   depositTree.insert(leaf)
+  // }
+  // const chain = chainIdToChain.get(chainId)!
+  // const poolContract = getContract({
+  //   address: poolAddress,
+  //   abi: PrivacyPoolAbi,
+  //   client: getPublicClient(chain),
+  // })
+  // const root = await poolContract.read.getLatestRoot()
+  // const inMemoryRoot = depositTree.root.toHexString()
+  // console.log('roots id=%o length=%o onchain=%o, local=%o', poolId, leaves.length, root, inMemoryRoot)
+  // if (root !== inMemoryRoot) {
+  //   throw new Error('roots mismatch')
+  // }
+  // const blocklist = AccessList.fullEmpty({
+  //   accessType: 'blocklist',
+  //   subsetLength: depositTree.length,
+  // })
+  // const insertable = deposits.map((deposit) => {
+  // const calldata = await createProof(secretHex, pool.asset as Hex, pool.denomination, depositTree, blocklist, {
+  //   ...shared,
+  //   path: +deposit.leafIndex,
+  // })
+  //   return {
+  //     pool,
+  //     deposit,
+  //     secret: secretHex,
+  //   }
+  // })
+  // const shared = {
+  //   recipient,
+  //   fee: feePerCommitment,
+  // } as const
+  // const proofs = sql.insertProofs()(insertable)
+  // const proofs = await Promise.all(deposits.map(async (deposit) => {
+  //   const calldata = await createProof(secretHex, pool.asset as Hex, pool.denomination, depositTree, blocklist, {
+  //     ...shared,
+  //     path: +deposit.leafIndex,
+  //   })
+  //   return {
+  //     pool,
+  //     deposit,
+  //     calldata,
+  //     depositTree,
+  //   }
+  // }))
+  // return proofs
+}
+
+// export const verifyWithdrawal = {
+//   encode: (calldata: WithdrawalProofStruct) => encodeFunctionData({
+//     abi: PrivacyPoolAbi,
+//     functionName: 'verifyWithdrawal',
+//     args: [calldata],
+//   }),
+//   decode: (data: Hex) => {
+//     return decodeFunctionData({
+//       abi: PrivacyPoolAbi,
+//       data,
+//     }) as {
+//       args: [WithdrawalProofStruct]
+//       functionName: 'verifyWithdrawal'
+//     }
+//   },
+// }
+
+export const cacheProofs = async (info: Awaited<ReturnType<typeof getProofInfo>>) => {
+  const { chainId, pool, deposits, secret, shared } = info
+  const serializedProofs = deposits.map(({ leafIndex }) => ({
+    chain_id: chainId,
+    pool_id: pool.id as Hex,
+    leaf_index: +leafIndex,
+    work_state: 'waiting',
+    secret,
+    user_inputs: valueToJSON.stringify(shared),
   }))
-  return proofs
+  sql.insertProofs(serializedProofs)
 }
 
-const bigintReplacer = (_key: string, value: unknown) => {
-  if (typeof value === 'bigint') {
-    return value.toString()
+export const generateProofsAndCache = async (
+  chainId: ChainIds, account: Account,
+  recipient: Hex, feePerCommitment: bigint,
+  pool: PrivacyPool, deposits: Deposit[],
+) => {
+  const proofs = await getProofInfo(chainId, account, recipient, feePerCommitment, pool, deposits)
+  await cacheProofs(proofs)
+}
+
+export const secretFromAccountSignature = async (account: Account, chainId: ChainIds, poolAddress: Hex) => {
+  const chain = chainIdToChain.get(chainId)!
+  const wallet = sql.query.get<WalletMetadata>('WALLET_GET', [{ id: account.wallet_id }])
+  if (!wallet) {
+    return null
   }
-  return value
+
+  const $account = safe.deriveAccountFromSecret(wallet.path_type, safe.decrypt(wallet.encrypted), account.address_index)
+  if (!$account) {
+    return null
+  }
+  const signature = await $account.signTypedData({
+    primaryType: 'ShieldInput',
+    types: {
+      ShieldInput: [
+        {
+          name: 'sender',
+          type: 'address',
+        },
+        {
+          name: 'pool',
+          type: 'address',
+        },
+      ],
+    },
+    domain: {
+      name: 'Shield',
+      version: '1',
+      verifyingContract: poolAddress,
+      chainId: chain.id,
+    },
+    message: {
+      sender: account.address,
+      pool: poolAddress,
+    },
+  })
+  const pk = keccak256(signature)
+  return toFE(pk)
 }
 
-export const cacheProofs = async (proofs: Awaited<ReturnType<typeof generateProofs>>) => {
-  if (!proofs) return
-  const insertable = proofs.map(({ pool, calldata, deposit }) => [pool.id, +deposit.leafIndex, JSON.stringify(calldata, bigintReplacer), 'waiting'])
-  await sql.query.run('INSERT_PROOF', insertable)
+export const secretToCommitment = (secret: BigNumberish | BigNumber) => {
+  const commitment = poseidon([secret])
+  return numberToHex(BigInt(commitment.toString()), { size: 32 })
 }
 
-export const factoryAddress = derived([config], ([$config]) => {
-  if (!$config) return null
-  return $config.byChain[$config.chainId]?.pools?.factory?.address || null
+export const commitmentFromAccountSignature = async (account: Account, chainId: ChainIds, poolAddress: Hex) => {
+  const secret = await secretFromAccountSignature(account, chainId, poolAddress)
+  if (!secret) return null
+  return secretToCommitment(secret)
+}
+
+export const nullifiedCommitmentIndices = async (account: Account, chainId: ChainIds, poolAddress: Hex) => {
+  const params = [account, chainId, poolAddress] as const
+  const secret = await secretFromAccountSignature(...params)
+  if (!secret) return []
+  const commitment = secretToCommitment(secret)
+  const commitmentsUnderPool = await query('DEPOSITS_FROM_COMMITMENTS', {
+    poolAddress,
+    commitments: [commitment],
+  })
+  const deposits = commitmentsUnderPool.privacyPools.items[0].deposits?.items || []
+  if (!deposits.length) return []
+  const knownNullifiers = deposits.map(({ leafIndex }) => +leafIndex)?.map((path) => {
+    const nullifier = poseidon([secret, 1n, `${path}`])
+    return numberToHex(BigInt(nullifier.toString()), { size: 32 })
+  }) || []
+  // at least 1 privacy pool was returned if there was also at least 1 deposit
+  const poolId = commitmentsUnderPool.privacyPools.items[0].id
+  const nullified = await query('WITHDRAWALS_BY_NULLIFIERS', {
+    poolId,
+    nullifiers: knownNullifiers,
+  })
+  const registeredNullifiers = new Set(nullified.withdrawals.items.map(({ nullifier }) => nullifier as Hex))
+  return _(knownNullifiers)
+    .map((n, i) => registeredNullifiers.has(n) ? `${i}` : false)
+    .compact()
+    .map((i) => BigInt(i))
+    .value()
+}
+
+handle('pool:commitmentFromAccountSignature', commitmentFromAccountSignature)
+
+handle('pool:secretFromAccountSignature', async (...params) => {
+  const result = await secretFromAccountSignature(...params)
+  if (!result) return null
+  return toHex(result.toBigInt(), { size: 32 })
+})
+
+handle('pool:nullifiedCommitmentIndices', nullifiedCommitmentIndices)
+
+handle('pool:generateProofsAndCache', generateProofsAndCache)
+
+handle('proof:all', () => {
+  return sql.query.all('PROOF_ALL')
+})
+
+handle('proof:allByChainId', (chainId: ChainIds) => {
+  return sql.query.all('PROOF_ALL_BY_CHAIN_ID', [{ chain_id: chainId }])
 })

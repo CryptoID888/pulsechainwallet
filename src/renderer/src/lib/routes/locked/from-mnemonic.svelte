@@ -34,6 +34,7 @@
     <MnemonicInput
       {phrase}
       on:cancel={() => {
+        console.log('from-mnemonic /locked')
         goto('/locked')
       }}
       on:valid-phrase={handleValidPhrase} />

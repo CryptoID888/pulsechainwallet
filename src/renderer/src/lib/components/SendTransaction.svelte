@@ -12,12 +12,15 @@
   import { Action } from '$lib/action'
   import BroadcastTransaction from '$lib/components/transaction/Broadcast.svelte'
   import { currentAccount as account } from '$lib/wallets'
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import type { TransactionAction } from '$common/types'
+  import { emptyHex } from '$common/config'
 
   export let action!: TransactionAction
+  export let sendButtonText = 'Send'
 
   export const updatePrep = async () => {
+    await tick()
     const formData = new FormData(form)
     prep = [...formData.entries()].reduce((inputs, [key, value]) => {
       if (key === 'to-address') {
@@ -37,10 +40,12 @@
         inputs.value = BigInt(value as string)
       } else if (key === 'data') {
         inputs.data = value as Hex
+      } else if (key === 'gas') {
+        inputs.gas = BigInt(value as string)
       }
       return inputs
     }, {} as Partial<PrepConfig>) as PrepConfig
-    // console.log([...formData.entries()], prep)
+    // console.log([...formData.entries()], prep, prep.data?.length)
   }
   const setToValue = (value: number) => {
     if (value < tabSet) {
@@ -54,7 +59,6 @@
     const chainId = $config.chainId
     hash = await wallet.sendTransaction(chainId, $account, payconfig as unknown as SendTransactionParameters, action)
   }
-  const emptyBytes = '0x'
 
   export let prep: PrepConfig | null = null
   export let pay: ViemRawTransaction | null = null
@@ -71,13 +75,13 @@
     decrement()
   }
   onMount(() => () => {
-    if (!$loading.isResolved('transaction')) {
+    if ($loading.isResolved('transaction')) {
       return
     }
     decrement()
   })
 
-  let hash: Hex = emptyBytes
+  let hash: Hex = emptyHex
   let form!: HTMLFormElement
   $: prepSubmitDisabled = !isAddress((prep?.to || '') as unknown as Hex)
 </script>
@@ -116,6 +120,7 @@
           <div class="flex flex-col gap-4">
             <form bind:this={form} class="contents">
               <Prep
+                {sendButtonText}
                 account={$account}
                 disabled={prepSubmitDisabled}
                 on:submit={() => {
@@ -127,9 +132,8 @@
       {:else if tabSet === 1 && prep}
         <div class="w-full">
           <Pay
-            action={prep.data === '0x' ? Action.NATIVE_TRANSFER : Action.ERC20_TRANSFER}
+            action={prep.data === emptyHex ? Action.NATIVE_TRANSFER : Action.ERC20_TRANSFER}
             {prep}
-            estimateGas
             on:confirm={handleConfirm}
             on:back={() => {
               tabSet = 0

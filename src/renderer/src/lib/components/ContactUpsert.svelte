@@ -1,23 +1,27 @@
 <script lang="ts">
-  import { writable } from 'svelte/store'
   import * as viem from 'viem'
-  import type { Contact } from '$lib/contacts'
   import Icon from '@iconify/svelte'
+  import { getDrawerStore } from '@skeletonlabs/skeleton'
+
+  import * as api from '$lib/api'
+
   export let headline = 'Update Contact Note'
   export let name = ''
   export let note: string | null = null
   export let address!: viem.Hex
   export let allowDelete = false
-  export let channel = writable<Contact | null>(null)
-  const handleSave = () => {
-    channel.set({
+  const drawerStore = getDrawerStore()
+
+  const handleSave = async () => {
+    await api.contact.upsert({
       address,
       note,
       name,
     })
+    drawerStore.close()
   }
   const handleCancel = () => {
-    channel.set(null)
+    drawerStore.close()
   }
   const toggleNote = () => {
     if (note === null) {

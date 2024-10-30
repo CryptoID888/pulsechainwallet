@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Account, WalletMetadata } from '$common/wallets'
+  import { defaultName, type Account, type WalletMetadata } from '$common/wallets'
   import Icon from '@iconify/svelte'
   import SeedBox from './account/SeedBox.svelte'
   import Address from './Address.svelte'
@@ -62,7 +62,7 @@
           <div class="flex w-full flex-row items-center justify-start gap-2">
             <SeedBox variant="soft" type={wallet?.type} />
             <div class="flex flex-col justify-start text-left leading-4">
-              <p>{derived.name}</p>
+              <p>{derived.name || defaultName(wallet?.type, wallet?.user_order, derived.address_index)}</p>
               <p class="flex flex-row text-sm font-light">
                 <Address address={derived.address} />
               </p>

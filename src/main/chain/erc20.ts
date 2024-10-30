@@ -1,5 +1,5 @@
 import * as viem from 'viem'
-import * as types from '../types'
+import * as types from '$common/types'
 
 export type Erc20Metadata = [string, string, number]
 
@@ -47,16 +47,16 @@ export const multicallRead = async <T>({
       call.allowFailure
         ? r[i].success
           ? viem.decodeFunctionResult({
-              abi: call.abi || abi,
-              functionName: call.functionName,
-              data: r[i].returnData,
-            })
-          : r[i].returnData
-        : viem.decodeFunctionResult({
             abi: call.abi || abi,
             functionName: call.functionName,
             data: r[i].returnData,
-          }),
+          })
+          : r[i].returnData
+        : viem.decodeFunctionResult({
+          abi: call.abi || abi,
+          functionName: call.functionName,
+          data: r[i].returnData,
+        }),
     ) as T
   } catch (err) {
     console.log(target, calls, reads)

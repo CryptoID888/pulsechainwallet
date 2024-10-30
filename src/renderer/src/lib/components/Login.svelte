@@ -1,6 +1,6 @@
 <script lang="ts">
   export let message = ''
-  import { push as goto } from 'svelte-spa-router'
+  import { push } from 'svelte-spa-router'
   import { onMount } from 'svelte'
   import BackButton from './BackButton.svelte'
   import * as wallets from '$lib/wallets'
@@ -14,7 +14,7 @@
   const attemptUnlock = async () => {
     const correct = await password.login(pass)
     if (correct) {
-      goto('/account')
+      push('/account')
     } else {
       msg = msg || message
       message = 'incorrect password'
@@ -28,7 +28,7 @@
     if (!$hasWallets) {
       // if your storage ever gets wiped, we cannot
       // attempt to unlock a wallet that does not exist
-      goto('/locked/create')
+      push('/locked/create')
     }
   })
 </script>
@@ -47,7 +47,7 @@
       <BackButton
         cancelText="Reset"
         on:cancel={() => {
-          goto('/locked/restore')
+          push('/locked/restore')
         }} />
       <button type="submit" {disabled} class="variant-filled-primary btn">Login</button>
     </div>

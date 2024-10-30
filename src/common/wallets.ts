@@ -16,21 +16,23 @@ export type WalletMetadata = {
   address_index: number
   type: SeedType
   name: string | null
+  encrypted: Hex
 }
 
-export type ChainState = {
+export type InsertableWalletMetadata = Omit<WalletMetadata, 'user_order'>
+
+export type UpdateableWalletMetadata = Pick<WalletMetadata, 'name'>
+
+export type NonceData = {
   latest: number
   pending: number
 }
-
-export type UpdateableWalletMetadata = Pick<WalletMetadata, 'name'>
 
 export type Account = {
   address: Hex
   wallet_id: Hex
   address_index: number
   added: boolean
-  name: string | null
 }
 
 export type AccountTarget = {

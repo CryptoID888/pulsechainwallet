@@ -1,4 +1,5 @@
 import type { Hex } from 'viem'
+import { ChainIds } from '$common/config'
 
 export type Erc20TokenMetadata = {
   name: string
@@ -12,7 +13,7 @@ export type Erc20TokenMetadata = {
 export type Chain = {
   logoURI: string
   alt: string
-  id: number
+  id: ChainIds
   blockTime: number
   gasUnit: string
 }

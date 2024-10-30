@@ -16,6 +16,7 @@
     try {
       const successful = await password.change(current, next)
       if (successful) {
+        console.log('changepass /locked')
         goto('/locked')
       }
     } catch (err) {

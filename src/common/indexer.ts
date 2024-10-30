@@ -1,5 +1,8 @@
 import { gql } from "graphql-request";
-import type { Hex } from "viem";
+import { native } from "./pools";
+import type { ChainIds } from "./config";
+import { memoizeWithTTL } from "./utils";
+import { query } from "$main/indexer";
 
 export const queries = {
   STATUS: gql`
@@ -10,32 +13,48 @@ query Status {
 }`,
   ALL_POOLS_UNDER_ASSET: gql`
 query AllPoolsUnderAsset($chainId: Int!, $asset: String!) {
-  privacyPools(where: { chainId: $chainId, asset: $asset }) {
+  privacyPools(
+    where: { chainId: $chainId, asset: $asset },
+    orderBy: "power",
+    orderDirection: "asc"
+  ) {
     items {
+      id
       address
       denomination
+      asset
+      power
+      poolIndex
     }
   }
 }`,
   DEPOSITS_FROM_COMMITMENTS: gql`
-query DepositsFromCommitments($commitments: [String!]!) {
-  deposits(where: {
-    commitment_in: $commitments
-  }, orderBy: "logIndex", orderDirection: "asc") {
+query DepositsFromCommitments(
+  $poolAddress: String!,
+  $commitments: [String!]!
+) {
+  privacyPools(where: { address: $poolAddress }) {
     items {
-      id,
-      logIndex,
-      commitment,
-      leaf,
-      leafIndex,
-      transactionId,
-      blockId,
-      chainId,
-      pool {
-        id,
-        address,
-        denomination,
-        asset
+      id
+      address
+      denomination
+      asset
+      power
+      deposits(
+        where: { commitment_in: $commitments }
+        orderBy: "leafIndex"
+        orderDirection: "asc"
+      ) {
+        items {
+          id
+          logIndex
+          commitment
+          leaf
+          leafIndex
+          transactionId
+          blockId
+          chainId
+        }
       }
     }
   }
@@ -44,7 +63,7 @@ query DepositsFromCommitments($commitments: [String!]!) {
 query LeavesUnderPool($poolId: String!) {
   deposits(where: {
     poolId: $poolId
-  }, orderBy: "leafIndex", orderDirection: "asc") {
+  }, orderBy: "leafIndex", orderDirection: "asc", limit: 1000) {
     items {
       leaf
     }
@@ -63,6 +82,17 @@ query DepositAt($poolId: String!, $leafIndex: BigInt!) {
         address
         chainId
       }
+    }
+  }
+}`,
+  WITHDRAWALS_BY_NULLIFIERS: gql`
+query WithdrawalsByNullifiers($poolId: String!, $nullifiers: [String!]!) {
+  withdrawals(where: {
+    poolId: $poolId,
+    nullifier_in: $nullifiers
+  }) {
+    items {
+      nullifier
     }
   }
 }`,
@@ -85,79 +115,21 @@ query WithdrawalAt($poolId: String!, $nullifier: String!) {
     }
   }
 }`,
-}
-
-export type AllPoolsUnderAssetQuery = {
-  privacyPools: {
-    items: {
-      address: Hex
-      denomination: string
-    }[]
+  POOL_BY_ID: gql`
+query PoolById($poolId: String!) {
+  privacyPools(where: { id: $poolId }) {
+    items {
+      id,
+      address,
+      chainId
+      leafIndex
+    }
   }
+}`,
 }
-
-export type Deposit = {
-  id: Hex
-  logIndex: number
-  commitment: Hex
-  leaf: Hex
-  leafIndex: number
-  transactionId: Hex
-  blockId: Hex
-  chainId: number
-  pool: {
-    id: Hex
-    address: Hex
-    denomination: bigint
-    asset: Hex
-  }
-}
-
-export type KnownCommitmentsResponse = { deposits: { items: Deposit[] } }
 
 export type QueryKey = keyof typeof queries
 
-export type ChainStatus = {
-  ready: boolean;
-  block: {
-    timestamp: number;
-    number: number;
-  }
-}
-
-export type Status = {
-  pulsechainV4: ChainStatus;
-}
-
-export type StatusResponse = { _meta: { status: Status } }
-
-export type AllKnownLeavesResponse = { deposits: { items: { leaf: Hex }[] } }
-
-
-export type DepositInfo = {
-  leafIndex: number
-  pool: {
-    id: Hex
-    address: Hex
-    chainId: number
-  }
-}
-
-export type DepositAtResponse = {
-  deposits: {
-    items: DepositInfo[]
-  },
-}
-
-export type WithdrawalInfo = {
-  nullifier: Hex
-  transaction: {
-    hash: Hex
-  }
-}
-
-export type WithdrawalAtResponse = {
-  withdrawals: {
-    items: WithdrawalInfo[]
-  }
-}
+export const allPoolsUnderChainId = memoizeWithTTL((chainId: ChainIds) => chainId, async (chainId: ChainIds) => {
+  return query('ALL_POOLS_UNDER_ASSET', { chainId, asset: native })
+}, 1000 * 60 * 5)

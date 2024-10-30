@@ -1,15 +1,15 @@
 import * as graphqlRequest from 'graphql-request'
-import { ipcMain } from 'electron'
 import { get } from 'svelte/store'
 import { config } from '$main/config'
-import { type QueryKey, queries } from '$common/indexer'
+import { type QueryKey, allPoolsUnderChainId, queries } from '$common/indexer'
 import { fetchStatus } from './store'
+import type { Query } from '$common/indexer/gql/graphql'
+import { handle } from '$main/ipc'
 
 let client: graphqlRequest.GraphQLClient | null = null
 let id: NodeJS.Timeout | null = null
 
 export const start = () => {
-  console.log('starting indexer')
   client = new graphqlRequest.GraphQLClient(get(config).indexer.url)
   id = setInterval(() => fetchStatus(), 5_000)
 }
@@ -30,19 +30,14 @@ export const restart = async () => {
   start()
 }
 
-ipcMain.handle('indexer:start', start)
-ipcMain.handle('indexer:stop', stop)
-ipcMain.handle('indexer:restart', restart)
-
-ipcMain.handle('indexer:query', async (_, q: QueryKey, vars?: object) => {
-  if (!client) {
-    throw new Error('Indexer not started')
-  }
-  const result = await query(q, vars)
-  return result
-})
-
-export const query = async <T>(queryKey: QueryKey, vars?: object): Promise<T> => {
+export const query = async (queryKey: QueryKey, vars?: object) => {
   // return null as unknown as T
-  return await client!.request(queries[queryKey], vars)
+  return await client!.request<Query>(queries[queryKey], vars)
 }
+
+handle('indexer:start', start)
+handle('indexer:stop', stop)
+handle('indexer:restart', restart)
+
+handle('indexer:query', query)
+handle('indexer:query:allPoolsUnderChainId', allPoolsUnderChainId)

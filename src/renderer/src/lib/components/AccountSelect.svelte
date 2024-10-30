@@ -21,10 +21,6 @@
       walletId: e.detail.wallet_id,
       addressIndex: e.detail.address_index,
     })
-    // await api.config.update({
-    //   walletId: e.detail.wallet_id,
-    //   addressIndex: e.detail.address_index,
-    // })
     current = e.detail
   }
 </script>

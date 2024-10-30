@@ -1,17 +1,17 @@
 import { query, restart } from '.'
 import { writable } from 'svelte/store'
-import { Status, StatusResponse } from '$common/indexer'
+import type { _Meta } from '$common/indexer/gql/graphql'
 
-export const status = writable<Status | null>(null)
+export const status = writable<_Meta["status"] | null>(null)
 
 let statusFailedCounter = 0
 
 export const fetchStatus = () => {
-  query<StatusResponse>('STATUS')
+  query('STATUS')
     .catch(async (error) => {
       if (error.response?.status >= 500) {
         console.log('indexer status failed, retrying...')
-        return await query<StatusResponse>('STATUS')
+        return await query('STATUS')
       }
       throw error
     })
@@ -20,7 +20,7 @@ export const fetchStatus = () => {
         console.log('indexer status recovered')
         statusFailedCounter = 0
       }
-      status.set(data._meta.status)
+      status.set(data?._meta?.status)
     })
     .catch(async (error) => {
       console.error('caught fetch status', error)

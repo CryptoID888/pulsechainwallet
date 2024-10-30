@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import BackButton from './BackButton.svelte'
 
   let password = ''
@@ -12,10 +12,14 @@
     if (confirm !== password) return
     dispatch('submit', password)
   }
+  let passwordInput: HTMLInputElement
+  onMount(() => {
+    passwordInput.focus()
+  })
 </script>
 
 <form on:submit|preventDefault={encryptAndSaveWallet}>
-  <input class="input mb-4" type="password" placeholder="password" bind:value={password} />
+  <input bind:this={passwordInput} class="input mb-4" type="password" placeholder="password" bind:value={password} />
   <input
     class="input mb-4"
     class:input-error={!!confirm && confirm !== password}

@@ -6,5 +6,14 @@
   if (lastLocation) {
     push(lastLocation)
   }
-  $: localStorage.setItem(layoutLastLocation, $location)
+  const blacklisted = new Set([
+    '/locked',
+    '/locked/login',
+    '/locked/create',
+    '/locked/restore',
+    '/locked/from-mnemonic',
+  ])
+  $: if (!blacklisted.has($location)) {
+    localStorage.setItem(layoutLastLocation, $location)
+  }
 </script>

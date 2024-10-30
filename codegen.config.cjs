@@ -3,7 +3,7 @@ module.exports = {
   schema: 'https://pulsechainwallet-indexer.up.railway.app',
   target: 'typescript',
   generates: {
-    './src/main/indexer/gql/': {
+    './src/common/indexer/gql/': {
       preset: 'client',
       plugins: [
         'typescript',

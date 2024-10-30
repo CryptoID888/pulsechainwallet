@@ -1,8 +1,8 @@
 import type { Hex } from "viem"
-import poolsConfig from './pools-config.json'
-import { mainnet, pulsechain, pulsechainV4 } from 'viem/chains'
+// import poolsConfig from './pools-config.json'
+import { mainnet, pulsechain, pulsechainV4 } from './chains'
 
-type ChainIds = 1 | 369 | 943
+export type ChainIds = 1 | 369 | 943
 
 type ScopedChainConfig = {
   /** the pool power that was last focused on for this chain */
@@ -23,12 +23,6 @@ type PoolConfig = {
   poseidon: ContractDeployment;
   factory: ContractDeployment;
 }
-
-type ChainPoolConfig = {
-  [key in ChainIds]: PoolConfig
-}
-
-const pools = poolsConfig as unknown as ChainPoolConfig
 
 export type Config = {
   // which wallet+account is being focused on currently
@@ -55,23 +49,25 @@ export const defaultConfig: Config = {
     [mainnet.id]: {
       poolPower: 18,
       rpcs: [
-        'https://rpc.pulsechain.com',
+        'https://rpc-ethereum.g4mm4.io',
       ],
-      pools: pools[mainnet.id],
+      // pools: pools[mainnet.id],
     },
     [pulsechain.id]: {
       poolPower: 24,
       rpcs: [
         'https://rpc.pulsechain.com',
       ],
-      pools: pools[pulsechain.id],
+      // pools: pools[pulsechain.id],
     },
     [pulsechainV4.id]: {
       poolPower: 15,
       rpcs: [
-        'https://rpc.v4.testnet.pulsechain.com',
+        'https://rpc-testnet-pulsechain.g4mm4.io',
       ],
-      pools: pools[pulsechainV4.id],
+      // pools: pools[pulsechainV4.id],
     },
   },
 }
+
+export const emptyHex = '0x' as Hex

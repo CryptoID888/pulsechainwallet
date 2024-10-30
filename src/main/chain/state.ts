@@ -1,14 +1,15 @@
-import { ipcMain } from "electron/main";
 import type { Erc20Token } from '$common/token';
-import { chainIdToChain, getPublicClient } from ".";
-import { getContract, type ChainContract, parseAbi, zeroAddress, parseUnits, Hex, erc20Abi, Block } from "viem";
+import { chainIdToChain, getPublicClient } from "./mappings";
+import { getContract, type ChainContract, parseAbi, zeroAddress, parseUnits, Hex, erc20Abi, Block, BlockTag } from "viem";
 import { binding } from "$main/handler";
 import * as sql from '$main/sql';
 import type { ChainTransaction } from '$common/types';
+import { ChainIds } from "$common/config";
+import { handle } from "$main/ipc";
 const poolAbi = parseAbi(['function getReserves() view returns((uint112,uint112,uint32))'])
 const factoryAbi = parseAbi(['function getPair(address, address) view returns(address)'])
 
-binding<Block>('state:block', async (_, respond, chainId: number) => {
+binding('state:block', async (_, respond, chainId) => {
   const chain = chainIdToChain.get(chainId)!
   const client = getPublicClient(chain)
   const cancel = client.watchBlocks({
@@ -21,27 +22,24 @@ binding<Block>('state:block', async (_, respond, chainId: number) => {
   return [block, cancel]
 })
 
-ipcMain.handle('state:transaction:wait', async (_event, chainId: number, hash: Hex) => {
+handle('state:transaction:wait', async (chainId: ChainIds, hash: Hex) => {
   const chain = chainIdToChain.get(chainId)!
   const client = getPublicClient(chain)
   return await client.waitForTransactionReceipt({ hash })
 })
 
-ipcMain.handle('state:transactions', async (_event) => {
+handle('state:transactions', () => {
   return sql.query.all<ChainTransaction>('ALL_TRANSACTIONS', [])
 })
 
-ipcMain.handle('state:transaction:data', async (_event, chainId: number, hash: Hex) => {
-  const chain = chainIdToChain.get(+chainId)!
+handle('state:transaction:data', async (chainId, hash) => {
+  const chain = chainIdToChain.get(chainId)!
   const client = getPublicClient(chain)
   let block: Block | null = null
   const [transaction, receipt] = await Promise.all([
-    client.getTransaction({
-      hash,
-    }),
-    client.getTransactionReceipt({
-      hash,
-    }),
+    // if this one fails, we should fail the whole thing
+    client.getTransaction({ hash }),
+    client.getTransactionReceipt({ hash }).catch(() => null),
   ])
   if (receipt) {
     block = await client.getBlock({
@@ -55,13 +53,13 @@ ipcMain.handle('state:transaction:data', async (_event, chainId: number, hash: H
   }
 })
 
-ipcMain.handle('state:transaction', async (_event, chainId: number, hash: Hex) => {
+handle('state:transaction', async (chainId, hash) => {
   const chain = chainIdToChain.get(chainId)!
   const client = getPublicClient(chain)
   return client.getTransaction({ hash })
 })
 
-ipcMain.handle('wallet:balance', async (_event, chainId: number, address: Hex, token: Erc20Token) => {
+handle('state:balance', async (chainId, address, token) => {
   const chain = chainIdToChain.get(chainId)!
   const client = getPublicClient(chain)
   if (token.address === zeroAddress) {
@@ -77,8 +75,8 @@ ipcMain.handle('wallet:balance', async (_event, chainId: number, address: Hex, t
   return await contract.read.balanceOf([address])
 })
 
-ipcMain.handle('state:price', async (_event, token: Erc20Token, blockNumber: string = 'latest') => {
-  const chain = chainIdToChain.get(Number(token.chain.id))!
+handle('state:price', async (token: Erc20Token, blockNumber: BlockTag | bigint = 'latest') => {
+  const chain = chainIdToChain.get(token.chain.id)!
   const client = getPublicClient(chain)
 
   const wrappedNative = chain.contracts!.wrappedNative as ChainContract
@@ -109,7 +107,7 @@ ipcMain.handle('state:price', async (_event, token: Erc20Token, blockNumber: str
     })
     .catch(() => null)
   if (!reserves) {
-    return
+    return null
   }
   const tokenIndex = tokenAddress.toLowerCase() < daiAddress.toLowerCase() ? 0 : 1
   const daiIndex = Number(!tokenIndex)

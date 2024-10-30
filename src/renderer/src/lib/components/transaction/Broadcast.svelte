@@ -6,12 +6,12 @@
   import Portal from 'svelte-portal'
   import { push as goto } from 'svelte-spa-router'
   import { onMount } from 'svelte'
-  import { pulsechainV4 } from 'viem/chains'
+  import { pulsechainV4 } from '$common/chains'
   import { state } from '$lib/api'
+  import { emptyHex, type ChainIds } from '$common/config'
 
-  const emptyHash = '0x'
   let receipt: TransactionReceipt | null = null
-  export let hash: Hex = emptyHash
+  export let hash: Hex = emptyHex
   export let gotoAccount = () => {
     goto('/account')
   }
@@ -19,7 +19,6 @@
     goto(`/account/transactions/${$chain.id}/${hash}`)
   }
   const handler = (r: TransactionReceipt) => {
-    console.log('handler', r)
     if (r.transactionHash === hash) {
       receipt = r
       cleanup()
@@ -30,27 +29,22 @@
     clearTimeout(id)
     id = null
   }
-  $: if (hash !== emptyHash) {
+  $: if (hash !== emptyHex && !receipt) {
     state
-      .transactionWait($chain.id, hash)
-      .catch(() => state.transactionData($chain.id, hash))
+      .transactionWait($chain.id as ChainIds, hash)
+      .catch(() => state.transactionWait($chain.id as ChainIds, hash))
       .then(handler)
     id = setTimeout(() => {
-      if (receipt) {
-        return
-      }
       cleanup()
       console.log('timeout')
     }, 60_000)
   }
-  onMount(() => () => {
-    cleanup()
-  })
+  onMount(() => () => cleanup())
   $: url = `${$chain.blockExplorers?.default.url}${$chain.id === pulsechainV4.id ? '/#' : ''}/tx/${hash}`
 </script>
 
 <div class="flex w-full flex-row items-center justify-center">
-  {#if hash === '0x'}
+  {#if hash === emptyHex}
     <span class="flex flex-col items-center justify-center">
       Waiting for network response <Loading />
     </span>
@@ -72,7 +66,7 @@
 </div>
 <Portal target="#sticky-portal">
   <div class="flex flex-row items-center gap-2 bg-primary-50 px-4 py-2 shadow-inner">
-    <button class="variant-ghost-primary btn w-full" on:click={gotoAccount}>Continue</button>
-    <button class="variant-filled-primary btn w-full" on:click={gotoDetails}>Details</button>
+    <button type="button" class="variant-ghost-primary btn w-full" on:click={gotoAccount}>Continue</button>
+    <button type="button" class="variant-filled-primary btn w-full" on:click={gotoDetails}>Details</button>
   </div>
 </Portal>

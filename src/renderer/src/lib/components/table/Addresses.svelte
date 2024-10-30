@@ -10,7 +10,7 @@
   import { DataHandler } from '@vincjo/datatables'
   import { SlideToggle } from '@skeletonlabs/skeleton'
   import type { Hex } from 'viem'
-  import { pop } from 'svelte-spa-router'
+  import { push } from 'svelte-spa-router'
   import Portal from 'svelte-portal'
   import { onMount } from 'svelte'
 
@@ -33,7 +33,7 @@
       else adds.delete(+id)
     }
     await wallet.updateAddedAccounts(walletId, [...adds.values()])
-    pop()
+    push('/account')
   }
   const updateLocalContactName = (e: Event, address: Hex) => {
     const target = e.target as HTMLSpanElement

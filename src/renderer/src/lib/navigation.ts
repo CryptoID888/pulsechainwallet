@@ -99,6 +99,12 @@ export const crumbs = {
     icon: 'fa:tasks',
     iconSize: 16,
   } as Crumb,
+  assist: {
+    text: 'Assist',
+    link: '/account/shield/assist',
+    icon: 'arcticons:mapassist',
+    iconSize: 24,
+  } as Crumb,
   receive: {
     text: 'Receive',
     link: '/account/receive',
