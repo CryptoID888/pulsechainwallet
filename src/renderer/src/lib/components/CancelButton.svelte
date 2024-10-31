@@ -13,5 +13,6 @@
     on:click={() => {
       if (backup) push(backup)
       else back()
-    }}><slot /></button>
+    }}><slot /></button
+  >
 </Back>

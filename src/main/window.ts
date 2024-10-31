@@ -1,6 +1,6 @@
-import type { BrowserWindow } from "electron";
-import { writable as storedWritable } from "./store";
-import { writable } from "svelte/store";
+import type { BrowserWindow } from 'electron'
+import { writable as storedWritable } from '$main/store'
+import { writable } from 'svelte/store'
 
 export type WindowConfig = {
   show: boolean

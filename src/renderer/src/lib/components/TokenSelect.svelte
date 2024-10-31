@@ -21,7 +21,8 @@
             current.set(token)
             // reflow the each loop
             tokens = tokens
-          }}>
+          }}
+        >
           <!-- <span class="flex flex-grow-[3]"></span> -->
           <span class="flex flex-grow-[1]">
             <Select show={matches(token)} />

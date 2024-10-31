@@ -46,5 +46,6 @@
     currentAddress={current.address}
     accounts={$addedAccounts}
     on:select={selectAddress}
-    itemButtons={['copy']} />
+    itemButtons={['copy']}
+  />
 </div>

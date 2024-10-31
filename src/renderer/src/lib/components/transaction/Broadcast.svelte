@@ -17,7 +17,7 @@
   }
   /** go to the transaction details page for the transaction that has just been mined */
   export let gotoDetails = () => {
-    goto(`/account/transactions/${$chain.id}/${hash}`)
+    goto(`/account/transactions/${$chain?.id}/${hash}`)
   }
   const handler = (r: TransactionReceipt) => {
     if (r.transactionHash === hash) {
@@ -25,15 +25,15 @@
       cleanup()
     }
   }
-  let id: Timer | null = null
+  let id: ReturnType<typeof setTimeout> | null = null
   let cleanup = () => {
-    clearTimeout(id)
+    if (id) clearTimeout(id)
     id = null
   }
   $: if (hash !== emptyHex && !receipt) {
     state
-      .transactionWait($chain.id as ChainIds, hash)
-      .catch(() => state.transactionWait($chain.id as ChainIds, hash))
+      .transactionWait($chain?.id as ChainIds, hash)
+      .catch(() => state.transactionWait($chain?.id as ChainIds, hash))
       .then(handler)
     id = setTimeout(() => {
       cleanup()
@@ -41,7 +41,7 @@
     }, 60_000)
   }
   onMount(() => () => cleanup())
-  $: url = `${$chain.blockExplorers?.default.url}${$chain.id === pulsechainV4.id ? '/#' : ''}/tx/${hash}`
+  $: url = `${$chain?.blockExplorers?.default.url}${$chain?.id === pulsechainV4.id ? '/#' : ''}/tx/${hash}`
 </script>
 
 <div class="flex w-full flex-row items-center justify-center">

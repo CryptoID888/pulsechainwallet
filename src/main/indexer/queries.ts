@@ -1,20 +1,25 @@
-import { Hex } from "viem"
-import { query } from "."
+import { Hex } from 'viem'
+import { query } from '.'
 
 export const fetchLeavesUnderPool = async (poolId: Hex) => {
   return await query('LEAVES_UNDER_POOL', {
     poolId,
-  }).then((data) => {
-    return data.deposits.items.map((item) => item.leaf as Hex)
-  }, (err) => {
-    console.log('error', err)
-    return [] as Hex[]
-  })
+  }).then(
+    (data) => {
+      return data.deposits.items.map((item) => item.leaf as Hex)
+    },
+    (err) => {
+      console.log('error', err)
+      return [] as Hex[]
+    },
+  )
 }
 
 export const getDeposit = async (poolId: Hex, leafIndex: number) => {
   const {
-    deposits: { items: [deposit] },
+    deposits: {
+      items: [deposit],
+    },
   } = await query('DEPOSIT_AT', {
     poolId,
     leafIndex,
@@ -24,7 +29,9 @@ export const getDeposit = async (poolId: Hex, leafIndex: number) => {
 
 export const getWithdrawal = async (poolId: Hex, nullifier: Hex) => {
   const {
-    withdrawals: { items: [withdrawal] },
+    withdrawals: {
+      items: [withdrawal],
+    },
   } = await query('WITHDRAWAL_AT', {
     poolId,
     nullifier,

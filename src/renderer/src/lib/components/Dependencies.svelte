@@ -5,7 +5,7 @@
   import { arrow, autoUpdate, computePosition, offset, shift, flip } from '@floating-ui/dom'
   // import Icon from '@iconify/svelte'
 
-  // import '../app.css'
+  // import '../../app.css'
   import UnitDrawer from '$lib/components/UnitDrawer.svelte'
   import TokenSelect from '$lib/components/TokenSelect.svelte'
   import ContactSelect from '$lib/components/ContactSelect.svelte'
@@ -21,7 +21,8 @@
   import { onMount } from 'svelte'
 
   const chainUnsubscribe = chain.subscribe(($chain) => {
-    const theme = $chain.id === 1 ? 'wintry' : 'gold-nouveau'
+    // show wintry for mainnet, gold-nouveau for pulsechain(s)
+    const theme = $chain?.id === 1 ? 'wintry' : 'gold-nouveau'
     document.body.setAttribute('data-theme', theme)
   })
   onMount(() => {

@@ -11,164 +11,106 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers'
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from '../common'
 
 export interface IncrementalMerkleTreeInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "LEVELS"
-      | "ROOTS_CAPACITY"
-      | "currentLeafIndex"
-      | "filledSubtrees"
-      | "getLatestRoot"
-      | "hasher"
-      | "isKnownRoot"
-      | "roots"
-  ): FunctionFragment;
+      | 'LEVELS'
+      | 'ROOTS_CAPACITY'
+      | 'currentLeafIndex'
+      | 'filledSubtrees'
+      | 'getLatestRoot'
+      | 'hasher'
+      | 'isKnownRoot'
+      | 'roots',
+  ): FunctionFragment
 
-  encodeFunctionData(functionFragment: "LEVELS", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "ROOTS_CAPACITY",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentLeafIndex",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "filledSubtrees",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getLatestRoot",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "hasher", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "isKnownRoot",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "roots", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'LEVELS', values?: undefined): string
+  encodeFunctionData(functionFragment: 'ROOTS_CAPACITY', values?: undefined): string
+  encodeFunctionData(functionFragment: 'currentLeafIndex', values?: undefined): string
+  encodeFunctionData(functionFragment: 'filledSubtrees', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'getLatestRoot', values?: undefined): string
+  encodeFunctionData(functionFragment: 'hasher', values?: undefined): string
+  encodeFunctionData(functionFragment: 'isKnownRoot', values: [BytesLike]): string
+  encodeFunctionData(functionFragment: 'roots', values: [BigNumberish]): string
 
-  decodeFunctionResult(functionFragment: "LEVELS", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ROOTS_CAPACITY",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentLeafIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "filledSubtrees",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getLatestRoot",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "hasher", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isKnownRoot",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "roots", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'LEVELS', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'ROOTS_CAPACITY', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'currentLeafIndex', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'filledSubtrees', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'getLatestRoot', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'hasher', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'roots', data: BytesLike): Result
 }
 
 export interface IncrementalMerkleTree extends BaseContract {
-  connect(runner?: ContractRunner | null): IncrementalMerkleTree;
-  waitForDeployment(): Promise<this>;
+  connect(runner?: ContractRunner | null): IncrementalMerkleTree
+  waitForDeployment(): Promise<this>
 
-  interface: IncrementalMerkleTreeInterface;
+  interface: IncrementalMerkleTreeInterface
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>
+  listeners(eventName?: string): Promise<Array<Listener>>
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>
 
-  LEVELS: TypedContractMethod<[], [bigint], "view">;
+  LEVELS: TypedContractMethod<[], [bigint], 'view'>
 
-  ROOTS_CAPACITY: TypedContractMethod<[], [bigint], "view">;
+  ROOTS_CAPACITY: TypedContractMethod<[], [bigint], 'view'>
 
-  currentLeafIndex: TypedContractMethod<[], [bigint], "view">;
+  currentLeafIndex: TypedContractMethod<[], [bigint], 'view'>
 
-  filledSubtrees: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  filledSubtrees: TypedContractMethod<[arg0: BigNumberish], [string], 'view'>
 
-  getLatestRoot: TypedContractMethod<[], [string], "view">;
+  getLatestRoot: TypedContractMethod<[], [string], 'view'>
 
-  hasher: TypedContractMethod<[], [string], "view">;
+  hasher: TypedContractMethod<[], [string], 'view'>
 
-  isKnownRoot: TypedContractMethod<[root: BytesLike], [boolean], "view">;
+  isKnownRoot: TypedContractMethod<[root: BytesLike], [boolean], 'view'>
 
-  roots: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  roots: TypedContractMethod<[arg0: BigNumberish], [string], 'view'>
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T
 
-  getFunction(
-    nameOrSignature: "LEVELS"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "ROOTS_CAPACITY"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "currentLeafIndex"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "filledSubtrees"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-  getFunction(
-    nameOrSignature: "getLatestRoot"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "hasher"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "isKnownRoot"
-  ): TypedContractMethod<[root: BytesLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "roots"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  getFunction(nameOrSignature: 'LEVELS'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'ROOTS_CAPACITY'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'currentLeafIndex'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'filledSubtrees'): TypedContractMethod<[arg0: BigNumberish], [string], 'view'>
+  getFunction(nameOrSignature: 'getLatestRoot'): TypedContractMethod<[], [string], 'view'>
+  getFunction(nameOrSignature: 'hasher'): TypedContractMethod<[], [string], 'view'>
+  getFunction(nameOrSignature: 'isKnownRoot'): TypedContractMethod<[root: BytesLike], [boolean], 'view'>
+  getFunction(nameOrSignature: 'roots'): TypedContractMethod<[arg0: BigNumberish], [string], 'view'>
 
-  filters: {};
+  filters: {}
 }

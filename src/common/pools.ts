@@ -1,7 +1,7 @@
-import { decodeFunctionData, encodeFunctionData, type Hex } from 'viem';
-import type { ChainIds } from './config';
-import { PrivacyPoolAbi } from './abis/PrivacyPool';
-import type { WithdrawalProofStruct } from './types';
+import { decodeFunctionData, encodeFunctionData, type Hex } from 'viem'
+import type { ChainIds } from '$common/config'
+import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
+import type { WithdrawalProofStruct } from '$common/types'
 
 export enum Strategy {
   OLDEST_FIRST = 'oldest-first',
@@ -15,9 +15,7 @@ export const maxPower = 77
 
 export const maxTotalDeposits = 2n ** 20n
 
-export const allPossiblePowers = (new Array(maxPower))
-  .fill(0)
-  .map((_v, i) => BigInt(i))
+export const allPossiblePowers = new Array(maxPower).fill(0).map((_v, i) => BigInt(i))
 
 export type ProofWorkState = 'waiting' | 'working' | 'broadcasted' | 'mined'
 
@@ -40,11 +38,12 @@ export type Proof = InsertableProof & {
 }
 
 export const verifyWithdrawal = {
-  encode: (calldata: WithdrawalProofStruct) => encodeFunctionData({
-    abi: PrivacyPoolAbi,
-    functionName: 'verifyWithdrawal',
-    args: [calldata],
-  }),
+  encode: (calldata: WithdrawalProofStruct) =>
+    encodeFunctionData({
+      abi: PrivacyPoolAbi,
+      functionName: 'verifyWithdrawal',
+      args: [calldata],
+    }),
   decode: (data: Hex) => {
     return decodeFunctionData({
       abi: PrivacyPoolAbi,

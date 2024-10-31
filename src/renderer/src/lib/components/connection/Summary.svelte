@@ -49,7 +49,8 @@
         type="button"
         class="variant-ghost-primary btn btn-sm py-1 pl-2 pr-0"
         on:click={openNetworkSelector}
-        {disabled}>
+        {disabled}
+      >
         <NetworkImage size={16} chain={currentVisualChain} />
         <span>{$chain.name}</span>
         <span>

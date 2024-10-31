@@ -164,9 +164,9 @@ export class HDSecretGenerator {
     const parent =
       this._nodes.length === 0
         ? {
-          extendedSeed: this._mainSeed,
-          keyPair: [BigNumber.from(0), BigNumber.from(0)],
-        }
+            extendedSeed: this._mainSeed,
+            keyPair: [BigNumber.from(0), BigNumber.from(0)],
+          }
         : this._nodes[this._nodes.length - 1]
 
     const extendedSeed = poseidon(parent.extendedSeed.slice(0, 2), 3) as ExtendedSeed

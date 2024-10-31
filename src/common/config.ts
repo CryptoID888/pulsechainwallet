@@ -1,6 +1,6 @@
-import type { Hex } from "viem"
-// import poolsConfig from './pools-config.json'
-import { mainnet, pulsechain, pulsechainV4 } from './chains'
+import type { Hex } from 'viem'
+import poolsConfig from '$common/pools-config.json'
+import { mainnet, pulsechain, pulsechainV4 } from '$common/chains'
 
 export type ChainIds = 1 | 369 | 943
 
@@ -15,14 +15,16 @@ type ScopedChainConfig = {
 
 type ContractDeployment = {
   transactionHash: Hex
-  blockNumber: string;
-  address: Hex;
+  blockNumber: string
+  address: Hex
 }
 
 type PoolConfig = {
-  poseidon: ContractDeployment;
-  factory: ContractDeployment;
+  poseidon: ContractDeployment
+  factory: ContractDeployment
 }
+
+export const pools = poolsConfig as Record<ChainIds, PoolConfig>
 
 export const maxDecimals = 18
 
@@ -69,6 +71,8 @@ export const defaultControllableSettings = {
   broadcastMessageCutoffTimeDelay: 5 * 60 * 1_000,
   /** the block delay before a message is considered stale */
   broadcastMessageCutoffBlockDelay: 50,
+  /** hide nullified commitments when they are presented individually */
+  hideNullifiedCommitments: false,
 }
 
 export type ControllableSettings = typeof defaultControllableSettings
@@ -98,24 +102,18 @@ export const defaultConfig: Config = {
   byChain: {
     [mainnet.id]: {
       poolPower: 18,
-      rpcs: [
-        'https://rpc-ethereum.g4mm4.io',
-      ],
-      // pools: pools[mainnet.id],
+      rpcs: ['https://rpc-ethereum.g4mm4.io'],
+      pools: pools[mainnet.id],
     },
     [pulsechain.id]: {
       poolPower: 24,
-      rpcs: [
-        'https://rpc.pulsechain.com',
-      ],
-      // pools: pools[pulsechain.id],
+      rpcs: ['https://rpc.pulsechain.com'],
+      pools: pools[pulsechain.id],
     },
     [pulsechainV4.id]: {
       poolPower: 15,
-      rpcs: [
-        'https://rpc-testnet-pulsechain.g4mm4.io',
-      ],
-      // pools: pools[pulsechainV4.id],
+      rpcs: ['https://rpc-testnet-pulsechain.g4mm4.io'],
+      pools: pools[pulsechainV4.id],
     },
   },
 }

@@ -2,7 +2,7 @@
   export let text = ''
 
   let copied = false
-  let id: Timer | null = null
+  let id: ReturnType<typeof setTimeout> | null = null
 
   const copyText = () => {
     navigator.clipboard.writeText(text)

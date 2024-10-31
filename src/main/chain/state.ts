@@ -1,11 +1,22 @@
-import type { Erc20Token } from '$common/token';
-import { chainIdToChain, getPublicClient } from "./mappings";
-import { getContract, type ChainContract, parseAbi, zeroAddress, parseUnits, Hex, erc20Abi, Block, BlockTag } from "viem";
-import { binding } from "$main/handler";
-import * as sql from '$main/sql';
-import type { ChainTransaction } from '$common/types';
-import { ChainIds } from "$common/config";
-import { handle } from "$main/ipc";
+import type { Erc20Token } from '$common/token'
+import { chainIdToChain, getPublicClient } from '$main/chain/mappings'
+import {
+  getContract,
+  type ChainContract,
+  parseAbi,
+  zeroAddress,
+  parseUnits,
+  type Hex,
+  erc20Abi,
+  Block,
+  BlockTag,
+} from 'viem'
+import { binding } from '$main/handler'
+import * as sql from '$main/sql'
+import type { ChainTransaction } from '$common/types'
+import { ChainIds } from '$common/config'
+import { handle } from '$main/ipc'
+
 const poolAbi = parseAbi(['function getReserves() view returns((uint112,uint112,uint32))'])
 const factoryAbi = parseAbi(['function getPair(address, address) view returns(address)'])
 
@@ -100,11 +111,15 @@ handle('state:price', async (token: Erc20Token, blockNumber: BlockTag | bigint =
     client,
   })
   const reserves = await pool.read
-    .getReserves(blockNumber === 'latest' ? {
-      blockTag: 'latest',
-    } : {
-      blockNumber: BigInt(blockNumber),
-    })
+    .getReserves(
+      typeof blockNumber === 'string'
+        ? {
+            blockTag: blockNumber,
+          }
+        : {
+            blockNumber: BigInt(blockNumber),
+          },
+    )
     .catch(() => null)
   if (!reserves) {
     return null

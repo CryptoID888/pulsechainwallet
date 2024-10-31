@@ -2,7 +2,7 @@ import { query, restart } from '.'
 import { writable } from 'svelte/store'
 import type { _Meta } from '$common/indexer/gql/graphql'
 
-export const status = writable<_Meta["status"] | null>(null)
+export const status = writable<_Meta['status'] | null>(null)
 
 let statusFailedCounter = 0
 

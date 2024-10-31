@@ -11,114 +11,74 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers'
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
   TypedContractMethod,
-} from "../../common";
+} from '../../common'
 
 export interface TestFilledSubtreesFinderInterface extends Interface {
-  getFunction(
-    nameOrSignature:
-      | "getFilledSubtreeIndex"
-      | "getFilledSubtreeIndexGasEstimate"
-  ): FunctionFragment;
+  getFunction(nameOrSignature: 'getFilledSubtreeIndex' | 'getFilledSubtreeIndexGasEstimate'): FunctionFragment
 
-  encodeFunctionData(
-    functionFragment: "getFilledSubtreeIndex",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getFilledSubtreeIndexGasEstimate",
-    values: [BigNumberish, BigNumberish]
-  ): string;
+  encodeFunctionData(functionFragment: 'getFilledSubtreeIndex', values: [BigNumberish, BigNumberish]): string
+  encodeFunctionData(functionFragment: 'getFilledSubtreeIndexGasEstimate', values: [BigNumberish, BigNumberish]): string
 
-  decodeFunctionResult(
-    functionFragment: "getFilledSubtreeIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getFilledSubtreeIndexGasEstimate",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: 'getFilledSubtreeIndex', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'getFilledSubtreeIndexGasEstimate', data: BytesLike): Result
 }
 
 export interface TestFilledSubtreesFinder extends BaseContract {
-  connect(runner?: ContractRunner | null): TestFilledSubtreesFinder;
-  waitForDeployment(): Promise<this>;
+  connect(runner?: ContractRunner | null): TestFilledSubtreesFinder
+  waitForDeployment(): Promise<this>
 
-  interface: TestFilledSubtreesFinderInterface;
+  interface: TestFilledSubtreesFinderInterface
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>
+  listeners(eventName?: string): Promise<Array<Listener>>
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>
 
-  getFilledSubtreeIndex: TypedContractMethod<
-    [elementIndex: BigNumberish, layerIndex: BigNumberish],
-    [bigint],
-    "view"
-  >;
+  getFilledSubtreeIndex: TypedContractMethod<[elementIndex: BigNumberish, layerIndex: BigNumberish], [bigint], 'view'>
 
   getFilledSubtreeIndexGasEstimate: TypedContractMethod<
     [elementIndex: BigNumberish, layerIndex: BigNumberish],
     [bigint],
-    "payable"
-  >;
+    'payable'
+  >
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T
 
   getFunction(
-    nameOrSignature: "getFilledSubtreeIndex"
-  ): TypedContractMethod<
-    [elementIndex: BigNumberish, layerIndex: BigNumberish],
-    [bigint],
-    "view"
-  >;
+    nameOrSignature: 'getFilledSubtreeIndex',
+  ): TypedContractMethod<[elementIndex: BigNumberish, layerIndex: BigNumberish], [bigint], 'view'>
   getFunction(
-    nameOrSignature: "getFilledSubtreeIndexGasEstimate"
-  ): TypedContractMethod<
-    [elementIndex: BigNumberish, layerIndex: BigNumberish],
-    [bigint],
-    "payable"
-  >;
+    nameOrSignature: 'getFilledSubtreeIndexGasEstimate',
+  ): TypedContractMethod<[elementIndex: BigNumberish, layerIndex: BigNumberish], [bigint], 'payable'>
 
-  filters: {};
+  filters: {}
 }

@@ -26,14 +26,16 @@
             name="to-address"
             id="to-address"
             on:change
-            value={token.address === zeroAddress ? toAddress : token.address} />
+            value={token.address === zeroAddress ? toAddress : token.address}
+          />
           <input type="hidden" id="value" name="value" value={token.address === zeroAddress ? amount : 0n} on:change />
           <input
             type="hidden"
             id="gas"
             name="gas"
             value={token.address === zeroAddress ? nativeTransferGasLimit : erc20GasLimit}
-            on:change />
+            on:change
+          />
           <input
             id="data"
             name="data"
@@ -47,7 +49,8 @@
                     functionName: 'transfer',
                     args: [toAddress, amount],
                   })
-                : null} />
+                : null}
+          />
         </div>
       </svelte:fragment>
     </TokenBalanceSelector>

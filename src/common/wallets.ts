@@ -1,5 +1,6 @@
 import type { Hex } from 'viem'
-import { PathTypes } from './path'
+
+import { PathTypes } from '$common/path'
 
 export type SeedType = 'phrase' | 'pk' | 'read-only'
 
@@ -36,8 +37,8 @@ export type Account = {
 }
 
 export type AccountTarget = {
-  wallet_id: Hex;
-  index: number;
+  wallet_id: Hex
+  index: number
 }
 
 export const defaultName = (type: SeedType, seedIndex: number, addressIndex: number) => {

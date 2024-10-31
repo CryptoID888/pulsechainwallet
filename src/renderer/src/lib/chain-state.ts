@@ -5,9 +5,7 @@ import { config } from '$lib/config'
 import * as viemChains from '$common/chains'
 import { state } from '$lib/api'
 
-export const chainIdToChain = new Map<number, viem.Chain>(
-  Object.values(viemChains).map((c) => [c.id, c]),
-)
+export const chainIdToChain = new Map<number, viem.Chain>(Object.values(viemChains).map((c) => [c.id, c]))
 
 export const chain = derived([config], ([$config]) => {
   if (!$config) return null
@@ -20,6 +18,11 @@ export const selectedChains = {
   pulsechainV4: 943,
 } as const
 
-export const currentBlock = derivedSlave<Stores, viem.Block | null>('state:block', [config], ([$config]) => {
-  return state.block($config.chainId)
-}, null)
+export const currentBlock = derivedSlave<Stores, viem.Block | null>(
+  'state:block',
+  [config],
+  ([$config]) => {
+    return state.block($config.chainId)
+  },
+  null,
+)

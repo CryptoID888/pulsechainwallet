@@ -63,12 +63,13 @@ export const crumbs = {
     link: '/account/addresses/manage',
     icon: 'lucide:contact-round',
   } as Crumb,
-  key: (link: string) => ({
-    text: 'Key',
-    link,
-    icon: 'fa:key',
-    iconSize: 16,
-  } as Crumb),
+  key: (link: string) =>
+    ({
+      text: 'Key',
+      link,
+      icon: 'fa:key',
+      iconSize: 16,
+    }) as Crumb,
   manageAddresses: {
     text: 'Manage',
     link: '/account/addresses/manage',
@@ -117,12 +118,13 @@ export const crumbs = {
     icon: 'bi:activity',
     iconSize: 24,
   } as Crumb,
-  transactionDetails: (hash: Hex) => ({
-    text: 'Details',
-    icon: 'fa:list',
-    link: `/account/transactions/${hash}`,
-    iconSize: 16,
-  } as Crumb),
+  transactionDetails: (hash: Hex) =>
+    ({
+      text: 'Details',
+      icon: 'fa:list',
+      link: `/account/transactions/${hash}`,
+      iconSize: 16,
+    }) as Crumb,
   settings: {
     text: 'Settings',
     link: '/account/settings',

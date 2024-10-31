@@ -113,7 +113,8 @@
     bind:offset
     step={incrementIn}
     bind:amount
-    bind:balance>
+    bind:balance
+  >
     <svelte:fragment slot="input">
       <div class="absolute hidden">
         {#if !canDeposit}

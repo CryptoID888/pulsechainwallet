@@ -1,4 +1,3 @@
-
 // let url = 'postgres://postgres:password@0.0.0.0:42070/pulsechainwallet'
 
 // let _db: ReturnType<typeof Database.load> | null = null

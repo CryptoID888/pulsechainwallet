@@ -5,10 +5,7 @@ module.exports = {
   generates: {
     './src/common/indexer/gql/': {
       preset: 'client',
-      plugins: [
-        'typescript',
-        'typescript-operations',
-      ],
+      plugins: ['typescript', 'typescript-operations'],
     },
   },
-};
+}

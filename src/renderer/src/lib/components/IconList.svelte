@@ -4,9 +4,10 @@
   import { createEventDispatcher } from 'svelte'
   const dispatch = createEventDispatcher()
 
-  export let selected: any = null
+  type T = unknown
+  export let selected: T = null
   export let icons: Icon[] = []
-  const selectWallet = (target: any) => {
+  const selectWallet = (target: T) => {
     selected = target
     dispatch('select', target)
   }
@@ -21,10 +22,12 @@
           class="btn relative px-2 shadow"
           class:variant-soft-primary={icon === selected}
           title={icon.title || ''}
-          on:click={() => selectWallet(icon)}>
+          on:click={() => selectWallet(icon)}
+        >
           <SeedBox variant="soft" type={icon.type} />
           <span class="badge-icon absolute right-0.5 top-0.5 flex h-5 min-w-5 bg-neutral-100 px-0.5 text-xs font-light"
-            >{icon.badge}</span>
+            >{icon.badge}</span
+          >
         </button>
       </li>
     {/each}

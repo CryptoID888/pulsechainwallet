@@ -4,6 +4,7 @@
   import { type Hex } from 'viem'
   import Portal from 'svelte-portal'
   import { onMount } from 'svelte'
+  import { SlideToggle } from '@skeletonlabs/skeleton'
 
   import ChipList from '$lib/components/ChipList.svelte'
   import Crumb from '$lib/components/Crumb.svelte'
@@ -29,6 +30,7 @@
   import { pool } from '$lib/api'
   import { emptyHex, type ChainIds } from '$common/config'
   import { poolIdFromParts } from '$common/utils'
+  import { config, updatePower } from '$lib/config'
 
   onMount(stickyFilledOnMount)
 
@@ -91,14 +93,7 @@
     // console.log('broadcast', $account, toAddress, feePerCommitment, commitments, power, selectedIndex, $deposits)
     const depositsUnderPool = $deposits[poolAddress].filter((deposit) => commitments.has(BigInt(deposit.leafIndex)))
     const p = deposits[0].pool
-    await pool.generateProofsAndCache(
-      $chain.id as ChainIds,
-      $account!,
-      toAddress,
-      feePerCommitment,
-      p,
-      depositsUnderPool,
-    )
+    await pool.generateProofsAndCache(chainId, $account!, toAddress, feePerCommitment, p, depositsUnderPool)
     // chain id is from bottom right dropdown
     push(`/account/shield/work/${p.id}`)
   }
@@ -108,15 +103,22 @@
   let commitments = new Set<bigint>()
   let feeBasisPoints = 25n
   let strategy: Strategy = Strategy.OLDEST_FIRST
+  $: chainId = $chain?.id as ChainIds
   $: poolAddress = getAddress($allPools[power]?.[selectedIndex] || zeroAddress)
-  $: poolId = poolIdFromParts($chain.id as ChainIds, poolAddress)
+  $: poolId = poolIdFromParts(chainId, poolAddress)
   $: disabled = new Set<bigint>(
     $proofs
       .filter((proof) => proof.pool_id === poolId)
       .map((proof) => BigInt(proof.leaf_index))
       .concat($nullifiedCommitmentsUnderPool),
   )
-  $: chips = new Set(_.sortBy($deposits[poolAddress]?.map((d) => BigInt(d.leafIndex)) || [], (i) => i))
+  let chips = new Set<bigint>()
+  $: {
+    chips = new Set(_.sortBy($deposits[poolAddress]?.map((d) => BigInt(d.leafIndex)) || [], (i) => i))
+    if ($config.hideNullifiedCommitments) {
+      chips = new Set([...chips.values()].filter((chip) => !disabled.has(chip)))
+    }
+  }
   $: if (disabled) {
     commitments = new Set([...commitments.values()].filter((chip) => !disabled.has(chip)))
   }
@@ -140,6 +142,13 @@
   $: token = $tokensOnActiveChain[0]
   // default to using the oldest first because that is generally safest
   $: proofGenerationDisabled = !isAddress(toAddress) || commitments.size === 0
+  const handlePowerChange = (e: CustomEvent<{ value: number }>) => {
+    updatePower(e.detail.value)
+  }
+  const handleHideNullifiedCommitmentsChange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    config.updatePartial('hideNullifiedCommitments', target.checked)
+  }
 </script>
 
 <Crumb {...crumbs.broadcast} />
@@ -148,20 +157,37 @@
   {#if $account}
     <AccountSummary account={$account} />
   {/if}
-  <PowerSelector bind:power />
+  <PowerSelector bind:power on:change={handlePowerChange} />
   <IconList {icons} bind:selected />
+  <div class="flex flex-row items-center gap-2">
+    <label for="hideNullifiedCommitments" class="flex flex-row items-center gap-2">
+      <SlideToggle
+        name="hideNullifiedCommitments"
+        id="hideNullifiedCommitments"
+        background="bg-primary-300"
+        active="bg-primary-500"
+        size="sm"
+        checked={$config.hideNullifiedCommitments}
+        on:change={handleHideNullifiedCommitmentsChange}
+      />
+      <span>Hide nullified</span>
+    </label>
+  </div>
+
   <ChipList {chips} bind:selected={commitments} {disabled} on:toggle={toggleCommitment} />
   <div class="flex flex-row items-center justify-between text-sm leading-6">
     <span class="flex flex-row items-center gap-2">
       <StrategyControls bind:strategy />
       <span
-        class="input-group input-group-divider bg-surface-200-700-token flex w-auto flex-row border-none p-0 outline outline-1 -outline-offset-1 outline-primary-400">
+        class="input-group input-group-divider bg-surface-200-700-token flex w-auto flex-row border-none p-0 outline outline-1 -outline-offset-1 outline-primary-400"
+      >
         <StepIncrementor
           padding="p-0"
           size="size-8"
           decrementDisabled={commitments.size === 0}
           incrementDisabled={commitments.size === chips.size}
-          on:change={strategyHandlers[strategy]} />
+          on:change={strategyHandlers[strategy]}
+        />
       </span>
     </span>
   </div>
@@ -192,7 +218,8 @@
 <Portal target="#sticky-portal">
   <div class="flex w-full flex-row items-center gap-2 bg-primary-50 px-4 py-2 shadow-inner">
     <button class="variant-filled-primary btn w-full" disabled={proofGenerationDisabled} on:click={broadcast}
-      >Broadcast</button>
+      >Broadcast</button
+    >
     <CancelButton backup="/account">Cancel</CancelButton>
   </div>
 </Portal>

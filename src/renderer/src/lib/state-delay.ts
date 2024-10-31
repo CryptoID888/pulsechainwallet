@@ -1,4 +1,4 @@
-import _ from "lodash"
+import _ from 'lodash'
 
 /**
  * Delay the function call until the object changes or the delay expires

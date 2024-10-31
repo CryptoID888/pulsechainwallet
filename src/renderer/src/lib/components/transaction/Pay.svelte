@@ -7,12 +7,12 @@
   import NetworkImage from '../NetworkImage.svelte'
   import Icon from '@iconify/svelte'
   import AccountSummary from '$lib/components/account/Summary.svelte'
-  import { type FeeValuesType, parseUnits, formatUnits, type Hex } from 'viem'
+  import { type FeeValuesType, parseUnits, formatUnits, type Hex, type SendTransactionParameters } from 'viem'
   import { config } from '$lib/config'
   import { currentAccount as account, nonces } from '$lib/wallets'
   import { wallet } from '$lib/api'
   import Number from '../Number.svelte'
-  import { delimiter } from '$lib/modifiers/delimiter'
+  import { delimiter, delimiterRender } from '$lib/modifiers/delimiter'
   import { addDecimalDelimiter, sanitize, sanitizeDecimal } from '$lib/number'
   import { createEventDispatcher, onMount } from 'svelte'
   import PriceFetch from '../PriceFetch.svelte'
@@ -134,10 +134,11 @@
   let rawDataPanelOpen = false
   let showNumbers = $config.numbersOverHex
 
-  $: visualChain = chainById.get($chain.id)!
+  $: chainId = $chain?.id as ChainIds
+  $: visualChain = chainById.get(chainId)!
   $: feeTypeChecked = feeType === feeTypes.EIP1559
   $: baseFeeNumerator = 1_125n ** BigInt(baseFeeValidityRange)
-  $: baseFeeDenominator = 10n ** (BigInt(baseFeeValidityRange) * 3n)
+  $: baseFeeDenominator = (10n ** 3n) ** BigInt(baseFeeValidityRange)
   $: feeInputDisabled = feeSpeed !== 3
   $: if (feeSpeed || estimatedGas || gasLimitExternal) {
     reflowGasLimitInput()
@@ -151,15 +152,12 @@
   const runGasEstimation = () => {
     let cancelled = false
     wallet
-      .estimateGas(
-        $chain.id as ChainIds,
-        {
-          account: prep.from.address as Hex,
-          to: prep.to as Hex,
-          value: prep.value,
-          data: prep.data as Hex,
-        } as any,
-      )
+      .estimateGas(chainId, {
+        account: prep.from.address as Hex,
+        to: prep.to as Hex,
+        value: prep.value,
+        data: prep.data as Hex,
+      } as SendTransactionParameters)
       .then((estimate) => {
         if (cancelled) return
         estimatedGas = BigInt(estimate)
@@ -197,10 +195,14 @@
   // we can do this without parseUnit because gas limit is an int
   $: gasLimit = BigInt(sanitize(gasLimitInput))
   $: block = $currentBlock
+  const lowerBoundPriorityFee = 1n
   $: if (block) {
     const blockBaseFee = block.baseFeePerGas as bigint
     maxBaseFeePerGas = (baseFeeNumerator * blockBaseFee) / baseFeeDenominator
-    maxPriorityFeePerGas = (blockBaseFee * (k10 + BigInt($config.defaultPriorityFeeAdditive))) / k10 - blockBaseFee
+    const computedMaxPriorityFeePerGas =
+      (blockBaseFee * (k10 + BigInt($config.defaultPriorityFeeAdditive))) / k10 - blockBaseFee
+    maxPriorityFeePerGas =
+      computedMaxPriorityFeePerGas < lowerBoundPriorityFee ? lowerBoundPriorityFee : computedMaxPriorityFeePerGas
   }
   $: minNonce = BigInt($nonces?.latest || 0n)
   $: nonce =
@@ -254,7 +256,7 @@
   <div class="mb-2 flex w-full flex-row px-4 py-2">
     <span class="flex flex-grow">Network</span>
     <NetworkImage size={24} chain={visualChain} />
-    <span class="ml-2 flex">{$chain.name}</span>
+    <span class="ml-2 flex">{$chain?.name}</span>
   </div>
   {#if $account}
     <AccountSummary account={$account} />
@@ -280,7 +282,8 @@
                     background="bg-primary-300"
                     active="bg-primary-500"
                     bind:checked={showNumbers}
-                    size="sm" />
+                    size="sm"
+                  />
                 </label>
               </button>
             {/if}
@@ -319,7 +322,8 @@
                     checked={feeTypeChecked}
                     on:change={handleFeeTypeChange}
                     background="bg-primary-300"
-                    active="bg-primary-500" />
+                    active="bg-primary-500"
+                  />
                 </label>
               </button>
             </div>
@@ -339,7 +343,8 @@
                       id="save-defaults"
                       name="save-defaults"
                       disabled
-                      bind:checked={saveDefaults} />
+                      bind:checked={saveDefaults}
+                    />
                   </label>
                 </button>
               </div>
@@ -349,7 +354,8 @@
                   padding="px-2 py-1"
                   bind:group={gasSpeedMultiplierIndex}
                   name="gasSpeedMultiplier"
-                  value={0}>
+                  value={0}
+                >
                   <div class="flex flex-row items-center justify-between gap-2">
                     <span class="min-w-16 text-left font-bold">{speedLabels[0]}</span>
                     <span class="min-w-28 text-right text-sm">
@@ -357,7 +363,8 @@
                         truncateZeros
                         decimals={9}
                         x={feeSpeedCalc(maxBaseFeePerGas, maxPriorityFeePerGas, priorityMultipliers[0])}
-                        maxDelimiterSets={2} />
+                        maxDelimiterSets={2}
+                      />
                       <span>{visualChain.gasUnit}</span>
                     </span>
                   </div>
@@ -367,7 +374,8 @@
                   padding="px-2 py-1"
                   bind:group={gasSpeedMultiplierIndex}
                   name="gasSpeedMultiplier"
-                  value={1}>
+                  value={1}
+                >
                   <div class="flex flex-row items-center justify-between gap-2">
                     <span class="min-w-16 text-left font-bold">{speedLabels[1]}</span>
                     <span class="min-w-28 text-right text-sm">
@@ -375,7 +383,8 @@
                         truncateZeros
                         decimals={9}
                         x={feeSpeedCalc(maxBaseFeePerGas, maxPriorityFeePerGas, priorityMultipliers[1])}
-                        maxDelimiterSets={2} />
+                        maxDelimiterSets={2}
+                      />
                       <span>{visualChain.gasUnit}</span>
                     </span>
                   </div>
@@ -385,7 +394,8 @@
                   padding="px-2 py-1"
                   bind:group={gasSpeedMultiplierIndex}
                   name="gasSpeedMultiplier"
-                  value={2}>
+                  value={2}
+                >
                   <div class="flex flex-row items-center justify-between gap-2">
                     <span class="min-w-16 text-left font-bold">{speedLabels[2]}</span>
                     <span class="min-w-28 text-right text-sm">
@@ -393,7 +403,8 @@
                         truncateZeros
                         decimals={9}
                         maxDelimiterSets={2}
-                        x={feeSpeedCalc(maxBaseFeePerGas, maxPriorityFeePerGas, priorityMultipliers[2])} />
+                        x={feeSpeedCalc(maxBaseFeePerGas, maxPriorityFeePerGas, priorityMultipliers[2])}
+                      />
                       <span>{visualChain.gasUnit}</span>
                     </span>
                   </div>
@@ -403,7 +414,8 @@
                   padding="px-2 py-1"
                   bind:group={gasSpeedMultiplierIndex}
                   name="gasSpeedMultiplier"
-                  value={3}>
+                  value={3}
+                >
                   <div class="flex flex-row items-center justify-between gap-2">
                     <span class="min-w-16 text-left font-bold">{speedLabels[3]}</span>
                   </div>
@@ -419,7 +431,8 @@
                   id="max-base-fee"
                   disabled={feeInputDisabled}
                   bind:value={maxBaseFeeInput}
-                  use:delimiter={{ decimals: 9, min: 0n }} />
+                  use:delimiter={delimiterRender(() => ({ decimals: 9, min: 0n }))}
+                />
               </label>
               <label for="max-priority-fee" class="label text-left">
                 <span class="text-left text-sm">Max Priority Fee</span>
@@ -429,7 +442,8 @@
                   id="max-priority-fee"
                   disabled={feeInputDisabled}
                   bind:value={maxPriorityFeeInput}
-                  use:delimiter={{ decimals: 9, min: 1n }} />
+                  use:delimiter={delimiterRender(() => ({ decimals: 9, min: 1n }))}
+                />
               </label>
               <label for="gas-limit" class="label text-left">
                 <span class="text-left text-sm">Limit</span>
@@ -438,7 +452,8 @@
                   class="input"
                   id="gas-limit"
                   bind:value={gasLimitInput}
-                  use:delimiter={{ decimals: 0, min: 21_000n }} />
+                  use:delimiter={delimiterRender(() => ({ decimals: 0, min: 21_000n }))}
+                />
               </label>
             </div>
           </div>
@@ -472,7 +487,8 @@
                   background="bg-primary-300"
                   active="bg-primary-500"
                   size="sm"
-                  bind:checked={usePendingNonce} />
+                  bind:checked={usePendingNonce}
+                />
                 <span class="min-w-24 pl-2 capitalize">{usePendingNonce ? 'pending' : 'latest'}</span>
               </label>
             </button>
@@ -482,7 +498,8 @@
               id="nonce"
               placeholder={`${nonce}`}
               bind:value={nonceInput}
-              use:delimiter={{ decimals: 0, min: minNonce, max: 2n ** 32n - 1n }} />
+              use:delimiter={delimiterRender(() => ({ decimals: 0, min: minNonce, max: 2n ** 32n - 1n }))}
+            />
           </div>
         </svelte:fragment>
       </AccordionItem>
@@ -497,6 +514,7 @@
       class="variant-ghost-primary btn"
       on:click={() => {
         dispatch('back')
-      }}>Cancel</button>
+      }}>Cancel</button
+    >
   </div>
 </Portal>

@@ -25,7 +25,8 @@
     class:input-error={!!confirm && confirm !== password}
     type="password"
     placeholder="confirm"
-    bind:value={confirm} />
+    bind:value={confirm}
+  />
   <div class="grid grid-cols-2 gap-2">
     <BackButton on:cancel />
     <button {disabled} type="submit" class="variant-filled-primary btn w-full">Save</button>

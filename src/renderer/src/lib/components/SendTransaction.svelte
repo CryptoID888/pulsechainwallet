@@ -98,7 +98,8 @@
         on:click={() => setToValue(1)}
         type="button"
         class="flex flex-row gap-2 px-4 py-2"
-        class:text-neutral-400={tabSet < 1}>
+        class:text-neutral-400={tabSet < 1}
+      >
         <Icon icon="mdi:gas" height={24} />
         <span>Pay</span>
       </button>
@@ -108,7 +109,8 @@
         on:click={() => setToValue(2)}
         type="button"
         class="flex flex-row gap-2 px-4 py-2"
-        class:text-neutral-400={tabSet < 2}>
+        class:text-neutral-400={tabSet < 2}
+      >
         <Icon icon="ph:broadcast" height={24} />
         <span>Broadcast</span>
       </button>
@@ -124,7 +126,8 @@
                 disabled={prepSubmitDisabled}
                 on:submit={() => {
                   tabSet = 1
-                }}><slot {prep} {updatePrep} /></Prep>
+                }}><slot {prep} {updatePrep} /></Prep
+              >
             </form>
           </div>
         </div>
@@ -135,7 +138,8 @@
             on:confirm={handleConfirm}
             on:back={() => {
               tabSet = 0
-            }} />
+            }}
+          />
         </div>
       {:else if tabSet === 2}
         <div class="w-full">

@@ -11,7 +11,7 @@ import { writable as w, readable as r, derived as d, type Stores, type StoresVal
 export const writable = <T>(
   eventKey: string,
   retrieve: () => Promise<T>,
-  setOnMain: (key: Key, value: any) => Promise<void>,
+  setOnMain: (key: Key, value: unknown) => Promise<void>,
   defaultValue: T,
 ) => {
   const store = w(defaultValue, (set) => {
@@ -30,7 +30,7 @@ export const writable = <T>(
     update: (fn: ($store: T) => T) => {
       setOnMain('.', fn(get(store)))
     },
-    updatePartial: (k: Key, partial: any) => {
+    updatePartial: (k: Key, partial: unknown) => {
       setOnMain(k, partial)
     },
   }
@@ -45,25 +45,32 @@ export const writable = <T>(
  * @returns a derived store
  */
 export const derived = <S extends Stores, T>(
-  eventName: string | null, stores: S,
+  eventName: string | null,
+  stores: S,
   updateRequester: (stores: StoresValues<Stores>) => Promise<T>,
   defaultValue: T,
 ) => {
-  const store = d(stores, (stores, set) => {
-    let cancelled = false
-    const update = (result: T) => {
-      if (cancelled) return
-      set(result)
-    }
-    updateRequester(stores).then(update)
-    const cancel = eventName ? window.electron.ipcRenderer.on(eventName, (_, data) => {
-      update(data)
-    }) : () => { }
-    return () => {
-      cancelled = true
-      cancel()
-    }
-  }, defaultValue)
+  const store = d(
+    stores,
+    (stores, set) => {
+      let cancelled = false
+      const update = (result: T) => {
+        if (cancelled) return
+        set(result)
+      }
+      updateRequester(stores).then(update)
+      const cancel = eventName
+        ? window.electron.ipcRenderer.on(eventName, (_, data) => {
+            update(data)
+          })
+        : () => {}
+      return () => {
+        cancelled = true
+        cancel()
+      }
+    },
+    defaultValue,
+  )
   return store
 }
 

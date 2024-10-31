@@ -1,10 +1,11 @@
-import { writable } from './store'
-import { type Config, defaultConfig } from '$common/config'
 import { get } from 'svelte/store'
+import _ from 'lodash'
+
+import { writable } from '$main/store'
 import type { Key } from '$preload/api'
-import _ from 'lodash';
+import { type Config, defaultConfig } from '$common/config'
 import poolsConfig from '$common/pools-config.json'
-import { emit, handle } from './ipc'
+import { emit, handle } from '$main/ipc'
 
 /**
  * The config store
@@ -17,7 +18,10 @@ export const config = writable<Config>('config', defaultConfig, (current) => {
   for (const chainId of Object.keys(current.byChain)) {
     current.byChain[chainId].pools = current.byChain[chainId].pools || poolsConfig[chainId]
   }
-  return current
+  return {
+    ...defaultConfig,
+    ...current,
+  }
 })
 config.subscribe((c) => {
   emit('config:update', c)
@@ -26,7 +30,7 @@ config.subscribe((c) => {
 handle('config:get', () => {
   return get(config)
 })
-handle('config:set', (k: Key, value: any) => {
+handle('config:set', <K extends Key, V = K extends '.' ? Partial<Config> : unknown>(k: K, value: V) => {
   if (k === null) {
     return
   }

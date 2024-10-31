@@ -1,8 +1,9 @@
 import * as fs from 'fs'
 import path from 'path'
-import { paths } from './paths'
 import { writable as w } from 'svelte/store'
-import { valueToJSON } from './json'
+
+import { paths } from '$main/paths'
+import { valueToJSON } from '$main/json'
 
 const io = {
   write: (key: string, value: object) => {
@@ -17,15 +18,20 @@ const io = {
       const startInfo = fs.readFileSync(filePath, 'utf8')
       return valueToJSON.parse(startInfo) as T
     } catch (err) {
+      console.log('failed to read', key, err)
       return null
     }
   },
 }
 
-export const writable = <T>(key: string, defaultValue: T, merge: (a: T) => T = ((current) => ({
-  ...defaultValue,
-  ...current,
-}))) => {
+export const writable = <T>(
+  key: string,
+  defaultValue: T,
+  merge: (a: T) => T = (current) => ({
+    ...defaultValue,
+    ...current,
+  }),
+) => {
   const stored = io.read<T>(key) || defaultValue
   const store = w<T>(merge(stored))
   return {

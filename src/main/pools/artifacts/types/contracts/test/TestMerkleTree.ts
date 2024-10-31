@@ -11,280 +11,161 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers'
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
   TypedContractMethod,
-} from "../../common";
+} from '../../common'
 
 export interface TestMerkleTreeInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "LEVELS"
-      | "ROOTS_CAPACITY"
-      | "currentLeafIndex"
-      | "currentRootIndex"
-      | "filledSubtrees"
-      | "getLatestRoot"
-      | "hasher"
-      | "isKnownRoot"
-      | "roots"
-      | "testInsert"
-      | "testInsertLoop"
-      | "testInsertMod"
-      | "testInsertStorage"
-      | "testUpdate"
-      | "z"
-  ): FunctionFragment;
+      | 'LEVELS'
+      | 'ROOTS_CAPACITY'
+      | 'currentLeafIndex'
+      | 'currentRootIndex'
+      | 'filledSubtrees'
+      | 'getLatestRoot'
+      | 'hasher'
+      | 'isKnownRoot'
+      | 'roots'
+      | 'testInsert'
+      | 'testInsertLoop'
+      | 'testInsertMod'
+      | 'testInsertStorage'
+      | 'testUpdate'
+      | 'z',
+  ): FunctionFragment
 
-  encodeFunctionData(functionFragment: "LEVELS", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'LEVELS', values?: undefined): string
+  encodeFunctionData(functionFragment: 'ROOTS_CAPACITY', values?: undefined): string
+  encodeFunctionData(functionFragment: 'currentLeafIndex', values?: undefined): string
+  encodeFunctionData(functionFragment: 'currentRootIndex', values?: undefined): string
+  encodeFunctionData(functionFragment: 'filledSubtrees', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'getLatestRoot', values?: undefined): string
+  encodeFunctionData(functionFragment: 'hasher', values?: undefined): string
+  encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'roots', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'testInsert', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'testInsertLoop', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'testInsertMod', values: [BigNumberish]): string
+  encodeFunctionData(functionFragment: 'testInsertStorage', values: [BigNumberish]): string
   encodeFunctionData(
-    functionFragment: "ROOTS_CAPACITY",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentLeafIndex",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentRootIndex",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "filledSubtrees",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getLatestRoot",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "hasher", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "isKnownRoot",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "roots", values: [BigNumberish]): string;
-  encodeFunctionData(
-    functionFragment: "testInsert",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testInsertLoop",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testInsertMod",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testInsertStorage",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "testUpdate",
-    values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish[]]
-  ): string;
-  encodeFunctionData(functionFragment: "z", values: [BigNumberish]): string;
+    functionFragment: 'testUpdate',
+    values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish[]],
+  ): string
+  encodeFunctionData(functionFragment: 'z', values: [BigNumberish]): string
 
-  decodeFunctionResult(functionFragment: "LEVELS", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ROOTS_CAPACITY",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentLeafIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentRootIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "filledSubtrees",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getLatestRoot",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "hasher", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isKnownRoot",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "roots", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "testInsert", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "testInsertLoop",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "testInsertMod",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "testInsertStorage",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "testUpdate", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "z", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'LEVELS', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'ROOTS_CAPACITY', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'currentLeafIndex', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'currentRootIndex', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'filledSubtrees', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'getLatestRoot', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'hasher', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'roots', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'testInsert', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'testInsertLoop', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'testInsertMod', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'testInsertStorage', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'testUpdate', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'z', data: BytesLike): Result
 }
 
 export interface TestMerkleTree extends BaseContract {
-  connect(runner?: ContractRunner | null): TestMerkleTree;
-  waitForDeployment(): Promise<this>;
+  connect(runner?: ContractRunner | null): TestMerkleTree
+  waitForDeployment(): Promise<this>
 
-  interface: TestMerkleTreeInterface;
+  interface: TestMerkleTreeInterface
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>
+  listeners(eventName?: string): Promise<Array<Listener>>
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>
 
-  LEVELS: TypedContractMethod<[], [bigint], "view">;
+  LEVELS: TypedContractMethod<[], [bigint], 'view'>
 
-  ROOTS_CAPACITY: TypedContractMethod<[], [bigint], "view">;
+  ROOTS_CAPACITY: TypedContractMethod<[], [bigint], 'view'>
 
-  currentLeafIndex: TypedContractMethod<[], [bigint], "view">;
+  currentLeafIndex: TypedContractMethod<[], [bigint], 'view'>
 
-  currentRootIndex: TypedContractMethod<[], [bigint], "view">;
+  currentRootIndex: TypedContractMethod<[], [bigint], 'view'>
 
-  filledSubtrees: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+  filledSubtrees: TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
 
-  getLatestRoot: TypedContractMethod<[], [bigint], "view">;
+  getLatestRoot: TypedContractMethod<[], [bigint], 'view'>
 
-  hasher: TypedContractMethod<[], [string], "view">;
+  hasher: TypedContractMethod<[], [string], 'view'>
 
-  isKnownRoot: TypedContractMethod<[root: BigNumberish], [boolean], "view">;
+  isKnownRoot: TypedContractMethod<[root: BigNumberish], [boolean], 'view'>
 
-  roots: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+  roots: TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
 
-  testInsert: TypedContractMethod<[leaf: BigNumberish], [bigint], "nonpayable">;
+  testInsert: TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
 
-  testInsertLoop: TypedContractMethod<
-    [leaf: BigNumberish],
-    [bigint],
-    "nonpayable"
-  >;
+  testInsertLoop: TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
 
-  testInsertMod: TypedContractMethod<
-    [leaf: BigNumberish],
-    [bigint],
-    "nonpayable"
-  >;
+  testInsertMod: TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
 
-  testInsertStorage: TypedContractMethod<
-    [leaf: BigNumberish],
-    [bigint],
-    "nonpayable"
-  >;
+  testInsertStorage: TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
 
   testUpdate: TypedContractMethod<
-    [
-      oldLeaf: BigNumberish,
-      newLeaf: BigNumberish,
-      oldIndex: BigNumberish,
-      siblings: BigNumberish[]
-    ],
+    [oldLeaf: BigNumberish, newLeaf: BigNumberish, oldIndex: BigNumberish, siblings: BigNumberish[]],
     [void],
-    "nonpayable"
-  >;
+    'nonpayable'
+  >
 
-  z: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+  z: TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T
 
+  getFunction(nameOrSignature: 'LEVELS'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'ROOTS_CAPACITY'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'currentLeafIndex'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'currentRootIndex'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'filledSubtrees'): TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
+  getFunction(nameOrSignature: 'getLatestRoot'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'hasher'): TypedContractMethod<[], [string], 'view'>
+  getFunction(nameOrSignature: 'isKnownRoot'): TypedContractMethod<[root: BigNumberish], [boolean], 'view'>
+  getFunction(nameOrSignature: 'roots'): TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
+  getFunction(nameOrSignature: 'testInsert'): TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
+  getFunction(nameOrSignature: 'testInsertLoop'): TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
+  getFunction(nameOrSignature: 'testInsertMod'): TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
+  getFunction(nameOrSignature: 'testInsertStorage'): TypedContractMethod<[leaf: BigNumberish], [bigint], 'nonpayable'>
   getFunction(
-    nameOrSignature: "LEVELS"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "ROOTS_CAPACITY"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "currentLeafIndex"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "currentRootIndex"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "filledSubtrees"
-  ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "getLatestRoot"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "hasher"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "isKnownRoot"
-  ): TypedContractMethod<[root: BigNumberish], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "roots"
-  ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "testInsert"
-  ): TypedContractMethod<[leaf: BigNumberish], [bigint], "nonpayable">;
-  getFunction(
-    nameOrSignature: "testInsertLoop"
-  ): TypedContractMethod<[leaf: BigNumberish], [bigint], "nonpayable">;
-  getFunction(
-    nameOrSignature: "testInsertMod"
-  ): TypedContractMethod<[leaf: BigNumberish], [bigint], "nonpayable">;
-  getFunction(
-    nameOrSignature: "testInsertStorage"
-  ): TypedContractMethod<[leaf: BigNumberish], [bigint], "nonpayable">;
-  getFunction(
-    nameOrSignature: "testUpdate"
+    nameOrSignature: 'testUpdate',
   ): TypedContractMethod<
-    [
-      oldLeaf: BigNumberish,
-      newLeaf: BigNumberish,
-      oldIndex: BigNumberish,
-      siblings: BigNumberish[]
-    ],
+    [oldLeaf: BigNumberish, newLeaf: BigNumberish, oldIndex: BigNumberish, siblings: BigNumberish[]],
     [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "z"
-  ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+    'nonpayable'
+  >
+  getFunction(nameOrSignature: 'z'): TypedContractMethod<[arg0: BigNumberish], [bigint], 'view'>
 
-  filters: {};
+  filters: {}
 }

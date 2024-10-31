@@ -7,10 +7,12 @@
     class="btn bg-primary-active-token mx-2"
     on:click={() => {
       goto('/locked/load')
-    }}>Import</button>
+    }}>Import</button
+  >
   <button
     class="btn bg-primary-active-token mx-2"
     on:click={() => {
       goto('/locked/create')
-    }}>Create New</button>
+    }}>Create New</button
+  >
 </div>

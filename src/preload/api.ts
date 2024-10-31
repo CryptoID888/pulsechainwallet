@@ -9,29 +9,25 @@ import type {
 
 export type Key = null | string | string[]
 
-const proxy = <K extends keyof APICommon>(key: K): Invoker<K> => (
-  async (...args: Parameters<APICommon[K]>) => (
+const proxy =
+  <K extends keyof APICommon>(key: K): Invoker<K> =>
+  async (...args: Parameters<APICommon[K]>) =>
     await ipcRenderer.invoke(key, ...args)
-  )
-)
 
-const proxyDefaultNull = <K extends keyof APICommon>(key: K): InvokerDefaultNull<K> => (
-  async (...args: Parameters<APICommon[K]>) => (
+const proxyDefaultNull =
+  <K extends keyof APICommon>(key: K): InvokerDefaultNull<K> =>
+  async (...args: Parameters<APICommon[K]>) =>
     await ipcRenderer.invoke(key, ...args)
-  )
-)
 
-const proxyRequireType = <K extends keyof APICommon, T = any>(key: K): InvokerRequireType<K, T> => (
-  async <R extends T>(...args: Parameters<APICommon[K]>) => (
-    await ipcRenderer.invoke(key, ...args) as R
-  )
-)
+const proxyRequireType =
+  <K extends keyof APICommon, T = unknown>(key: K): InvokerRequireType<K, T> =>
+  async <R extends T>(...args: Parameters<APICommon[K]>) =>
+    (await ipcRenderer.invoke(key, ...args)) as R
 
-const proxyRequireTypeDefaultNull = <K extends keyof APICommon, T = any>(key: K): InvokerRequireTypeDefaultNull<K> => (
-  async <R extends T>(...args: Parameters<APICommon[K]>) => (
-    await ipcRenderer.invoke(key, ...args) as R | null
-  )
-)
+const proxyRequireTypeDefaultNull =
+  <K extends keyof APICommon, T = unknown>(key: K): InvokerRequireTypeDefaultNull<K> =>
+  async <R extends T>(...args: Parameters<APICommon[K]>) =>
+    (await ipcRenderer.invoke(key, ...args)) as R | null
 
 // Custom APIs for renderer
 export const api = {
@@ -56,6 +52,7 @@ export const api = {
     restart: proxy('indexer:restart'),
     query: proxy('indexer:query'),
     queryAllPoolsUnderChainId: proxy('indexer:query:allPoolsUnderChainId'),
+    queryAllDepositsFromCommitments: proxy('indexer:query:allDepositsFromCommitments'),
   },
   config: {
     get: proxy('config:get'),

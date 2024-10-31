@@ -1,14 +1,13 @@
 import _ from 'lodash'
-import { ipcMain } from 'electron'
 // for some reason i couldn't get this package to work appropriately. kept getting
 // errors about the file not being a database file.
 import BetterSqlite3, { SqliteError } from 'better-sqlite3-multiple-ciphers'
 // import BetterSqlite3 from 'better-sqlite3'
 
-import { paths } from '$main/paths';
-import { AllQueryKeys, backendOnlyQueries, queries, type QueryKeys } from '$common/sql'
-import * as fs from 'fs';
-import path from 'path';
+import { paths } from '$main/paths'
+import { type AllSQLQueryKeys, backendOnlyQueries, queries, type SQLQueryKeys } from '$common/sql'
+import * as fs from 'fs'
+import path from 'path'
 
 // best not to export this and force everything to go through the query function
 // so that this file can control the migration process
@@ -18,18 +17,16 @@ fs.mkdirSync(path.dirname(paths.db), { recursive: true })
 let db: BetterSqlite3.Database | null = null
 
 // all prepared queries against the current db
-let preparedQueries: null | Record<QueryKeys, BetterSqlite3.Statement> = null
+let preparedQueries: null | Record<SQLQueryKeys, BetterSqlite3.Statement> = null
 
 import walletMigrationUp from './migrations/V000__wallet.up.sql?asset'
 import accountMigrationUp from './migrations/V001__account.up.sql?asset'
 import transactionMigrationUp from './migrations/V002__chain-transaction.up.sql?asset'
 import contactMigrationUp from './migrations/V003__contact.up.sql?asset'
 import proofMigrationUp from './migrations/V004__proof.up.sql?asset'
-import { Account, InsertableWalletMetadata, WalletMetadata } from '$common/wallets';
-import { Hex } from 'viem';
-import { setTimeout } from 'timers/promises';
-import type { InsertableProof } from '$common/pools';
-import { handle } from '$main/ipc';
+import { setTimeout } from 'timers/promises'
+import { handle } from '$main/ipc'
+import { StatementParams } from '$common/types'
 
 const migrationsUp = [
   walletMigrationUp,
@@ -39,14 +36,13 @@ const migrationsUp = [
   proofMigrationUp,
 ]
 
-const migrate = (db: BetterSqlite3.Database, migrationPaths: string[]) => (
+const migrate = (db: BetterSqlite3.Database, migrationPaths: string[]) =>
   db!.transaction((migrationPaths: string[]) => {
     for (const migration of migrationPaths) {
       const contents = fs.readFileSync(migration)
       db!.prepare(contents.toString()).run()
     }
   })(migrationPaths)
-)
 
 const createDb = (pass: Buffer) => {
   const d = BetterSqlite3(paths.db, {
@@ -85,7 +81,7 @@ const rekey = async (d: BetterSqlite3.Database, key: Buffer, newKey: Buffer) => 
   // another solution would be to simply keep trying, on a delay, to re-create the db
   await setTimeout(1000)
   let err: SqliteError | null = null
-  let start = Date.now()
+  const start = Date.now()
   do {
     err = null
     try {
@@ -95,16 +91,19 @@ const rekey = async (d: BetterSqlite3.Database, key: Buffer, newKey: Buffer) => 
       err = e as SqliteError
       setTimeout(1_000)
     }
-  } while (start + 5 * 1_000 < Date.now());
+  } while (start + 5 * 1_000 < Date.now())
   throw err
 }
 
 const prepare = (db: BetterSqlite3.Database) => {
   migrate(db, migrationsUp)
-  return _.mapValues({
-    ...queries,
-    ...backendOnlyQueries,
-  }, (query) => db!.prepare(query))
+  return _.mapValues(
+    {
+      ...queries,
+      ...backendOnlyQueries,
+    },
+    (query) => db!.prepare(query),
+  )
 }
 
 /**
@@ -116,8 +115,9 @@ const prepare = (db: BetterSqlite3.Database) => {
  * @param fn a function to run in a try
  * @returns a true if the fn does not err
  */
-const boolReturn = (fn: (...args: any[]) => Promise<boolean> | boolean) => {
-  return async (...args: any[]) => {
+type BoolReturner = (...args: string[]) => Promise<boolean> | boolean
+const boolReturn = <BR extends BoolReturner>(fn: BR) => {
+  return async (...args: Parameters<BR>) => {
     try {
       return await fn(...args)
     } catch (err) {
@@ -189,39 +189,27 @@ export const password = {
   }),
 }
 
-ipcMain.handle('password:login', (_, pass: string) => {
-  return password.login(pass)
-})
-
+handle('password:login', password.login)
 handle('password:check', password.check)
+handle('password:change', password.change)
+handle('password:logout', password.logout)
 
-ipcMain.handle('password:change', (_, current: string, next: string) => {
-  return password.change(current, next)
-})
-
-ipcMain.handle('password:logout', (_) => {
-  return password.logout()
-})
-
-const statementFromQueryKey = (queryKey: AllQueryKeys) => {
+const statementFromQueryKey = (queryKey: AllSQLQueryKeys) => {
   preparedQueries = preparedQueries || prepare(db!)
-  return preparedQueries[queryKey]
+  return preparedQueries[queryKey] as BetterSqlite3.Statement
 }
 
 const queryCheck = <
   method extends 'run' | 'get' | 'all',
-  T = any,
-  R = method extends 'run'
-  ? BetterSqlite3.RunResult
-  : method extends 'get'
-  ? T | null
-  : T[]
->(fn: (...args: any[]) => R) => {
-  return <T, R = method extends 'run'
-    ? BetterSqlite3.RunResult
-    : method extends 'get'
-    ? T | null
-    : T[]>(queryKey: AllQueryKeys, params: any[] = []) => {
+  T = unknown,
+  R = method extends 'run' ? BetterSqlite3.RunResult : method extends 'get' ? T | null : T[],
+>(
+  fn: (stmt: BetterSqlite3.Statement, ...args: StatementParams[]) => R,
+) => {
+  return <U = T, R = method extends 'run' ? BetterSqlite3.RunResult : method extends 'get' ? U | null : U[]>(
+    queryKey: AllSQLQueryKeys,
+    params: Parameters<BetterSqlite3.Statement['run']> = [],
+  ) => {
     const stmt = statementFromQueryKey(queryKey)
     try {
       return fn(stmt, params) as unknown as R
@@ -234,37 +222,39 @@ const queryCheck = <
 }
 
 export const query = {
-  run: queryCheck<'run'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
-    return stmt.run(...params) as I
+  run: queryCheck<'run'>(
+    <I extends BetterSqlite3.RunResult>(stmt: BetterSqlite3.Statement, params: StatementParams = []) => {
+      return stmt.run(...params) as I
+    },
+  ),
+  get: queryCheck<'get'>((stmt: BetterSqlite3.Statement, params: StatementParams = []) => {
+    return stmt.get(...params)
   }),
-  get: queryCheck<'get'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
-    return stmt.get(...params) as I | null
-  }),
-  all: queryCheck<'all'>(<I>(stmt: BetterSqlite3.Statement, params: any[] = []) => {
-    return stmt.all(...params) as I[]
+  all: queryCheck<'all'>((stmt: BetterSqlite3.Statement, params: StatementParams = []) => {
+    return stmt.all(...params)
   }),
 }
 
-const onlyFrontend = (queryKey: AllQueryKeys) => {
+const onlyFrontend = (queryKey: AllSQLQueryKeys) => {
   if (!(queryKey in queries)) {
     throw new Error('This query is not available on the frontend')
   }
 }
 
-ipcMain.handle("sql:run", async (_event: Electron.IpcMainInvokeEvent, queryKey: QueryKeys, params: any[]) => {
+handle('sql:run', async (queryKey: SQLQueryKeys, ...params: StatementParams[]) => {
   onlyFrontend(queryKey)
-  return query.run(queryKey, params)
-});
+  return query.run(queryKey, ...params)
+})
 
-ipcMain.handle("sql:get", async (_event: Electron.IpcMainInvokeEvent, queryKey: QueryKeys, params: any[]) => {
+handle('sql:get', async (queryKey: SQLQueryKeys, ...params: StatementParams[]) => {
   onlyFrontend(queryKey)
-  return query.get(queryKey, params)
-});
+  return query.get(queryKey, ...params)
+})
 
-ipcMain.handle("sql:all", async (_event: Electron.IpcMainInvokeEvent, queryKey: QueryKeys, params: any[]) => {
+handle('sql:all', async (queryKey: SQLQueryKeys, ...params: StatementParams[]) => {
   onlyFrontend(queryKey)
-  return query.all(queryKey, params)
-});
+  return query.all(queryKey, ...params)
+})
 
 type Task = {
   up: () => void
@@ -287,63 +277,8 @@ export const addSetupTask = (task: Task) => {
 //
 // the unique characteristic about these transactions is that they first return a function as they are being prepared
 //
-type VariableArgFunction = (...params: any[]) => unknown;
-type ArgumentTypes<F extends VariableArgFunction> = F extends (...args: infer A) => unknown ? A : never;
-const futureTransaction = <T extends VariableArgFunction, P extends ArgumentTypes<T>>(fn: T) => {
+type VariableArgFunction = <T extends unknown[] = []>(...params: T) => unknown
+type ArgumentTypes<F extends VariableArgFunction> = F extends (...args: infer A) => unknown ? A : never
+export const futureTransaction = <T extends VariableArgFunction, P extends ArgumentTypes<T>>(fn: T) => {
   return (...args: P) => (db!.transaction(fn) as BetterSqlite3.Transaction<T>)(...args)
-}
-
-export const transactions = {
-  addWallet: futureTransaction((
-    wallet: InsertableWalletMetadata,
-    accounts: Account[] = [],
-  ) => {
-    const result = query.get<{ count: number }>('WALLET_COUNT', [])
-    if (!result) {
-      throw new Error('no result from WALLET_COUNT')
-    }
-    const { count } = result
-    const w = { ...wallet, user_order: count } as WalletMetadata
-    query.run('WALLET_INSERT', [w])
-    accounts.map((account) => query.run('ACCOUNT_INSERT', [{
-      ...account,
-      // this is because the db does not actually understand boolean types
-      added: account.added ? 1 : 0,
-    }]))
-    return count
-  }),
-
-  nullifyAndSetAdded: futureTransaction((
-    walletId: Hex,
-    added: number[],
-  ) => {
-    query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
-    added.map((i) => query.run<Account>('ACCOUNT_SET_ADDED', [{
-      wallet_id: walletId,
-      address_index: i,
-    }]))
-  }),
-
-  insertProofs: futureTransaction((proofs: InsertableProof[]) => {
-    proofs.map((proof) => query.run('PROOF_INSERT', [proof]))
-  }),
-
-  sendWork: futureTransaction(async (
-    poolId: string, leafIndex: number,
-    fn: () => Promise<Hex>,
-  ) => {
-    // run a query locally first to reduce the chance of
-    // local failing after the work has been sent
-    query.run('MARK_PROOF_AS_BROADCASTED', [{
-      pool_id: poolId,
-      leaf_index: leafIndex,
-    }])
-    const id = await fn()
-    query.run('UPDATE_MSG_ID', [{
-      pool_id: poolId,
-      leaf_index: leafIndex,
-      message_hash: id,
-    }])
-    return id
-  }),
 }

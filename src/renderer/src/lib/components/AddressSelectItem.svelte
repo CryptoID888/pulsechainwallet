@@ -51,6 +51,7 @@
           address: contact.address,
           name: name,
           note: null,
-        })}>Select</button>
+        })}>Select</button
+    >
   </div>
 </div>

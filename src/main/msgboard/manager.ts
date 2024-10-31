@@ -1,14 +1,9 @@
 import { JsonRpcProvider } from 'ethers'
 import * as msgboard from '@pulsechain/msgboard'
-import workerpool from 'workerpool'
+
 import nodeWorker from '$main/worker?nodeWorker'
 import type { ServiceWorkerMessage } from '$common/types'
 import type { ChainIds } from '$common/config'
-
-// make this dependent on config so that user can control timeout
-export let pool = workerpool.pool({
-  workerTerminateTimeout: 120_000,
-})
 
 export const cancel = async (reg: ServiceWorkerRegistration) => {
   reg.active?.postMessage(
@@ -64,38 +59,40 @@ export const doWork = async ({
       rejected()
     },
     start: async () => {
-      // const { port1, port2 } = new MessageChannelMain()
       const worker = nodeWorker({
         workerData: initMsg,
       })
       const eventHandlers = {
-        logger: (a: { log: string, args: unknown[] }) => {
+        logger: (a: { log: string; args: unknown[] }) => {
           logger?.(a.log, a.args)
         },
-        progress: (msg: object) => {
+        progress: (msg: msgboard.WorkResultObject) => {
           if (cancelled) {
             return
           }
-          const work = msgboard.Work.fromObject(msg as msgboard.WorkResultObject)
+          const work = msgboard.Work.fromObject(msg)
           progress(work)
         },
-        complete: (msg: object) => {
+        complete: (msg: msgboard.WorkResultObject) => {
           if (cancelled) {
             return
           }
-          const work = msgboard.Work.fromObject(msg as msgboard.WorkResultObject)
+          const work = msgboard.Work.fromObject(msg)
           complete(work)
         },
-      }
+      } as const
       worker.on('message', (msg) => {
         const { type, work } = msg as {
-          type: string
-          work: ServiceWorkerMessage
+          type: 'logger' | 'progress' | 'complete'
+          work: msgboard.WorkResultObject
+        }
+        if (type === 'logger') {
+          return eventHandlers.logger(work as unknown as Parameters<typeof eventHandlers.logger>[0])
         }
         eventHandlers[type]?.(work)
       })
       worker.postMessage(initMsg)
       return worker
-    }
+    },
   }
 }

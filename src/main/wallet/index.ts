@@ -1,9 +1,32 @@
-import { concatBytes, createWalletClient, HDAccount, Hex, hexToBytes, isHex, keccak256, PrivateKeyAccount, SendTransactionParameters, stringToBytes, toHex, type PublicClient } from 'viem'
+import {
+  concatBytes,
+  createWalletClient,
+  HDAccount,
+  type Hex,
+  hexToBytes,
+  isHex,
+  keccak256,
+  PrivateKeyAccount,
+  SendTransactionParameters,
+  stringToBytes,
+  toHex,
+  type PublicClient,
+} from 'viem'
 import { mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
-import type { NonceData, InsertableWalletMetadata, Phrase, PK, PrivateWalletInfo, WalletMetadata, Account, UpdateableWalletMetadata } from '$common/wallets'
-import { transactions, password, query } from '$main/sql'
+import type {
+  NonceData,
+  InsertableWalletMetadata,
+  Phrase,
+  PK,
+  PrivateWalletInfo,
+  WalletMetadata,
+  Account,
+  UpdateableWalletMetadata,
+} from '$common/wallets'
+import { password, query } from '$main/sql'
+import { transactions } from '$main/sql/transactions'
 import { paths, PathTypes } from '$common/path'
-import { chainIdToChain, getPublicClient, transportByChain } from '$main/chain';
+import { chainIdToChain, getPublicClient, transportByChain } from '$main/chain'
 import { config } from '$main/config'
 import { ChainIds } from '$common/config'
 import { handle } from '$main/ipc'
@@ -35,7 +58,11 @@ export const walletMetadata = ($wallet: WalletMetadata, index: number) => {
   } as const
 }
 
-const deriveAccountFromSecret = (pathType: PathTypes, wallet: PrivateWalletInfo, index: number): HDAccount | PrivateKeyAccount => {
+const deriveAccountFromSecret = (
+  pathType: PathTypes,
+  wallet: PrivateWalletInfo,
+  index: number,
+): HDAccount | PrivateKeyAccount => {
   if (pathType === PathTypes.UNKNOWN) {
     const pkWallet = wallet as PK
     const account = privateKeyToAccount(pkWallet)
@@ -60,10 +87,9 @@ export const methods = {
     const pk = secret as Hex
     const phrase = secret as string
     const type = pathType === PathTypes.UNKNOWN ? 'pk' : 'phrase'
-    const secretInput = isPK ? concatBytes([
-      stringToBytes('pk', { size: 32 }),
-      hexToBytes(pk),
-    ]) : concatBytes(phrase.split(' ').map((word) => stringToBytes(word, { size: 32 })))
+    const secretInput = isPK
+      ? concatBytes([stringToBytes('pk', { size: 32 }), hexToBytes(pk)])
+      : concatBytes(phrase.split(' ').map((word) => stringToBytes(word, { size: 32 })))
     const id = keccak256(secretInput)
     const encrypted = safe.encrypt(secret)
     const addedSet = new Set([0])
@@ -103,10 +129,12 @@ export const methods = {
     return query.get<WalletMetadata>('WALLET_GET', [{ id }])
   },
   account: async (id: Hex, addressIndex: number) => {
-    return query.get<Account>('ACCOUNT_GET', [{
-      wallet_id: id,
-      address_index: addressIndex,
-    }])
+    return query.get<Account>('ACCOUNT_GET', [
+      {
+        wallet_id: id,
+        address_index: addressIndex,
+      },
+    ])
   },
   accounts: async () => {
     return query.all<Account>('ACCOUNT_ALL', [])
@@ -125,9 +153,7 @@ export const methods = {
     const revealed = safe.decrypt($wallet.encrypted)
     if (addressIndex === undefined) {
       // returning the secret!!!
-      return isHex(revealed)
-        ? (revealed as PK)
-        : (revealed as Phrase)
+      return isHex(revealed) ? (revealed as PK) : (revealed as Phrase)
     }
     // the encrypted secret on the wallet is the only secret we have
     if (isHex(revealed)) {
@@ -152,7 +178,12 @@ export const methods = {
     transactions.nullifyAndSetAdded(walletId, added)
     return added
   },
-  sendTransaction: async (chainId: ChainIds, accountInput: Account, input: SendTransactionParameters, action: string) => {
+  sendTransaction: async (
+    chainId: ChainIds,
+    accountInput: Account,
+    input: SendTransactionParameters,
+    action: string,
+  ) => {
     const seed = await query.get<Wallet>('WALLET_GET', [{ id: accountInput.wallet_id }])
     if (!seed) {
       throw new Error('seed')
@@ -176,11 +207,13 @@ export const methods = {
       transport: transportByChain(chain),
     })
     const hash = await walletClient.sendTransaction(input)
-    query.run('CHAIN_TRANSACTION_INSERT', [{
-      hash,
-      chain_id: chainId,
-      action,
-    }])
+    query.run('CHAIN_TRANSACTION_INSERT', [
+      {
+        hash,
+        chain_id: chainId,
+        action,
+      },
+    ])
     return hash
   },
   estimateGas: async (chainId: ChainIds, input: SendTransactionParameters) => {

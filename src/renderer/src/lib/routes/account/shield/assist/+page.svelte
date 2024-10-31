@@ -1,5 +1,4 @@
 <script lang="ts">
-  import _ from 'lodash'
   import Crumb from '$lib/components/Crumb.svelte'
   import { crumbs } from '$lib/navigation'
   import SendTransaction from '$lib/components/SendTransaction.svelte'

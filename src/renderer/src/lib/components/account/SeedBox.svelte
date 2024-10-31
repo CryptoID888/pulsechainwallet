@@ -9,4 +9,5 @@
 <span
   class="flex size-7 items-center justify-center rounded border-2 text-center"
   class:border-primary-200={variant === 'filled'}
-  class:border-primary-500={variant === 'soft'}>{type === 'phrase' ? 'A' : emptyHex}</span>
+  class:border-primary-500={variant === 'soft'}>{type === 'phrase' ? 'A' : emptyHex}</span
+>

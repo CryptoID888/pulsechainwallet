@@ -8,7 +8,7 @@ import plsx from '$lib/assets/tokens/0x95B303987A60C71504D99Aa1b13B4DA07b0790ab.
 import type { Erc20Token } from '$common/token'
 import { derived } from 'svelte/store'
 import { chain } from './chain-state'
-import pulsechainTestnetV4Logo from '$lib/assets/chains/0x3af.png';
+import pulsechainTestnetV4Logo from '$lib/assets/chains/0x3af.png'
 
 export const whitelistedERC20: Erc20Token[] = [
   {

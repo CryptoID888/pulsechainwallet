@@ -1,20 +1,23 @@
+import * as msgboard from '@pulsechain/msgboard'
+import { getContract, toHex, type Hex } from 'viem'
+import { Worker } from 'worker_threads'
+import { get } from 'svelte/store'
+
+import type { MsgboardProvider } from '$common/types'
 import { query } from '$main/indexer'
 import * as sql from '$main/sql'
-import { getContract, type Hex } from 'viem'
 import { chainIdToChain, getPublicClient } from '$main/chain/mappings'
-import * as msgboard from '@pulsechain/msgboard'
 import { native, type Proof, verifyWithdrawal } from '$common/pools'
 import type { ChainIds } from '$common/config'
-import { doWork } from './manager'
+import { doWork } from '$main/msgboard/manager'
 import { sqliteDate } from '$common/sql'
 import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
 import { emit, handle } from '$main/ipc'
-import _ from 'lodash'
 import { loopWork, memoizeWithTTL, truncateHash, log } from '$common/utils'
-import { Worker } from 'worker_threads'
 import { proofToWithdrawalStruct } from '$main/pools'
 import { config } from '$main/config'
-import { get } from 'svelte/store'
+import { transactions } from '$main/sql/transactions'
+import _ from 'lodash'
 
 const board = (chainId: ChainIds) => {
   const chain = chainIdToChain.get(chainId)
@@ -23,7 +26,7 @@ const board = (chainId: ChainIds) => {
     return
   }
   const provider = getPublicClient(chain)
-  return new msgboard.MsgBoard(msgboard.wrap1193(provider as any))
+  return new msgboard.MsgBoard(msgboard.wrap1193(provider as MsgboardProvider))
 }
 
 const updateWorkStateLog = (pool_id: Hex, leaf_index: number, reason: string) => {
@@ -44,22 +47,24 @@ const startWork = async (proof: Proof) => {
     if (!workCache.has(key)) {
       return
     }
-    log('working pool=%o leaf=%o block=%o nonce=%o',
-      truncateHash(poolId), leafIndex, e.block.number, e.nonce,
-    )
-    sql.query.run('MARK_PROOF_AS_WORKING', [{
-      pool_id: poolId,
-      leaf_index: leafIndex,
-    }])
+    log('working pool=%o leaf=%o block=%o nonce=%o', truncateHash(poolId), leafIndex, e.block.number, e.nonce)
+    sql.query.run('MARK_PROOF_AS_WORKING', [
+      {
+        pool_id: poolId,
+        leaf_index: leafIndex,
+      },
+    ])
   }
   const withdrawalStruct = await proofToWithdrawalStruct(proof)
   const exists = await nullifierExists(poolId, withdrawalStruct.nullifier)
   if (exists) {
     updateWorkStateLog(poolId, leafIndex, 'nullifier exists')
-    sql.query.run('MARK_PROOF_AS_MINED', [{
-      pool_id: poolId,
-      leaf_index: leafIndex,
-    }])
+    sql.query.run('MARK_PROOF_AS_MINED', [
+      {
+        pool_id: poolId,
+        leaf_index: leafIndex,
+      },
+    ])
     return
   }
   const calldata = verifyWithdrawal.encode(withdrawalStruct)
@@ -71,17 +76,24 @@ const startWork = async (proof: Proof) => {
     progress: markWorking,
     cancel: async () => {
       workCache.delete(key)
-      sql.query.run('UPDATE_WORK_STATE', [{
-        pool_id: poolId,
-        leaf_index: leafIndex,
-        work_state: 'cancelled',
-      }])
+      sql.query.run('UPDATE_WORK_STATE', [
+        {
+          pool_id: poolId,
+          leaf_index: leafIndex,
+          work_state: 'cancelled',
+        },
+      ])
     },
     complete: async (work: msgboard.Work) => {
-      log('complete hash=%o@%o nonce=%o pool=%o leaf=%o',
-        truncateHash(work.hash), work.block.number, work.nonce, truncateHash(poolId), leafIndex,
+      log(
+        'complete hash=%o@%o nonce=%o pool=%o leaf=%o',
+        truncateHash(work.hash),
+        work.block.number,
+        work.nonce,
+        truncateHash(poolId),
+        leafIndex,
       )
-      await sql.transactions.sendWork(poolId, leafIndex, async () => {
+      await transactions.sendWork(poolId, leafIndex, async () => {
         return await b.add(work.toRLP())
       })
       workCache.delete(key)
@@ -91,19 +103,23 @@ const startWork = async (proof: Proof) => {
   // this allows us to cancel the work if the root updates
   workCache.set(key, worker)
   updateWorkStateLog(poolId, leafIndex, 'starting work')
-  sql.query.run('MARK_PROOF_WORK_START', [{
-    pool_id: poolId,
-    leaf_index: leafIndex,
-    calldata,
-  }])
+  sql.query.run('MARK_PROOF_WORK_START', [
+    {
+      pool_id: poolId,
+      leaf_index: leafIndex,
+      calldata,
+    },
+  ])
 }
 
 const resetWorkState = (pool_id: Hex, leaf_index: number, reason: string) => {
   updateWorkStateLog(pool_id, leaf_index, reason)
-  sql.query.run('RESET_WORK_STATE', [{
-    pool_id,
-    leaf_index,
-  }])
+  sql.query.run('RESET_WORK_STATE', [
+    {
+      pool_id,
+      leaf_index,
+    },
+  ])
 }
 
 const fixupFirst = async (loopState: LoopState) => {
@@ -132,7 +148,9 @@ const fixupFirst = async (loopState: LoopState) => {
             reset(pool_id, leaf_index, 'work block number too old')
           }
           const root = await getRoot(chain_id as ChainIds, pool_id)
-          const { args: [parsedCalldata] } = verifyWithdrawal.decode(work.data)
+          const {
+            args: [parsedCalldata],
+          } = verifyWithdrawal.decode(work.data)
           if (parsedCalldata.root !== root) {
             reset(pool_id, leaf_index, 'work root mismatch')
           }
@@ -140,17 +158,13 @@ const fixupFirst = async (loopState: LoopState) => {
         }
       }
       // let the work propagate through the network before claiming that it is missing
-      if (+(new Date(sqliteDate(last_work_broadcast_time!))) > +(new Date()) - 5 * 1_000) {
+      if (+new Date(sqliteDate(last_work_broadcast_time!)) > +new Date() - 5 * 1_000) {
         continue
       }
       reset(pool_id, leaf_index, 'work missing')
     } else if (work_state === 'working') {
       // do nothing
-      const {
-        pool_id,
-        leaf_index,
-        last_work_activity_time,
-      } = proof
+      const { pool_id, leaf_index, last_work_activity_time } = proof
       // check that the last_work_activity_time is recent
       // if it's not recent, then we need to mark it as failed
       // if it's recent, then we need to continue
@@ -178,7 +192,7 @@ const waitTime = {
   LONG: 30_000,
 } as const
 
-type WaitTime = typeof waitTime[keyof typeof waitTime]
+type WaitTime = (typeof waitTime)[keyof typeof waitTime]
 
 const latestBlock = memoizeWithTTL(
   (chainId: ChainIds) => chainId,
@@ -188,51 +202,64 @@ const latestBlock = memoizeWithTTL(
     return client.getBlock({
       blockTag: 'latest',
     })
-  }, 10_000)
-const msgboardContents = memoizeWithTTL((chainId: ChainIds) => chainId,
+  },
+  10_000,
+)
+const msgboardContents = memoizeWithTTL(
+  (chainId: ChainIds) => chainId,
   async (chainId: ChainIds) => {
     return board(chainId)!.content()
-  }, 30_000)
-const sortMap = (map: Map<any, any>) => {
-  return new Map([...map.entries()].sort(([a], [b]) => a - b))
+  },
+  30_000,
+)
+const sortMap = <K extends string | number | bigint, V = unknown>(map: Map<K, V>) => {
+  return new Map([...map.entries()].sort(([a], [b]) => (BigInt(toHex(a)) > BigInt(toHex(b)) ? 1 : -1)))
 }
-const serializeMap = (map: Map<any, any>) => {
+const serializeMap = (map: Map<unknown, unknown>) => {
   return JSON.stringify([...map.entries()].map(([k, v]) => [k, v]))
 }
-const logWorkState = memoizeWithTTL((groupedStatus: Map<string, number[]>) => serializeMap(sortMap(groupedStatus)),
+const logWorkState = memoizeWithTTL(
+  (groupedStatus: Map<string, number[]>) => serializeMap(sortMap(groupedStatus)),
   (groupedStatus: Map<string, number[]>) => {
     log('statuses=%o', groupedStatus)
-  }, 60 * 60 * 1_000)
-const getRoot = memoizeWithTTL((chainId: ChainIds, poolId: Hex) => `${chainId}-${poolId}`,
+  },
+  60 * 60 * 1_000,
+)
+const getRoot = memoizeWithTTL(
+  (chainId: ChainIds, poolId: Hex) => `${chainId}-${poolId}`,
   async (chainId: ChainIds, poolId: Hex) => {
-    const { privacyPools: { items: [pool] } } = await query('POOL_BY_ID', { poolId })
+    const {
+      privacyPools: {
+        items: [pool],
+      },
+    } = await query('POOL_BY_ID', { poolId })
     const contract = getContract({
       address: pool.address as Hex,
       client: getPublicClient(chainIdToChain.get(chainId)!),
       abi: PrivacyPoolAbi,
     })
     return contract.read.getLatestRoot()
-  }, 10_000)
+  },
+  10_000,
+)
 
 type LoopState = {
-  now: Date;
-  outstanding: number;
+  now: Date
+  outstanding: number
 }
 
 const stateHandler = {
-  working: async (_proof: Proof, _ls: LoopState) => {
+  working: async () => {
+    // nothing to do while it is working
     return waitTime.SHORT
   },
   broadcasted: async (proof: Proof, state: LoopState) => {
-    const {
-      message_hash,
-      pool_id,
-      leaf_index,
-      last_work_broadcast_time,
-    } = proof
+    const { message_hash, pool_id, leaf_index, last_work_broadcast_time } = proof
     const calldata = proof.calldata as Hex
     const poolId = pool_id as Hex
-    const { args: [parsedCalldata] } = verifyWithdrawal.decode(calldata)
+    const {
+      args: [parsedCalldata],
+    } = verifyWithdrawal.decode(calldata)
     // check that the nullifier is not on the pool
     // check that the last_work_broadcast_time is recent
     // if it's not recent, then we need to mark it as failed
@@ -249,11 +276,13 @@ const stateHandler = {
     const nullified = await contract.read.nullifiers([parsedCalldata.nullifier])
     if (nullified) {
       // nullifier is on the pool, mark as failed
-      sql.query.run('UPDATE_WORK_STATE', [{
-        pool_id: poolId,
-        leaf_index,
-        work_state: 'mined',
-      }])
+      sql.query.run('UPDATE_WORK_STATE', [
+        {
+          pool_id: poolId,
+          leaf_index,
+          work_state: 'mined',
+        },
+      ])
       updateWorkStateLog(poolId, leaf_index, 'mark as mined')
       return null
     }
@@ -297,38 +326,6 @@ const stateHandler = {
     return null
   },
   waiting: async (proof: Proof) => {
-    // const {
-    //   // message_hash,
-    //   pool_id,
-    //   leaf_index,
-    //   // last_work_activity_time,
-    // } = proof
-    // const calldata = proof.calldata as Hex
-    // const { args: [parsedCalldata] } = verifyWithdrawal.decode(calldata)
-    // const poolId = pool_id as Hex
-    // const [
-    //   // depositQuery,
-    //   withdrawalQuery,
-    // ] = await Promise.all([
-    // query('DEPOSIT_AT', {
-    //   poolId,
-    //   leafIndex: leaf_index,
-    // }),
-    // query('WITHDRAWAL_AT', {
-    //   poolId,
-    //   nullifier: parsedCalldata.nullifier,
-    // }),
-    // ])
-    // const withdrawal = withdrawalQuery.withdrawals.items[0]
-    // if (withdrawal) {
-    //   // mark as finished
-    //   sql.query.run('MARK_PROOF_AS_MINED', [{
-    //     pool_id: poolId,
-    //     leaf_index,
-    //   }])
-    //   // check the next proof
-    //   return null
-    // }
     await startWork(proof)
     return waitTime.SHORT
   },
@@ -344,10 +341,11 @@ const nullifierExists = async (poolId: Hex, nullifier: Hex) => {
 
 const groupedStatusCounts = (proofs: Proof[]) => {
   return new Map(
-    _(proofs).groupBy('work_state')
+    _(proofs)
+      .groupBy('work_state')
       .entries()
       .map(([k, list]) => [k, list.map(({ leaf_index }) => leaf_index)] as const)
-      .value()
+      .value(),
   )
 }
 
@@ -367,7 +365,7 @@ export const ensureWorkIsBeingPerformed = async (): Promise<WaitTime> => {
   }
   for (const proof of proofs) {
     const { work_state } = proof
-    const shouldWait = await stateHandler[work_state]?.(proof, state) as null | WaitTime
+    const shouldWait = (await stateHandler[work_state]?.(proof, state)) as null | WaitTime
     if (shouldWait) {
       return shouldWait
     }
@@ -429,14 +427,18 @@ handle('msgboard:pool:contents', async (chainId: ChainIds) => {
   ])
   const pools = poolsResponse.privacyPools.items
   const poolIds = pools.map((pool) => pool.id)
-  const messages = Object.entries(content).filter(([poolId, _]) => poolIds.includes(poolId))
-  const flattened = _(messages).flatMap(([_, messages]) => Object.values(messages)).sortBy([
-    (m) => -m.blockNumber,
-    (m) => m.hash,
-  ]).uniqBy((m) => {
-    const { args: [parsedCalldata] } = verifyWithdrawal.decode(m.data)
-    return parsedCalldata.nullifier
-  }).reverse().value()
+  const messages = Object.entries(content).filter(([poolId]) => poolIds.includes(poolId))
+  const flattened = _(messages)
+    .flatMap(([, messages]) => Object.values(messages))
+    .sortBy([(m) => -m.blockNumber, (m) => m.hash])
+    .uniqBy((m) => {
+      const {
+        args: [parsedCalldata],
+      } = verifyWithdrawal.decode(m.data)
+      return parsedCalldata.nullifier
+    })
+    .reverse()
+    .value()
   // do more validation here later
   return {
     messages: flattened,

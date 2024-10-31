@@ -97,12 +97,14 @@
       {accounts}
       walletId={selectedWallet.id}
       currentAddress={$currentAccount.address}
-      on:select={selectAddress} />
+      on:select={selectAddress}
+    />
   {:else}
     <Portal target="#sticky-portal">
       <div class="flex w-full bg-primary-50 px-4 py-2">
         <button type="button" class="variant-filled-primary btn w-full" on:click={navToAddAddresses}
-          >Add Addresses</button>
+          >Add Addresses</button
+        >
       </div>
     </Portal>
   {/if}

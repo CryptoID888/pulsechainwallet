@@ -1,9 +1,9 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import type { API } from './api'
 
-declare module "*.json" {
-  const value: any;
-  export default value;
+declare module '*.json' {
+  const value: unknown
+  export default value
 }
 
 declare global {

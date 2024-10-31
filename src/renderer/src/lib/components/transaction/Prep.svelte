@@ -25,7 +25,8 @@
   {@const contact = $contactByAddress.get(fromAddress)}
   <div class="flex w-full flex-col">
     <span class="text-sm font-medium italic"
-      >From{#if !!contact}: {contact?.name || ''}{/if}</span>
+      >From{#if !!contact}: {contact?.name || ''}{/if}</span
+    >
     {#if account}
       <AccountSummary {account} />
     {/if}
@@ -35,14 +36,16 @@
 <Portal target="#sticky-portal">
   <div class="flex gap-2 bg-primary-50 px-4 py-2 shadow-inner">
     <button class="variant-filled-primary btn flex w-full opacity-100" on:click={sendTransaction} {disabled}
-      >{sendButtonText}</button>
+      >{sendButtonText}</button
+    >
     <Back let:back>
       <button
         type="button"
         class="variant-outline-primary btn"
         on:click={() => {
           back()
-        }}>Cancel</button>
+        }}>Cancel</button
+      >
     </Back>
   </div>
 </Portal>

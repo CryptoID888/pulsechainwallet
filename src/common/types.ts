@@ -1,5 +1,8 @@
+import type BetterSqlite3 from 'better-sqlite3'
 import type { Hex, Abi, Block, TransactionReceipt, Transaction } from 'viem'
-import type { SeedType } from './wallets'
+import type { wrap1193 } from '@pulsechain/msgboard'
+
+import type { SeedType } from '$common/wallets'
 
 export type Contact = {
   name: string
@@ -57,9 +60,9 @@ export type WithdrawalProofStruct = {
 export type TransactionAction = 'send' | 'shield' | 'swap' | 'approve' | 'stake' | 'unstake' | 'assist' | 'deploy'
 
 export type TransactionData = {
-  transaction: Transaction,
-  receipt: TransactionReceipt | null,
-  block: Block | null,
+  transaction: Transaction
+  receipt: TransactionReceipt | null
+  block: Block | null
 }
 
 export type ChainTransaction = {
@@ -73,3 +76,7 @@ export type Icon = {
   badge: number
   type: SeedType
 }
+
+export type StatementParams = Parameters<BetterSqlite3.Statement['run']>
+
+export type MsgboardProvider = Parameters<typeof wrap1193>[0]

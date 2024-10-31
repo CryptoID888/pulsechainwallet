@@ -30,7 +30,8 @@
           decrementDisabled={power === 0}
           incrementDisabled={power === maxPower}
           on:change={handleIncrement}
-          decrementClass="border-t border-primary-400 rounded-t-none" />
+          decrementClass="border-t border-primary-400 rounded-t-none"
+        />
       </div>
     </div>
     <div class="flex flex-col w-full">
@@ -46,7 +47,8 @@
           pips
           float
           first="label"
-          last="label" />
+          last="label"
+        />
       </div>
     </div>
   </div>

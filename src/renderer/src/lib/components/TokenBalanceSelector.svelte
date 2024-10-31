@@ -1,20 +1,21 @@
 <script lang="ts">
+  import { parseUnits, formatUnits } from 'viem'
+  import { createEventDispatcher } from 'svelte'
+
   import type { Erc20Token } from '$common/token'
-  import { delimiter } from '$lib/modifiers/delimiter'
+  import { delimiter, delimiterRender } from '$lib/modifiers/delimiter'
   import TokenBalance from '$lib/components/TokenBalance.svelte'
   import { currentAccount } from '$lib/wallets'
-  import Unit from './Unit.svelte'
-  import TokenSelector from './TokenSelector.svelte'
+  import Unit from '$lib/components/Unit.svelte'
+  import TokenSelector from '$lib/components/TokenSelector.svelte'
   import { Offsets } from '$lib/unit'
   import { chainIdToChain } from '$lib/chain-state'
-  import { parseUnits, formatUnits } from 'viem'
   import { sanitizeDecimal } from '$lib/number'
-  import PriceFetch from './PriceFetch.svelte'
-  import Number from './Number.svelte'
-  import InfoBubble from './InfoBubble.svelte'
-  import Loading from './Loading.svelte'
-  import StepIncrementor from './StepIncrementor.svelte'
-  import { createEventDispatcher } from 'svelte'
+  import PriceFetch from '$lib/components/PriceFetch.svelte'
+  import Number from '$lib/components/Number.svelte'
+  import InfoBubble from '$lib/components/InfoBubble.svelte'
+  import Loading from '$lib/components/Loading.svelte'
+  import StepIncrementor from '$lib/components/StepIncrementor.svelte'
 
   const oneEther = 10n ** 18n
   const dispatch = createEventDispatcher()
@@ -56,6 +57,7 @@
   let price = oneEther
 
   $: decimals = token.metadata!.decimals || 18
+  $: amount = amountDecimal ? parseUnits(sanitizeDecimal(amountDecimal), decimals) : 0n
   $: if (limit !== null) {
     const sanitizedAmount = amountDecimal ? sanitizeDecimal(amountDecimal) : amountDecimal
     const currentAmount = amountDecimal ? parseUnits(sanitizedAmount, decimals) : 0n
@@ -64,12 +66,12 @@
     }
   }
   $: chainName = chainIdToChain.get(+token.chain.id)!.name
-  $: amount = amountDecimal ? parseUnits(sanitizeDecimal(amountDecimal), decimals) : 0n
   $: decrementDisabled = amount - step < 0n
   $: incrementDisabled = limit !== null && amount + step > limit
   // price is always formatted with 18 decimals when int
   $: totalValueUSD = price * amount
   $: value = parseUnits(sanitizeDecimal(amountDecimal), decimals)
+  $: delimiterConfig = { decimals, min: 0n, max: limit === null ? undefined : limit, step }
 
   const handleTokenChange = (e: CustomEvent<Erc20Token>) => {
     token = e.detail
@@ -91,7 +93,8 @@
             type="button"
             title={maxTitle}
             class="flex flex-row items-center gap-2 px-2 uppercase text-primary-700 hover:text-primary-500"
-            on:click={useMax}>
+            on:click={useMax}
+          >
             <span>Max</span>
             {#if limit !== null}
               <Number x={limit} />
@@ -112,9 +115,10 @@
           name="amount"
           class="flex flex-grow pr-0 text-right"
           disabled={disableInput}
-          use:delimiter={{ decimals, min: 0n, max: limit === null ? undefined : limit, step }}
+          use:delimiter={delimiterRender(() => delimiterConfig)}
           placeholder={decimals !== -window.Number(+offset) ? '0.0' : '0'}
-          bind:value={amountDecimal} />
+          bind:value={amountDecimal}
+        />
         <Unit {token} bind:offset />
         <input class="hidden" type="hidden" id="value" name="value" {value} />
         <slot name="input" {token} {balance} amount={value} />

@@ -20,7 +20,8 @@
     <span
       class="text-sm text-primary-200"
       class:text-primary-200={variant === 'filled'}
-      class:text-primary-800={variant === 'soft'}>
+      class:text-primary-800={variant === 'soft'}
+    >
       <Address address={account?.address} />
       <input type="hidden" id="from-address" name="from-address" value={account && account.address} />
     </span>

@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
+
   import { currentBlock } from '$lib/chain-state'
   import type { Erc20Token } from '$common/token'
-  import _ from 'lodash'
-  import { onMount } from 'svelte'
   import { state } from '$lib/api'
   import { delay } from '$lib/state-delay'
 
@@ -16,7 +16,8 @@
       return () => {}
     }
     let cancelled = false
-    const blockNumber = (BigInt($currentBlock.number) - BigInt(blockOffset)).toString()
+    const num = $currentBlock.number!
+    const blockNumber = BigInt(num) - BigInt(blockOffset)
     state.price(token, blockNumber).then((p) => {
       if (cancelled) return
       if (!p) return

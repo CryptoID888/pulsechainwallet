@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Erc20Token } from '$lib/tokens'
+  import type { Erc20Token } from '$common/token'
   import { Offsets, units } from '$lib/unit'
   import { getDrawerStore } from '@skeletonlabs/skeleton'
   import { writable } from 'svelte/store'

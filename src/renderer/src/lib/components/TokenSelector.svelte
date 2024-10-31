@@ -36,7 +36,8 @@
   type="button"
   {disabled}
   class="token-selector btn flex flex-row items-center rounded-none leading-6 transition-all"
-  on:click={openDrawer}>
+  on:click={openDrawer}
+>
   <TokenWithImage {token} />
   <span class="flex">
     <Icon icon="mdi:chevron-down" height={20} width={20} />

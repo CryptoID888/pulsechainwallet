@@ -21,6 +21,7 @@
         // goto(previous || '/account')
         back()
       }}
-      on:valid-phrase={handleValidPhrase} />
+      on:valid-phrase={handleValidPhrase}
+    />
   </Back>
 </div>

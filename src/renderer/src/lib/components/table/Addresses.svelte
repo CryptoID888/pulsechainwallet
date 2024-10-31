@@ -114,7 +114,8 @@
                     active="bg-primary-500"
                     on:change={(e) => toggleIndexAddition(e, row.address_index)}
                     checked={!!addedInputs[row.address_index]}
-                    size="sm" />
+                    size="sm"
+                  />
                 </span>
               </td>
               <td class="align-middle">
@@ -131,12 +132,14 @@
                   <span
                     class="flex w-full leading-6 focus:outline-none focus:ring-0"
                     contenteditable="true"
-                    on:input={(e) => updateLocalContactName(e, row.address)}>{addressName(row.address)}</span>
+                    on:input={(e) => updateLocalContactName(e, row.address)}>{addressName(row.address)}</span
+                  >
                   <button
                     type="button"
                     class="variant-filled-primary btn size-6 p-1 leading-4"
                     class:hidden={localContactNames[row.address] === undefined}
-                    on:click={() => deleteLocalContactName(row.address)}>&times;</button>
+                    on:click={() => deleteLocalContactName(row.address)}>&times;</button
+                  >
                 </div>
               </td>
             </tr>

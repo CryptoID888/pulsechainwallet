@@ -12,6 +12,7 @@
   import { getDrawerStore } from '@skeletonlabs/skeleton'
   import { wallets } from '$lib/wallets'
   import * as api from '$lib/api'
+  import { contactByAddress } from '$lib/contacts'
 
   export let walletId!: Hex
   export let currentAddress!: Hex
@@ -55,14 +56,16 @@
     <li class="flex w-full items-center justify-stretch rounded bg-white shadow">
       <Hover let:hovering>
         {@const selected = !!currentAddress && getAddress(currentAddress) === getAddress(derived.address)}
+        {@const contact = $contactByAddress.get(derived.address)}
         <button
           type="button"
           class="flex w-full flex-row items-center justify-between px-2 py-1"
-          on:click={() => selectAddress(derived)}>
+          on:click={() => selectAddress(derived)}
+        >
           <div class="flex w-full flex-row items-center justify-start gap-2">
             <SeedBox variant="soft" type={wallet?.type} />
             <div class="flex flex-col justify-start text-left leading-4">
-              <p>{derived.name || defaultName(wallet?.type, wallet?.user_order, derived.address_index)}</p>
+              <p>{contact?.name || defaultName(wallet?.type, wallet?.user_order, derived.address_index)}</p>
               <p class="flex flex-row text-sm font-light">
                 <Address address={derived.address} />
               </p>
@@ -74,7 +77,8 @@
               <button
                 type="button"
                 class="variant-soft-primary size-8 rounded p-2"
-                on:click={() => showPrivateKey(derived)}>
+                on:click={() => showPrivateKey(derived)}
+              >
                 <Icon icon="mdi:eye-lock-open-outline" />
               </button>
             {/if}
@@ -83,7 +87,8 @@
                 <button
                   type="button"
                   class="variant-soft-primary size-8 rounded p-2 px-2"
-                  on:click|stopPropagation={copy}>
+                  on:click|stopPropagation={copy}
+                >
                   {#if copied}
                     <Icon icon="icon-park-outline:file-success-one" height={12} width={12} />
                   {:else}
@@ -98,7 +103,8 @@
       <button
         type="button"
         class="variant-filled-primary m-0 flex items-center justify-center rounded-r border-l p-3 hover:border-l"
-        on:click={() => gotoAddressDetails(derived.address_index)}>
+        on:click={() => gotoAddressDetails(derived.address_index)}
+      >
         <Icon icon="gravity-ui:circle-chevron-right" height={20} />
       </button>
     </li>

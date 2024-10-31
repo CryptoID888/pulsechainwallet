@@ -16,7 +16,7 @@
   import type { TransactionData } from '$common/types'
   import Date from '$lib/components/Date.svelte'
   import { TimeUnit } from '$lib/time'
-  import { emptyHex } from '$common/config'
+  import { emptyHex, type ChainIds } from '$common/config'
 
   export let params: { hash: string; chainId: number }
 
@@ -25,7 +25,7 @@
   // $: transaction = $transactions.find((tx) => tx.hash === params.hash)
   let chaindata: Partial<TransactionData> | null = null
 
-  $: chainId = +params.chainId
+  $: chainId = +params.chainId as ChainIds
   $: chain = chainIdToChain.get(chainId)!
   $: visualChain = chainById.get(chainId)!
   $: {
@@ -34,7 +34,7 @@
     })
   }
   $: href = chain
-    ? `${chain.blockExplorers.default.url}${chainId === pulsechainV4.id ? '/#' : ''}/tx/${chaindata?.transaction?.hash}`
+    ? `${chain.blockExplorers?.default?.url}${chainId === pulsechainV4.id ? '/#' : ''}/tx/${chaindata?.transaction?.hash}`
     : ''
   $: status = chaindata?.receipt?.status || 'pending'
 </script>
@@ -72,7 +72,8 @@
         </div>
         <div class="mt-2 top-2 w-1 bg-gray-200 relative">
           <div
-            class="size-8 bg-gray-600 rounded-full absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 items-center text-white justify-center text-center flex">
+            class="size-8 bg-gray-600 rounded-full absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 items-center text-white justify-center text-center flex"
+          >
             <Icon icon="mdi:arrow-right" height={24} width={24} />
           </div>
         </div>
@@ -90,7 +91,8 @@
     <div class="flex w-full justify-between">
       <span class="font-bold">Value</span>
       <span class="font-mono"
-        ><Number decimals={18} x={chaindata?.transaction?.value || 0n} /> {chain?.nativeCurrency?.symbol}</span>
+        ><Number decimals={18} x={chaindata?.transaction?.value || 0n} /> {chain?.nativeCurrency?.symbol}</span
+      >
     </div>
     <div class="flex w-full justify-between">
       <span class="font-bold">Nonce</span>
@@ -123,12 +125,14 @@
     <div class="flex w-full justify-between">
       <span class="font-bold">Block Number</span>
       <span class="font-mono"
-        >{#if chaindata?.block?.number}<Number decimals={0} x={chaindata.block.number} />{/if}</span>
+        >{#if chaindata?.block?.number}<Number decimals={0} x={chaindata.block.number} />{/if}</span
+      >
     </div>
     <div class="flex w-full justify-between">
       <span class="font-bold">Block Timestamp</span>
       <span class="font-mono"
-        >{#if chaindata?.block?.timestamp}<Date unit={TimeUnit.Second} value={chaindata.block.timestamp} />{/if}</span>
+        >{#if chaindata?.block?.timestamp}<Date unit={TimeUnit.Second} value={chaindata.block.timestamp} />{/if}</span
+      >
     </div>
   </div>
 {/if}

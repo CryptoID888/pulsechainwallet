@@ -13,7 +13,7 @@ import type {
   ContractRunner,
   ContractMethod,
   Listener,
-} from "ethers";
+} from 'ethers'
 import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
@@ -21,218 +21,136 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from '../common'
 
 export interface PrivacyPoolFactoryInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "MAX_TREE_LIMIT"
-      | "NATIVE"
-      | "createPool"
-      | "poolGroupByInput"
-      | "poolGroupLength"
-      | "poolGroups"
-      | "poseidon"
-  ): FunctionFragment;
+      | 'MAX_TREE_LIMIT'
+      | 'NATIVE'
+      | 'createPool'
+      | 'poolGroupByInput'
+      | 'poolGroupLength'
+      | 'poolGroups'
+      | 'poseidon',
+  ): FunctionFragment
 
-  getEvent(nameOrSignatureOrTopic: "PrivacyPoolCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PrivacyPoolCreated'): EventFragment
 
-  encodeFunctionData(
-    functionFragment: "MAX_TREE_LIMIT",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "NATIVE", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "createPool",
-    values: [AddressLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "poolGroupByInput",
-    values: [AddressLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "poolGroupLength",
-    values: [AddressLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "poolGroups",
-    values: [AddressLike, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "poseidon", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'MAX_TREE_LIMIT', values?: undefined): string
+  encodeFunctionData(functionFragment: 'NATIVE', values?: undefined): string
+  encodeFunctionData(functionFragment: 'createPool', values: [AddressLike, BigNumberish]): string
+  encodeFunctionData(functionFragment: 'poolGroupByInput', values: [AddressLike, BigNumberish]): string
+  encodeFunctionData(functionFragment: 'poolGroupLength', values: [AddressLike, BigNumberish]): string
+  encodeFunctionData(functionFragment: 'poolGroups', values: [AddressLike, BigNumberish, BigNumberish]): string
+  encodeFunctionData(functionFragment: 'poseidon', values?: undefined): string
 
-  decodeFunctionResult(
-    functionFragment: "MAX_TREE_LIMIT",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "NATIVE", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "createPool", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "poolGroupByInput",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "poolGroupLength",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "poolGroups", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "poseidon", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'MAX_TREE_LIMIT', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'NATIVE', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'createPool', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'poolGroupByInput', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'poolGroupLength', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'poolGroups', data: BytesLike): Result
+  decodeFunctionResult(functionFragment: 'poseidon', data: BytesLike): Result
 }
 
 export namespace PrivacyPoolCreatedEvent {
-  export type InputTuple = [
-    privacyPool: AddressLike,
-    asset: AddressLike,
-    denomination: BigNumberish
-  ];
-  export type OutputTuple = [
-    privacyPool: string,
-    asset: string,
-    denomination: bigint
-  ];
+  export type InputTuple = [privacyPool: AddressLike, asset: AddressLike, denomination: BigNumberish]
+  export type OutputTuple = [privacyPool: string, asset: string, denomination: bigint]
   export interface OutputObject {
-    privacyPool: string;
-    asset: string;
-    denomination: bigint;
+    privacyPool: string
+    asset: string
+    denomination: bigint
   }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
+  export type Filter = TypedDeferredTopicFilter<Event>
+  export type Log = TypedEventLog<Event>
+  export type LogDescription = TypedLogDescription<Event>
 }
 
 export interface PrivacyPoolFactory extends BaseContract {
-  connect(runner?: ContractRunner | null): PrivacyPoolFactory;
-  waitForDeployment(): Promise<this>;
+  connect(runner?: ContractRunner | null): PrivacyPoolFactory
+  waitForDeployment(): Promise<this>
 
-  interface: PrivacyPoolFactoryInterface;
+  interface: PrivacyPoolFactoryInterface
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
-  ): Promise<Array<TypedEventLog<TCEvent>>>;
+    toBlock?: string | number | undefined,
+  ): Promise<Array<TypedEventLog<TCEvent>>>
 
-  on<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  once<TCEvent extends TypedContractEvent>(
-    event: TCEvent,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
-  ): Promise<this>;
+    listener: TypedListener<TCEvent>,
+  ): Promise<this>
 
-  listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
-  ): Promise<Array<TypedListener<TCEvent>>>;
-  listeners(eventName?: string): Promise<Array<Listener>>;
-  removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
-  ): Promise<this>;
+  listeners<TCEvent extends TypedContractEvent>(event: TCEvent): Promise<Array<TypedListener<TCEvent>>>
+  listeners(eventName?: string): Promise<Array<Listener>>
+  removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>
 
-  MAX_TREE_LIMIT: TypedContractMethod<[], [bigint], "view">;
+  MAX_TREE_LIMIT: TypedContractMethod<[], [bigint], 'view'>
 
-  NATIVE: TypedContractMethod<[], [string], "view">;
+  NATIVE: TypedContractMethod<[], [string], 'view'>
 
-  createPool: TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [string],
-    "nonpayable"
-  >;
+  createPool: TypedContractMethod<[asset: AddressLike, power: BigNumberish], [string], 'nonpayable'>
 
-  poolGroupByInput: TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [string[]],
-    "view"
-  >;
+  poolGroupByInput: TypedContractMethod<[asset: AddressLike, power: BigNumberish], [string[]], 'view'>
 
-  poolGroupLength: TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [bigint],
-    "view"
-  >;
+  poolGroupLength: TypedContractMethod<[asset: AddressLike, power: BigNumberish], [bigint], 'view'>
 
-  poolGroups: TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish, arg2: BigNumberish],
-    [string],
-    "view"
-  >;
+  poolGroups: TypedContractMethod<[arg0: AddressLike, arg1: BigNumberish, arg2: BigNumberish], [string], 'view'>
 
-  poseidon: TypedContractMethod<[], [string], "view">;
+  poseidon: TypedContractMethod<[], [string], 'view'>
 
-  getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
-  ): T;
+  getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T
 
+  getFunction(nameOrSignature: 'MAX_TREE_LIMIT'): TypedContractMethod<[], [bigint], 'view'>
+  getFunction(nameOrSignature: 'NATIVE'): TypedContractMethod<[], [string], 'view'>
   getFunction(
-    nameOrSignature: "MAX_TREE_LIMIT"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: 'createPool',
+  ): TypedContractMethod<[asset: AddressLike, power: BigNumberish], [string], 'nonpayable'>
   getFunction(
-    nameOrSignature: "NATIVE"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: 'poolGroupByInput',
+  ): TypedContractMethod<[asset: AddressLike, power: BigNumberish], [string[]], 'view'>
   getFunction(
-    nameOrSignature: "createPool"
-  ): TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [string],
-    "nonpayable"
-  >;
+    nameOrSignature: 'poolGroupLength',
+  ): TypedContractMethod<[asset: AddressLike, power: BigNumberish], [bigint], 'view'>
   getFunction(
-    nameOrSignature: "poolGroupByInput"
-  ): TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [string[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "poolGroupLength"
-  ): TypedContractMethod<
-    [asset: AddressLike, power: BigNumberish],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "poolGroups"
-  ): TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish, arg2: BigNumberish],
-    [string],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "poseidon"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: 'poolGroups',
+  ): TypedContractMethod<[arg0: AddressLike, arg1: BigNumberish, arg2: BigNumberish], [string], 'view'>
+  getFunction(nameOrSignature: 'poseidon'): TypedContractMethod<[], [string], 'view'>
 
   getEvent(
-    key: "PrivacyPoolCreated"
+    key: 'PrivacyPoolCreated',
   ): TypedContractEvent<
     PrivacyPoolCreatedEvent.InputTuple,
     PrivacyPoolCreatedEvent.OutputTuple,
     PrivacyPoolCreatedEvent.OutputObject
-  >;
+  >
 
   filters: {
-    "PrivacyPoolCreated(address,address,uint256)": TypedContractEvent<
+    'PrivacyPoolCreated(address,address,uint256)': TypedContractEvent<
       PrivacyPoolCreatedEvent.InputTuple,
       PrivacyPoolCreatedEvent.OutputTuple,
       PrivacyPoolCreatedEvent.OutputObject
-    >;
+    >
     PrivacyPoolCreated: TypedContractEvent<
       PrivacyPoolCreatedEvent.InputTuple,
       PrivacyPoolCreatedEvent.OutputTuple,
       PrivacyPoolCreatedEvent.OutputObject
-    >;
-  };
+    >
+  }
 }

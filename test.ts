@@ -1,6 +1,6 @@
 import BetterSqlite3 from 'better-sqlite3-multiple-ciphers'
 import path from 'path'
-import * as fs from 'fs';
+import * as fs from 'fs'
 
 const dataFolder = path.join(process.cwd(), 'data')
 

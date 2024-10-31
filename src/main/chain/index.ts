@@ -1,8 +1,9 @@
 import * as viem from 'viem'
-import { config } from '../config';
-import { chainIdToChain, getPublicClient } from './mappings'
-import { derived, Stores, writable } from 'svelte/store';
-export * from './mappings'
+import { derived, Stores, writable } from 'svelte/store'
+
+import { config } from '$main/config'
+import { chainIdToChain, getPublicClient } from '$main/chain/mappings'
+export * from '$main/chain/mappings'
 
 export const chain = derived<Stores, viem.Chain>([config], ([$config]) => {
   return chainIdToChain.get($config.chainId)!

@@ -1,6 +1,6 @@
-import * as sql from '$main/sql';
-import { Contact } from "$common/types";
-import { handle, emit } from "$main/ipc";
+import * as sql from '$main/sql'
+import { Contact } from '$common/types'
+import { handle, emit } from '$main/ipc'
 
 handle('contact:all', () => {
   return sql.query.all('CONTACT_ALL', [])

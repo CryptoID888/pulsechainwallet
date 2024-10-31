@@ -21,7 +21,8 @@
   <button
     on:click={openSelectAccount}
     type="button"
-    class="flex w-full items-center justify-between gap-2 rounded-md bg-primary-400 p-2 leading-7 text-primary-50">
+    class="flex w-full items-center justify-between gap-2 rounded-md bg-primary-400 p-2 leading-7 text-primary-50"
+  >
     <AccountDetailSummary {account} />
     <Icon icon="material-symbols:chevron-right" height={24} />
   </button>

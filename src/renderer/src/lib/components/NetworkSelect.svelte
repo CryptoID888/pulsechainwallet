@@ -24,7 +24,8 @@
               current.set(chain)
               // reflow the each loop
               chains = chains
-            }}>
+            }}
+          >
             <span class="flex flex-grow-[3]"></span>
             <span class="flex flex-grow-[1] gap-2">
               <Select show={matches(chain)} />

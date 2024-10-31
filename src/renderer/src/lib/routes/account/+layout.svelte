@@ -1,4 +1,5 @@
 <script lang="ts">
+  import _ from 'lodash'
   import Crumb from '$lib/components/Crumb.svelte'
   import Breadcrumbs from '$lib/components/Breadcrumbs.svelte'
   import Loader from '$lib/components/Loader.svelte'
@@ -62,8 +63,8 @@
 
   onMount(checkWallets)
 
-  // a default params to make the compiler happy
   export let params = {}
+  _.noop(params)
 </script>
 
 <LocationSaver prefix="account" />

@@ -12,9 +12,13 @@ import type { ChainIds } from '$common/config'
  * the wallets that should be available to the app
  * this is a read only store, so we only pass the event that we want to listen to
  */
-export const wallets = readable<WalletMetadata[] | null>('wallets', () => {
-  return api.wallet.all()
-}, [])
+export const wallets = readable<WalletMetadata[] | null>(
+  'wallets',
+  () => {
+    return api.wallet.all()
+  },
+  [],
+)
 
 export const isLoggedIn = derived([wallets], ([$wallets]) => {
   return $wallets && $wallets.length > 0
@@ -28,15 +32,20 @@ export const walletAccountsUnder = (id: Hex) => {
   return api.wallet.accountsUnder(id)
 }
 
-export const accounts = readable<Account[]>('accounts', () => {
-  return api.wallet.accounts()
-}, [])
+export const accounts = readable<Account[]>(
+  'accounts',
+  () => {
+    return api.wallet.accounts()
+  },
+  [],
+)
 
 export const currentAccount = derived([accounts, config], ([$accounts, $config]) => {
-  return $accounts.find(($account) => (
-    $account.wallet_id === $config.walletId &&
-    $account.address_index === $config.addressIndex
-  )) ?? null
+  return (
+    $accounts.find(
+      ($account) => $account.wallet_id === $config.walletId && $account.address_index === $config.addressIndex,
+    ) ?? null
+  )
 })
 
 export const accountsUnder = derived([accounts, config], ([$accounts, $config]) => {
@@ -52,35 +61,36 @@ export const addedAccountsUnder = derived([addedAccounts, config], ([$addedAccou
 })
 
 export const addedAccountsByWalletId = derived([addedAccounts], ([$accounts]) => {
-  return $accounts.reduce((acc, curr) => {
-    const list = acc[curr.wallet_id] || []
-    list.push(curr)
-    acc[curr.wallet_id] = list
-    return acc
-  }, {} as Record<Hex, Account[]>)
+  return $accounts.reduce(
+    (acc, curr) => {
+      const list = acc[curr.wallet_id] || []
+      list.push(curr)
+      acc[curr.wallet_id] = list
+      return acc
+    },
+    {} as Record<Hex, Account[]>,
+  )
 })
 
 export const revealSecret = async (pass: string, walletId: Hex, addressIndex?: number) => {
   return api.wallet.reveal(pass, walletId, addressIndex)
 }
 
-export const hasWallets = derived([config], ([$config]) => (
-  $config.walletCount
-))
+export const hasWallets = derived([config], ([$config]) => $config.walletCount)
 
 export const accountFrom = async (walletId: Hex, addressIndex: number) => {
   return await api.wallet.account(walletId, addressIndex)
 }
 
 export const deriveAddresses = async (id: Hex, indices: number[]) => {
-  return await api.wallet.derive(id, indices) as Hex[]
+  return (await api.wallet.derive(id, indices)) as Hex[]
 }
 
 export const addWalletUnderCurrent = async (value: Hex | string) => {
   return await api.wallet.add(value, PathTypes.UNKNOWN)
 }
 
-export const nonces = derived<Stores, NonceData>([chain, currentBlock, currentAccount], ([$chain, _$currentBlock, $account], set) => {
+export const nonces = derived<Stores, NonceData>([chain, currentAccount, currentBlock], ([$chain, $account], set) => {
   api.wallet.nonces($chain.id, $account.address).then(set)
 })
 

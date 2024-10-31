@@ -35,5 +35,6 @@
     bind:balance
     bind:amount
     bind:offset
-    bind:power />
+    bind:power
+  />
 </SendTransaction>

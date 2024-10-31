@@ -25,7 +25,8 @@
         class:variant-soft-primary={!isSelected}
         class:variant-filled-primary={isSelected}
         disabled={isDisabled}
-        on:click={() => toggleSelected(leafIndex)}>
+        on:click={() => toggleSelected(leafIndex)}
+      >
         {#if isLoading}
           <Loader size={16} />
         {/if}

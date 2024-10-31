@@ -15,15 +15,15 @@ import {
   zeroAddress,
   type Hex,
 } from 'viem'
-import { AccessList, poseidon, subsetDataToBytes, toFE, MerkleTree } from './pools-ts'
+import { AccessList, poseidon, subsetDataToBytes, toFE, MerkleTree } from '$main/pools/pools-ts'
 import { WalletMetadata, type Account } from '$common/wallets'
 import type { WithdrawalProofStruct } from '$common/types'
 import * as safe from '$main/safe'
 import { type Proof } from '$common/pools'
 
-import withdrawFromSubsetWasm from './pools-ts/withdraw_from_subset.wasm?asset'
-import withdrawFromSubsetZkey from './pools-ts/withdraw_from_subset_final.zkey?asset'
-// import withdrawFromSubsetVerifier from './pools-ts/withdraw_from_subset_verifier.json'
+import withdrawFromSubsetWasm from '$main/pools/pools-ts/withdraw_from_subset.wasm?asset'
+import withdrawFromSubsetZkey from '$main/pools/pools-ts/withdraw_from_subset_final.zkey?asset'
+// import withdrawFromSubsetVerifier from '$main/pools/pools-ts/withdraw_from_subset_verifier.json'
 
 import * as fs from 'fs'
 import * as sql from '$main/sql'
@@ -35,11 +35,12 @@ import { handle } from '$main/ipc'
 import { PrivacyPoolAbi } from '$common/abis/PrivacyPool'
 // import { memoizeWithTTL } from '$common/utils'
 // import { query } from '$main/indexer'
-import { allPoolsUnderChainId } from '$common/indexer'
+import { allDepositsFromCommitments, allPoolsUnderChainId } from '$common/indexer'
 import { valueToJSON } from '$main/json'
 import { query } from '$main/indexer'
 import _ from 'lodash'
-import { truncateHash } from '$common/utils'
+import { poolIdFromParts, truncateHash } from '$common/utils'
+import { transactions } from '$main/sql/transactions'
 
 let zkeyBytes!: Uint8Array
 let wasmBytes!: Uint8Array
@@ -94,9 +95,8 @@ const asInt = (accessList: AccessList) => {
   return accessList.accessType === 'allowlist' ? 1 : 0
 }
 
-export const generateAssetMetadata = (assetAddress: string, denomination: string | bigint) => (
+export const generateAssetMetadata = (assetAddress: string, denomination: string | bigint) =>
   hashMod(['address', 'uint256'], [assetAddress, denomination])
-)
 
 export const hashMod = (types: string[], values: unknown[]) => {
   return toFE(BigInt(keccak256(encodePacked(types, values))))
@@ -138,15 +138,20 @@ export const proofToWithdrawalStruct = async (proof: Proof) => {
   })
   const root = await poolContract.read.getLatestRoot()
   const inMemoryRoot = depositTree.root.toHexString() as Hex
-  console.log('roots id=%o length=%o\n\tcontract=%o\n\tinmemory=%o', truncateHash(poolId), leaves.length, truncateHash(root), truncateHash(inMemoryRoot))
+  console.log(
+    'roots id=%o length=%o\n\tcontract=%o\n\tinmemory=%o',
+    truncateHash(poolId),
+    leaves.length,
+    truncateHash(root),
+    truncateHash(inMemoryRoot),
+  )
   if (root !== inMemoryRoot) {
     throw new Error('roots mismatch')
   }
-  const isKnownRoot = await poolContract.read.isKnownRoot([inMemoryRoot])
-    .catch((e) => {
-      console.log('error', e)
-      return false
-    })
+  const isKnownRoot = await poolContract.read.isKnownRoot([inMemoryRoot]).catch((e) => {
+    console.log('error', e)
+    return false
+  })
   if (!isKnownRoot) {
     throw new Error('root not known')
   }
@@ -166,7 +171,8 @@ const createProofCalldata = async (
   secret: Hex,
   assetAddress: Hex,
   denomination: bigint,
-  depositTree: MerkleTree, accessList: AccessList,
+  depositTree: MerkleTree,
+  accessList: AccessList,
   userDefinedInputs: UserDefinedInputs,
 ) => {
   // oldestLoneDeposit.secret -> commitment
@@ -215,18 +221,10 @@ const createProofCalldata = async (
     withdrawMetadata: withdrawMetadata.toHexString(),
     secret,
     path: withdrawalData.path,
-    mainProof: proof.siblings.map((b) => (
-      toHex(b.toBigInt(), { size: 32 })
-    )),
-    subsetProof: subsetProof.siblings.map((b) => (
-      toHex(b.toBigInt(), { size: 32 })
-    )),
+    mainProof: proof.siblings.map((b) => toHex(b.toBigInt(), { size: 32 })),
+    subsetProof: subsetProof.siblings.map((b) => toHex(b.toBigInt(), { size: 32 })),
   }
-  const { proof: fullProof } = await snarkjs.groth16.fullProve(
-    input,
-    wasmBytes,
-    zkeyBytes,
-  )
+  const { proof: fullProof } = await snarkjs.groth16.fullProve(input, wasmBytes, zkeyBytes)
   const solidityInput = {
     flatProof: [
       fullProof.pi_a[0] as Hex,
@@ -261,9 +259,12 @@ const createProofCalldata = async (
 }
 
 export const getProofInfo = async (
-  chainId: ChainIds, account: Account,
-  recipient: Hex, feePerCommitment: bigint,
-  pool: PrivacyPool, deposits: Deposit[],
+  chainId: ChainIds,
+  account: Account,
+  recipient: Hex,
+  feePerCommitment: bigint,
+  pool: PrivacyPool,
+  deposits: Deposit[],
 ) => {
   if (!account) console.log('no account')
   if (!isAddress(recipient)) console.log('no recipient')
@@ -369,13 +370,16 @@ export const cacheProofs = async (info: Awaited<ReturnType<typeof getProofInfo>>
     secret,
     user_inputs: valueToJSON.stringify(shared),
   }))
-  sql.transactions.insertProofs(serializedProofs)
+  transactions.insertProofs(serializedProofs)
 }
 
 export const generateProofsAndCache = async (
-  chainId: ChainIds, account: Account,
-  recipient: Hex, feePerCommitment: bigint,
-  pool: PrivacyPool, deposits: Deposit[],
+  chainId: ChainIds,
+  account: Account,
+  recipient: Hex,
+  feePerCommitment: bigint,
+  pool: PrivacyPool,
+  deposits: Deposit[],
 ) => {
   const proofs = await getProofInfo(chainId, account, recipient, feePerCommitment, pool, deposits)
   await cacheProofs(proofs)
@@ -437,25 +441,24 @@ export const nullifiedCommitmentIndices = async (account: Account, chainId: Chai
   const secret = await secretFromAccountSignature(...params)
   if (!secret) return []
   const commitment = secretToCommitment(secret)
-  const commitmentsUnderPool = await query('DEPOSITS_FROM_COMMITMENTS', {
-    poolAddress,
-    commitments: [commitment],
-  })
-  const deposits = commitmentsUnderPool.privacyPools.items[0].deposits?.items || []
+  const poolId = poolIdFromParts(chainId, poolAddress)
+  const deposits = await allDepositsFromCommitments(poolId, [commitment])
   if (!deposits.length) return []
-  const knownNullifiers = deposits.map(({ leafIndex }) => +leafIndex)?.map((path) => {
-    const nullifier = poseidon([secret, 1n, `${path}`])
-    return numberToHex(BigInt(nullifier.toString()), { size: 32 })
-  }) || []
+  const knownNullifiers =
+    deposits
+      .map(({ leafIndex }) => +leafIndex)
+      ?.map((path) => {
+        const nullifier = poseidon([secret, 1n, `${path}`])
+        return numberToHex(BigInt(nullifier.toString()), { size: 32 })
+      }) || []
   // at least 1 privacy pool was returned if there was also at least 1 deposit
-  const poolId = commitmentsUnderPool.privacyPools.items[0].id
   const nullified = await query('WITHDRAWALS_BY_NULLIFIERS', {
     poolId,
     nullifiers: knownNullifiers,
   })
   const registeredNullifiers = new Set(nullified.withdrawals.items.map(({ nullifier }) => nullifier as Hex))
   return _(knownNullifiers)
-    .map((n, i) => registeredNullifiers.has(n) ? `${i}` : false)
+    .map((n, i) => (registeredNullifiers.has(n) ? `${i}` : false))
     .compact()
     .map((i) => BigInt(i))
     .value()
@@ -474,7 +477,7 @@ handle('pool:nullifiedCommitmentIndices', nullifiedCommitmentIndices)
 handle('pool:generateProofsAndCache', generateProofsAndCache)
 
 handle('proof:all', () => {
-  return sql.query.all('PROOF_ALL')
+  return sql.query.all<Proof>('PROOF_ALL')
 })
 
 handle('proof:allByChainId', (chainId: ChainIds) => {

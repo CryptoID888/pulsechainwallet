@@ -20,7 +20,7 @@
         goto('/locked')
       }
     } catch (err) {
-      console.log('failed to change pass')
+      console.log('failed to change pass', err)
     }
   }
   const focus = (e: Event) => {
@@ -43,7 +43,8 @@
         type="text"
         bind:value={current}
         on:focus={focus}
-        on:blur={blur} />
+        on:blur={blur}
+      />
     </label>
     <label class="flex w-full flex-col">
       New Pass
@@ -53,7 +54,8 @@
         type="text"
         bind:value={next}
         on:focus={focus}
-        on:blur={blur} />
+        on:blur={blur}
+      />
     </label>
     <label class="flex w-full flex-col">
       Confirm Pass
@@ -63,7 +65,8 @@
         type="text"
         bind:value={nextConfirm}
         on:focus={focus}
-        on:blur={blur} />
+        on:blur={blur}
+      />
     </label>
     <div class="grid grid-cols-2 gap-2">
       <Back let:back>
@@ -71,7 +74,8 @@
           cancelText="Cancel"
           on:cancel={() => {
             back()
-          }} />
+          }}
+        />
       </Back>
       <button {disabled} type="submit" class="variant-filled-error btn">Change Password</button>
     </div>

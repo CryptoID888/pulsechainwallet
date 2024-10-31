@@ -28,7 +28,8 @@
     class="btn flex items-center {padding} {size} {className} {decrementClassName}"
     class:cursor-not-allowed={decrementDisabled}
     disabled={decrementDisabled}
-    on:click={handleDecrement}>&minus;</button>
+    on:click={handleDecrement}>&minus;</button
+  >
 </div>
 <div class="input-group-shim flex h-full items-center justify-center p-0">
   <button
@@ -36,7 +37,8 @@
     class="btn flex items-center {padding} {size} {className} {incrementClassName}"
     class:cursor-not-allowed={incrementDisabled}
     disabled={incrementDisabled}
-    on:click={handleIncrement}>&plus;</button>
+    on:click={handleIncrement}>&plus;</button
+  >
 </div>
 
 <style lang="postcss">

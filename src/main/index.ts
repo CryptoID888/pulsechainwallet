@@ -1,18 +1,20 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-import './sql'
-import './wallet'
-import * as pools from './pools'
-import './ens'
-import './contact'
-import * as indexer from './indexer'
-import './chain/state'
-import './msgboard'
-
-import { main, mainProps } from './window'
 import { get } from 'svelte/store'
+
+import icon from '../../resources/icon.png?asset'
+
+import '$main/sql'
+import '$main/wallet'
+import * as pools from '$main/pools'
+import '$main/ens'
+import '$main/contact'
+import * as indexer from '$main/indexer'
+import '$main/chain/state'
+import '$main/msgboard'
+
+import { main, mainProps } from '$main/window'
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -58,7 +60,9 @@ async function createWindow(): Promise<void> {
   }
   try {
     mainWindow.webContents.openDevTools()
-  } catch { }
+  } catch {
+    // ignore
+  }
 }
 
 // This method will be called when Electron has finished

@@ -69,18 +69,12 @@
   $: shortenCount = shortenUnusedZeros(allDecimalDigits)
   $: decimalDigitsNoEndZeros = removeTrailingZeros(allDecimalDigits)
   $: value = joinNumber(intDelimited, decimalDigitsNoEndZeros)
+  $: showingSub = truncateZeros && !!shortenCount
+  $: showingSubDecimals = decimalDigitsNoEndZeros.slice(shortenCount)
 </script>
 
 <slot {value}>
-  {#if truncateZeros && shortenCount}{@html joinNumber(
-      intDelimited,
-      `0<sub>${shortenCount}</sub>${decimalDigitsNoEndZeros.slice(shortenCount)}`,
-    )}{:else}{value}{/if}
-  <!-- <Copy text={value} let:copy>
-    <button type="button" on:click|stopPropagation={copy}
-      >{#if truncateZeros && shortenCount}{@html joinNumber(
-          intDelimited,
-          `0<sub>${shortenCount}</sub>${decimalDigitsNoEndZeros.slice(shortenCount)}`,
-        )}{:else}{value}{/if}</button>
-  </Copy> -->
+  {#if !showingSub}{value}
+  {:else}{intDelimited}.0<sub>{shortenCount}</sub>{showingSubDecimals}
+  {/if}
 </slot>

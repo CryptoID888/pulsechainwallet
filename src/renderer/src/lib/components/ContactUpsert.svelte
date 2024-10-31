@@ -43,7 +43,8 @@
       type="button"
       class="mt-4 flex size-10 items-center justify-center"
       class:rotate-180={note !== null}
-      on:click={toggleNote}>
+      on:click={toggleNote}
+    >
       <Icon icon="mdi:chevron-down" class="flex" height={24} />
     </button>
   </div>

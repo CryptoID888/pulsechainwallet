@@ -71,7 +71,8 @@
     bind:value
     placeholder="0x.../.eth/.pls"
     on:input={checkForAddressDerivation}
-    class="input flex w-full" />
+    class="input flex w-full"
+  />
   <div class="flex flex-row items-center gap-2">
     <Copy text={addr} let:copy let:copied>
       <button type="button" class="flex flex-row items-center" on:click={copy}>

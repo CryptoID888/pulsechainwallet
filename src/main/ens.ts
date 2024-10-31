@@ -1,7 +1,8 @@
-import { chainIdToChain, getPublicClient } from './chain'
 import { Hex } from 'viem'
+
+import { chainIdToChain, getPublicClient } from '$main/chain'
 import { ChainIds } from '$common/config'
-import { handle } from './ipc'
+import { handle } from '$main/ipc'
 
 export const getEnsAddress = async (chainId: ChainIds, name: string) => {
   const chain = chainIdToChain.get(chainId)

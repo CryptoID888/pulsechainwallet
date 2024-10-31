@@ -36,10 +36,10 @@ export default defineConfig({
     ],
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src', 'common'),
-        '$main': path.resolve(__dirname, 'src', 'main'),
-        '$preload': path.resolve(__dirname, 'src', 'preload'),
-        '$root': path.resolve(__dirname),
+        $common: path.resolve(__dirname, 'src', 'common'),
+        $main: path.resolve(__dirname, 'src', 'main'),
+        $preload: path.resolve(__dirname, 'src', 'preload'),
+        $root: path.resolve(__dirname),
       },
     },
   },
@@ -52,7 +52,8 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src', 'common'),
+        $common: path.resolve(__dirname, 'src', 'common'),
+        $preload: path.resolve(__dirname, 'src', 'preload'),
       },
     },
   },
@@ -64,8 +65,8 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '$common': path.resolve(__dirname, 'src', 'common'),
-        '$preload': path.resolve(__dirname, 'src', 'preload'),
+        $common: path.resolve(__dirname, 'src', 'common'),
+        $preload: path.resolve(__dirname, 'src', 'preload'),
       },
     },
     plugins: [

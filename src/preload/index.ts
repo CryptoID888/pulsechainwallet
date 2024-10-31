@@ -1,5 +1,5 @@
 import { contextBridge } from 'electron'
-import { api } from './api'
+import { api } from '$preload/api'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -13,8 +13,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // @ts-expect-error (define in dts)
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-expect-error (define in dts)
   window.api = api
 }

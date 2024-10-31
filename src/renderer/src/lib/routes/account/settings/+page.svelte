@@ -4,7 +4,7 @@
   import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton'
   import { defaultAddress, truncatedAddress } from '$lib/address'
   import { formatUnits, parseUnits } from 'viem'
-  import { delimiter } from '$lib/modifiers/delimiter'
+  import { delimiter, delimiterRender } from '$lib/modifiers/delimiter'
   import { crumbs } from '$lib/navigation'
   import Crumb from '$lib/components/Crumb.svelte'
   import StepIncrementor from '$lib/components/StepIncrementor.svelte'
@@ -71,7 +71,8 @@
         <span class="text-sm"
           >Example: <span class="font-mono"
             >123{digitGroupSeparator}456{digitGroupSeparator}789{decimalSeparator}0001</span
-          ></span>
+          ></span
+        >
       </div>
     </li>
     <li class="flex w-full flex-col">
@@ -84,7 +85,8 @@
         min={3}
         max={upperBoundMaxDigitGroupSets}
         step={1}
-        ticked></RangeSlider>
+        ticked
+      ></RangeSlider>
     </li>
     <li class="flex w-full flex-col">
       <Label text="Truncate Address">
@@ -106,13 +108,15 @@
         class="input text-right"
         type="text"
         bind:value={defaultGasLimitMultiplierInput}
-        use:delimiter={{ decimals: 4, min: 10_000n, delimiter: false }} />
+        use:delimiter={delimiterRender(() => ({ decimals: 4, min: 10_000n, delimiter: false }))}
+      />
       <span class="text-sm italic">* for non native transfer transactions only</span>
     </li>
     <li class="flex w-full flex-col">
       <Label text="Prefer Numbers or Hexadecimal"
         ><span class="font-mono">{numbersOverHex ? '' : emptyHex}{(123456789).toString(numbersOverHex ? 10 : 16)}</span
-        ></Label>
+        ></Label
+      >
       <div class="flex flex-row gap-2">
         <span class="font-mono">0x</span>
         <SlideToggle
@@ -120,7 +124,8 @@
           bind:checked={numbersOverHex}
           size="sm"
           background="bg-primary-300"
-          active="bg-primary-500" />
+          active="bg-primary-500"
+        />
         <span class="font-mono">#</span>
       </div>
     </li>
@@ -130,10 +135,11 @@
         <StepIncrementor decrementDisabled={baseFeeValidityRange <= 1} on:change={handleBaseFeeValidityRangeChange} />
         <input
           type="text"
-          use:delimiter={{ decimals: 0, min: 1n }}
+          use:delimiter={delimiterRender(() => ({ decimals: 0, min: 1n }))}
           class="flex flex-grow text-right"
           min="1"
-          bind:value={baseFeeValidityRange} />
+          bind:value={baseFeeValidityRange}
+        />
       </div>
       <span class="text-sm italic">Defaults to a base fee that will be valid for at least this many blocks</span>
     </li>
@@ -148,7 +154,8 @@
           background="bg-primary-300"
           active="bg-primary-500"
           disabled
-          bind:checked={defaultTransactionTypeIsEIP1559} />
+          bind:checked={defaultTransactionTypeIsEIP1559}
+        />
         <span>EIP1559</span>
       </label>
     </li>
@@ -162,7 +169,8 @@
         id="default-priority-fee-additive"
         class="input text-right"
         bind:value={defaultPriorityFeeAdditiveInput}
-        use:delimiter={{ decimals: 2, delimiter: false }} />
+        use:delimiter={delimiterRender(() => ({ decimals: 2, delimiter: false }))}
+      />
       <span class="text-sm italic">Generate a default priority fee that is x% of the latest block's base fee.</span>
     </li>
     <!-- replace / reattempt transaction -->
@@ -179,9 +187,11 @@
         id="default-priority-fee-retry-additive"
         class="input text-right"
         bind:value={defaultPriorityFeeRetryAdditiveInput}
-        use:delimiter={{ decimals: 2, delimiter: false }} />
+        use:delimiter={delimiterRender(() => ({ decimals: 2, delimiter: false }))}
+      />
       <span class="text-sm italic"
-        >Generate a default priority fee that is x% of the previous transaction's priority fee.</span>
+        >Generate a default priority fee that is x% of the previous transaction's priority fee.</span
+      >
     </li>
     <li class="flex w-full flex-col">
       <Label text="Auto Replace Underpriced" />
@@ -191,7 +201,8 @@
         background="bg-primary-300"
         active="bg-primary-500"
         disabled
-        bind:checked={autoReplaceUnderpriced} />
+        bind:checked={autoReplaceUnderpriced}
+      />
       <span class="text-sm italic">Replaces a transaction when the base fee moves too quickly against you.</span>
     </li>
     <!-- broadcast settings -->
@@ -209,7 +220,8 @@
         name="show-testnet"
         background="bg-primary-300"
         active="bg-primary-500"
-        bind:checked={showTestnets} />
+        bind:checked={showTestnets}
+      />
     </li>
   </ul>
 </div>

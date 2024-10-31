@@ -40,7 +40,8 @@
   <AddressInput on:change bind:value={toValue} bind:address={toAddress}>
     <svelte:fragment slot="label"
       >To{#if !!$contactByAddress.get(toAddress)}: {$contactByAddress.get(toAddress)?.name || ''}
-      {/if}</svelte:fragment>
+      {/if}</svelte:fragment
+    >
   </AddressInput>
 
   <button type="button" class="variant-soft-primary rounded px-3.5 py-3" on:click={openContactList}>

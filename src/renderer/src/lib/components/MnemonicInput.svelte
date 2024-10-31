@@ -61,7 +61,8 @@
             placeholder={'*'.repeat(3 + Math.floor(Math.random() * 4))}
             class="input min-w-0"
             bind:this={inputs[i]}
-            bind:value={word} />
+            bind:value={word}
+          />
         </li>
       {/each}
     </ol>
@@ -71,7 +72,8 @@
         class="btn variant-ghost-error"
         on:click={() => {
           dispatch('cancel')
-        }}>{cancelText}</button>
+        }}>{cancelText}</button
+      >
       <button type="button" disabled={clearDisabled} class="btn variant-outline-primary" on:click={clearPhrase}>
         Clear
       </button>
