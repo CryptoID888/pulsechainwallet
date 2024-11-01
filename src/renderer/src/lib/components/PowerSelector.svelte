@@ -58,6 +58,10 @@
     #power-selector {
       @apply w-full;
 
+      .rangePips {
+        bottom: 0;
+        top: -1em;
+      }
       /* styles for all pips */
       & .rangePips .pip {
         width: 10px;
@@ -73,14 +77,20 @@
       & .pipVal {
         opacity: 0;
       }
-      & .rangeNub,
       & .rangeFloat {
+        opacity: 0;
+        pointer-events: none;
+        /* margin-top: 0.25em;
+        top: 100%;
+        transform: translate(-50%); */
+      }
+      & .rangeNub {
         @apply bg-primary-500;
       }
 
       /* styles for the selected pip */
       .rangePips .pip.selected {
-        transform: translate3d(-50%, 6px, 0.1px) scale(0.8);
+        transform: translate3d(-50%, -6px, 0.1px) scale(0.8);
       }
       .pip.selected .pipVal {
         opacity: 1;
@@ -89,24 +99,24 @@
 
       /* styles for the pips directly after the selected pip */
       .rangePips .pip.selected + * {
-        transform: translate3d(calc(-50% + 2px), 4px, 0.1px) scale(0.6);
+        transform: translate3d(calc(-50% + 2px), -4px, 0.1px) scale(0.6);
       }
       .rangePips .pip.selected + * + * {
-        transform: translate3d(calc(-50% + 2px), 2px, 0.1px) scale(0.4);
+        transform: translate3d(calc(-50% + 2px), -2px, 0.1px) scale(0.4);
       }
       .rangePips .pip.selected + * + * + * {
-        transform: translate3d(calc(-50% + 1px), 1px, 0.1px) scale(0.2);
+        transform: translate3d(calc(-50% + 1px), -1px, 0.1px) scale(0.2);
       }
 
       /* styles for the pips directly before the selected pip */
       .rangePips .pip:has(+ .selected) {
-        transform: translate3d(calc(-50% - 2px), 4px, 0.1px) scale(0.6);
+        transform: translate3d(calc(-50% - 2px), -4px, 0.1px) scale(0.6);
       }
       .rangePips .pip:has(+ * + .selected) {
-        transform: translate3d(calc(-50% - 2px), 2px, 0.1px) scale(0.4);
+        transform: translate3d(calc(-50% - 2px), -2px, 0.1px) scale(0.4);
       }
       .rangePips .pip:has(+ * + * + .selected) {
-        transform: translate3d(calc(-50% - 1px), 1px, 0.1px) scale(0.2);
+        transform: translate3d(calc(-50% - 1px), -1px, 0.1px) scale(0.2);
       }
 
       /* hide the focus ring when hovering */
