@@ -27,7 +27,7 @@
     amountDecimal = ''
   }
   const generateCommitment = async (poolAddress: Hex) => {
-    const commitment = await api.pool.commitmentFromAccountSignature($account!, $chain.id as ChainIds, poolAddress!)
+    const commitment = await api.pool.commitmentFromAccountSignature($account!, $chain?.id as ChainIds, poolAddress!)
     return commitment
   }
   const calldataFromCommitment = (amount: bigint, commitment: Hex | null) => {
@@ -113,12 +113,11 @@
     bind:offset
     step={incrementIn}
     bind:amount
-    bind:balance
-  >
+    bind:balance>
     <svelte:fragment slot="input">
       <div class="absolute hidden">
         {#if !canDeposit}
-          <input type="hidden" name="to-address" id="to-address" value={$factory.address} />
+          <input type="hidden" name="to-address" id="to-address" value={$factory?.address} />
           <input type="hidden" name="value" id="value" value={0n} />
           <input type="hidden" name="gas" id="gas" value={6_000_000} />
           <input type="hidden" id="data" name="data" value={deployData} />
