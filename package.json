@@ -59,6 +59,7 @@
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
     "hono": "^4.6.6",
+    "postcss-nested": "^7.0.2",
     "snarkjs": "^0.7.5",
     "svelte-persisted-store": "^0.11.0",
     "svelte-portal": "^2.2.1",

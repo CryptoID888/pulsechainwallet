@@ -30,14 +30,14 @@
           decrementDisabled={power === 0}
           incrementDisabled={power === maxPower}
           on:change={handleIncrement}
-          decrementClass="border-t border-primary-400 rounded-t-none"
-        />
+          decrementClass="border-t border-primary-400 rounded-t-none" />
       </div>
     </div>
     <div class="flex flex-col w-full">
       <span class="px-4"><Number truncateZeros x={increment} {decimals} />{unit}</span>
       <div class="flex flex-row flex-grow w-full">
         <RangeSlider
+          id="power-selector"
           on:change
           {disabled}
           bind:value={power}
@@ -47,15 +47,75 @@
           pips
           float
           first="label"
-          last="label"
-        />
+          last="label" />
       </div>
     </div>
   </div>
 </div>
 
 <style lang="postcss">
-  :global(.rangeSlider) {
-    @apply w-full;
+  :global(
+    #power-selector {
+      @apply w-full;
+
+      /* styles for all pips */
+      & .rangePips .pip {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        /* background: var(--handle-focus); */
+        @apply bg-primary-500;
+        transform: translate3d(-50%, 0, 0.1px) scale(0.1);
+        opacity: 0.9999;
+        will-change: transform opacity;
+        display: flex;
+      }
+      & .pipVal {
+        opacity: 0;
+      }
+      & .rangeNub,
+      & .rangeFloat {
+        @apply bg-primary-500;
+      }
+
+      /* styles for the selected pip */
+      .rangePips .pip.selected {
+        transform: translate3d(-50%, 6px, 0.1px) scale(0.8);
+      }
+      .pip.selected .pipVal {
+        opacity: 1;
+        transition-duration: 0s;
+      }
+
+      /* styles for the pips directly after the selected pip */
+      .rangePips .pip.selected + * {
+        transform: translate3d(calc(-50% + 2px), 4px, 0.1px) scale(0.6);
+      }
+      .rangePips .pip.selected + * + * {
+        transform: translate3d(calc(-50% + 2px), 2px, 0.1px) scale(0.4);
+      }
+      .rangePips .pip.selected + * + * + * {
+        transform: translate3d(calc(-50% + 1px), 1px, 0.1px) scale(0.2);
+      }
+
+      /* styles for the pips directly before the selected pip */
+      .rangePips .pip:has(+ .selected) {
+        transform: translate3d(calc(-50% - 2px), 4px, 0.1px) scale(0.6);
+      }
+      .rangePips .pip:has(+ * + .selected) {
+        transform: translate3d(calc(-50% - 2px), 2px, 0.1px) scale(0.4);
+      }
+      .rangePips .pip:has(+ * + * + .selected) {
+        transform: translate3d(calc(-50% - 1px), 1px, 0.1px) scale(0.2);
+      }
+
+      /* hide the focus ring when hovering */
+      .rangeSlider.hoverable:not(.disabled) .rangeHandle::before {
+        display: none;
+        box-shadow: none;
+      }
+    }
+  ) {
+    /*  */
   }
 </style>

@@ -2,6 +2,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import * as path from 'path'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from 'tailwindcss'
+import postcss from 'postcss'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import topLevelAwait from 'vite-plugin-top-level-await'
@@ -83,7 +84,7 @@ export default defineConfig({
     ],
     css: {
       postcss: {
-        plugins: [tailwindcss()],
+        plugins: [tailwindcss(), postcss()],
       },
     },
   },
