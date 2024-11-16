@@ -1,0 +1,19 @@
+version: 2.1
+
+orbs:
+  electron: electron/electron@3
+
+workflows:
+  build-and-test:
+    jobs:
+      - build-and-test-electron
+
+jobs:
+  build-and-test-electron:
+    steps:
+      - checkout
+      - run: npm install
+      - run: electron-forge make --platform=win32
+      - run: npm run test
+      - store_artifacts: path=build/out/make, patterns: '**/*'
+
