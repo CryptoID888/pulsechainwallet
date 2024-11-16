@@ -1,28 +1,30 @@
 version: 2.1
 orbs:
   bun-orb: cmgriffing/bun-orb@0.0.29
-  electron: electron/electron@3
 
 jobs:
-  build:
+  build_windows:
     docker:
-      - image: cimg/node:18.17
+      - image: electronuserland/builder:wine
     steps:
       - checkout
-      - bun-orb/setup
-      - restore_cache:
-          keys:
-            - v1-bun-deps-{{ checksum "bun.lockb" }}
-            - v1-bun-deps-
-      - run: |
-          bun install bun bake
-      - save_cache:
-          key: v1-bun-deps-{{ checksum "bun.lockb" }}
-          paths:
-            - ~/.bun/install/cache
-            - node_modules
+      - run: bun i && bun run release --win
+
+  build_macos:
+    macos:
+      xcode: '10.0.0'
+    steps:
+      - checkout
+      - run: security create-keychain -p $KEYCHAIN_PASSWORD build.keychain
+      - run: security default-keychain -s build.keychain
+      - run: security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
+      - run: echo $KEYSTORE | base64 --decode - > keystore.p12
+      - run: security import keystore.p12 -k build.keychain -P $KEYCHAIN_PASSWORD -T /usr/bin/codesign
+      - run: bun i && bun run release --mac
 
 workflows:
-  use-bun-orb:
+  version: 2
+  build:
     jobs:
-      - build
+      - build_windows
+      - build_macos
