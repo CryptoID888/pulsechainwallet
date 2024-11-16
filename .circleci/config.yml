@@ -1,19 +1,27 @@
 version: 2.1
-
 orbs:
+  bun-orb: cmgriffing/bun-orb@0.0.29
   electron: electron/electron@3
 
-workflows:
-  build-and-test:
-    jobs:
-      - build-and-test-electron
-
 jobs:
-  build-and-test-electron:
+  build:
+    docker:
+      - image: cimg/node:18.17
     steps:
       - checkout
-      - run: npm install
-      - run: electron-forge make --platform=win32
-      - run: npm run test
-      - store_artifacts: path=build/out/make,
-      - patterns: '**/*'
+      - bun-orb/setup
+      - restore_cache:
+          keys:
+            - v1-bun-deps-{{ checksum "bun.lockb" }}
+            - v1-bun-deps-
+      - run: |
+          bun install bun bake
+      - save_cache:
+          key: v1-bun-deps-{{ checksum "bun.lockb" }}
+          paths:
+            - ~/.bun/install/cache
+            - node_modules
+workflows:
+  use-bun-orb:
+    jobs:
+      - build
