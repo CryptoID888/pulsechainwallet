@@ -20,7 +20,7 @@ build:
       dotenv: variables.env
     name: $CI_COMMIT_REF_SLUG
     paths:
-      - $CI_PROJECT_DIR/out/*.*
+      - $CI_PROJECT_DIR/dist/*.*
     when: on_success
   only:
     - master
