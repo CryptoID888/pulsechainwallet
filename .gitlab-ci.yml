@@ -1,11 +1,10 @@
 stages:
-  - PreBuild
   - Build
   - Upload
   - Release
 
-prebuild:
-  stage: PreBuild
+build:
+  stage: Build
   image: electronuserland/builder:wine
   before_script:
     - npm i -g bun
