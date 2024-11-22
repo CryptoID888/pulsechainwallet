@@ -277,8 +277,8 @@ export const addSetupTask = (task: Task) => {
 //
 // the unique characteristic about these transactions is that they first return a function as they are being prepared
 //
-type VariableArgFunction = <T extends unknown[] = []>(...params: T) => unknown
-type ArgumentTypes<F extends VariableArgFunction> = F extends (...args: infer A) => unknown ? A : never
-export const futureTransaction = <T extends VariableArgFunction, P extends ArgumentTypes<T>>(fn: T) => {
-  return (...args: P) => (db!.transaction(fn) as BetterSqlite3.Transaction<T>)(...args)
+// type VariableArgFunction = <R, T extends unknown[] = []>(...params: T) => R
+// type ArgumentTypes<F extends VariableArgFunction> = F extends (...args: infer A) => unknown ? A : never
+export const futureTransaction = <P extends unknown[], R>(fn: (...p: P) => R) => {
+  return (...args: P) => (db!.transaction(fn) as BetterSqlite3.Transaction<(...p: P) => R>)(...args)
 }

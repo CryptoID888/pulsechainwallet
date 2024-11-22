@@ -25,7 +25,7 @@ const proxyRequireType =
     (await ipcRenderer.invoke(key, ...args)) as R
 
 const proxyRequireTypeDefaultNull =
-  <K extends keyof APICommon, T = unknown>(key: K): InvokerRequireTypeDefaultNull<K> =>
+  <K extends keyof APICommon, T = unknown>(key: K): InvokerRequireTypeDefaultNull<K, T> =>
   async <R extends T>(...args: Parameters<APICommon[K]>) =>
     (await ipcRenderer.invoke(key, ...args)) as R | null
 

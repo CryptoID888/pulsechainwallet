@@ -4,7 +4,7 @@ import type { InsertableProof } from '$common/pools'
 import type { Hex } from 'viem'
 
 export const transactions = {
-  addWallet: futureTransaction((wallet: InsertableWalletMetadata, accounts: Account[] = []) => {
+  addWallet: futureTransaction<[InsertableWalletMetadata, Account[]?], number>((wallet, accounts = []) => {
     const result = query.get<{ count: number }>('WALLET_COUNT', [])
     if (!result) {
       throw new Error('no result from WALLET_COUNT')
@@ -24,7 +24,7 @@ export const transactions = {
     return count
   }),
 
-  nullifyAndSetAdded: futureTransaction((walletId: Hex, added: number[]) => {
+  nullifyAndSetAdded: futureTransaction<[Hex, number[]], void>((walletId, added) => {
     query.run('ACCOUNT_NULLIFY_ADDED', [{ wallet_id: walletId }])
     added.map((i) =>
       query.run<Account>('ACCOUNT_SET_ADDED', [

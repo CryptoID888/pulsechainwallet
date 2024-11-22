@@ -117,7 +117,7 @@ export type InvokerRequireType<T extends keyof API, R = unknown> = <I extends R>
   ...args: Parameters<API[T]>
 ) => Promise<I>
 
-export type InvokerRequireTypeDefaultNull<T extends keyof API, R = unknown> = <I extends R | null>(
+export type InvokerRequireTypeDefaultNull<T extends keyof API, R = unknown> = <I extends R>(
   ...args: Parameters<API[T]>
 ) => Promise<I | null>
 
