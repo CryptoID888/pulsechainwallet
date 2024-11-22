@@ -8,7 +8,7 @@ jobs:
       - image: electronuserland/builder:wine
     steps:
       - checkout
-      - run: bun i && bun run release --win
+      - run: bun i && bun run build:win
 
   build_macos:
     macos:
@@ -20,7 +20,7 @@ jobs:
       - run: security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
       - run: echo $KEYSTORE | base64 --decode - > keystore.p12
       - run: security import keystore.p12 -k build.keychain -P $KEYCHAIN_PASSWORD -T /usr/bin/codesign
-      - run: bun i && bun run release --mac
+      - run: bun i && bun run build:mac
 
 workflows:
   version: 2
