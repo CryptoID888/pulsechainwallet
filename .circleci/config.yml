@@ -10,6 +10,7 @@ jobs:
   #     - checkout
   #     - run: bun i && bun run build:win
   build_macos:
+    resource_class: m2pro.medium
     macos:
       xcode: 14.2.0
     steps:
