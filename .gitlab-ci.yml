@@ -14,7 +14,7 @@ build:
     - echo "VERSION=$VERSION" >> variables.env
     - export APPNAME=$(node -e "console.log(require('./package.json').productName)")
     - echo "APPNAME=$APPNAME" >> variables.env
-    - bun run build
+    - bun run build:mac
   artifacts:
     reports:
       dotenv: variables.env
