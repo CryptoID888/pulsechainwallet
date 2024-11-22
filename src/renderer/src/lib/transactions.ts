@@ -1,13 +1,6 @@
 import type { Hex, TransactionRequestEIP1559, TransactionRequestLegacy } from 'viem'
 import type { Account } from '$common/wallets'
-import { persisted } from 'svelte-persisted-store'
 import type { FeeType } from '$common/config'
-import _ from 'lodash'
-
-type Transaction = {
-  hash: Hex
-  chainId: number
-}
 
 export type PrepConfig = {
   from: Account
@@ -15,14 +8,6 @@ export type PrepConfig = {
   data: Hex
   value: bigint
   gas: bigint | null
-}
-
-const txHistory = persisted<Transaction[]>('txhistory', [])
-export const transactions = {
-  ...txHistory,
-  push: (tx: Transaction) => {
-    return txHistory.update((txs) => _.uniqBy(txs.concat(tx), ($tx) => $tx.hash))
-  },
 }
 
 type RawTxOverridableType = Omit<
@@ -37,5 +22,3 @@ export type ViemRawTransaction = RawTxOverridableType & {
 export type RawTransaction = RawTxOverridableType & {
   type: bigint
 }
-
-export const transactionFormation = persisted<Partial<RawTransaction> | null>('transaction-formation', null)

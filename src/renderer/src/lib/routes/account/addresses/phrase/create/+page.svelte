@@ -22,8 +22,7 @@
       }}
       on:valid-phrase={async () => {
         const metadata = await wallet.add(phrase.join(' '), PathTypes.BIP44)
-        goto(`/account/addresses/${metadata.id}/toggle`)
-      }}
-    />
+        goto(`/account/addresses/${metadata}/toggle`)
+      }} />
   </Back>
 </div>

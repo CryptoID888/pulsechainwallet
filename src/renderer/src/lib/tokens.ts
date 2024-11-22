@@ -104,7 +104,7 @@ export const whitelistedERC20: Erc20Token[] = [
 ]
 
 export const tokensOnActiveChain = derived([chain], ([$chain]) => {
-  return whitelistedERC20.filter((tkn) => +tkn.chain.id === $chain.id)
+  return whitelistedERC20.filter((tkn) => +tkn.chain.id === $chain?.id)
 })
 
 export const nativeTokenOn = (id: number) => {

@@ -3,10 +3,14 @@ import { get } from 'svelte/store'
 import _ from 'lodash'
 
 import { config } from '$main/config'
-import { type QueryKey, allDepositsFromCommitments, allPoolsUnderChainId, queries } from '$common/indexer'
+import { type QueryKey, queries } from '$common/indexer'
 import { fetchStatus } from '$main/indexer/store'
-import type { Query, PageInfo } from '$common/indexer/gql/graphql'
+import type { Query, PageInfo, Deposit } from '$common/indexer/gql/graphql'
 import { handle } from '$main/ipc'
+import { memoizeWithTTL } from '$common/utils'
+import { ChainIds } from '$common/config'
+import { native } from '$common/pools'
+import type { Hex } from 'viem'
 
 let client: graphqlRequest.GraphQLClient | null = null
 let id: NodeJS.Timeout | null = null
@@ -62,5 +66,21 @@ handle('indexer:stop', stop)
 handle('indexer:restart', restart)
 
 handle('indexer:query', query)
+
+export const allPoolsUnderChainId = memoizeWithTTL(
+  (chainId: ChainIds) => chainId,
+  async (chainId: ChainIds) => {
+    return query('ALL_POOLS_UNDER_ASSET', { chainId, asset: native })
+  },
+  1000 * 60 * 5,
+)
+
+export const allDepositsFromCommitments = async (poolId: Hex, commitments: Hex[]) => {
+  return await loopQuery<Deposit>('DEPOSITS_FROM_COMMITMENTS', 'privacyPools.items.[0].deposits', {
+    poolId,
+    commitments,
+  })
+}
+
 handle('indexer:query:allPoolsUnderChainId', allPoolsUnderChainId)
 handle('indexer:query:allDepositsFromCommitments', allDepositsFromCommitments)

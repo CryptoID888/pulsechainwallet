@@ -1,5 +1,5 @@
 import type { Hex } from 'viem'
-import { ChainIds } from '$common/config'
+import { type ChainIds } from '$common/config'
 
 export type Erc20TokenMetadata = {
   name: string

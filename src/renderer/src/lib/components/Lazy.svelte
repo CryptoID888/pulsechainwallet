@@ -3,7 +3,7 @@
   export let height = 1
   let className = ''
   let load = false
-  export let visible = (e: CustomEvent) => {
+  export let visible = (e: CustomEvent<boolean>) => {
     load = !!e.detail
   }
   export { className as class }

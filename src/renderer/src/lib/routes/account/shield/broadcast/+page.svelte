@@ -173,8 +173,9 @@
         background="bg-primary-300"
         active="bg-primary-500"
         size="sm"
-        checked={$config.hideNullifiedCommitments}
-        on:change={handleHideNullifiedCommitmentsChange} />
+        checked={$config?.hideNullifiedCommitments}
+        on:change={handleHideNullifiedCommitmentsChange}
+      />
       <span>Hide nullified</span>
     </label>
   </div>
@@ -184,13 +185,15 @@
     <span class="flex flex-row items-center gap-2">
       <StrategyControls bind:strategy />
       <span
-        class="input-group input-group-divider bg-surface-200-700-token flex w-auto flex-row border-none p-0 outline outline-1 -outline-offset-1 outline-primary-400">
+        class="input-group input-group-divider bg-surface-200-700-token flex w-auto flex-row border-none p-0 outline outline-1 -outline-offset-1 outline-primary-400"
+      >
         <StepIncrementor
           padding="p-0"
           size="size-8"
           decrementDisabled={commitments.size === 0}
           incrementDisabled={commitments.size === chips.size}
-          on:change={strategyHandlers[strategy]} />
+          on:change={strategyHandlers[strategy]}
+        />
       </span>
       <span class="flex flex-row items-center gap-2">
         <button type="button" class="btn btn-sm variant-ghost-primary" on:click={clear}>Clear</button>
@@ -225,7 +228,8 @@
 <Portal target="#sticky-portal">
   <div class="flex w-full flex-row items-center gap-2 bg-primary-50 px-4 py-2 shadow-inner">
     <button class="variant-filled-primary btn w-full" disabled={proofGenerationDisabled} on:click={broadcast}
-      >Broadcast</button>
+      >Broadcast</button
+    >
     <CancelButton backup="/account">Cancel</CancelButton>
   </div>
 </Portal>

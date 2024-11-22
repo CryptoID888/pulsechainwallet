@@ -12,7 +12,7 @@ import type { ChainIds } from '$common/config'
  * the wallets that should be available to the app
  * this is a read only store, so we only pass the event that we want to listen to
  */
-export const wallets = readable<WalletMetadata[] | null>(
+export const wallets = readable<WalletMetadata[]>(
   'wallets',
   () => {
     return api.wallet.all()

@@ -4,7 +4,7 @@
   import _ from 'lodash'
   export let value: bigint | string | null = null
   export let unit: TimeUnit = TimeUnit.Millisecond
-  $: date = new Date(_.isString(value) ? value : Number(numberToTime(BigInt(value), unit)))
+  $: date = new Date(_.isString(value) ? value : Number(numberToTime(BigInt(value || 0n), unit)))
   $: iso = date.toISOString()
   $: locale = date.toLocaleString()
   $: display = $config.useISOTime ? iso : locale

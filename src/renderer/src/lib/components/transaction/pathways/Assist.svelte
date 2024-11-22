@@ -34,7 +34,7 @@
         args: [verifiable],
       } = verifyWithdrawal.decode(message.data)
       const hashPrefix = message.hash.slice(0, 12)
-      const unit = $chain.nativeCurrency.symbol
+      const unit = $chain?.nativeCurrency.symbol
       const key = `${hashPrefix}/${formatEther(verifiable.fee)}${unit}`
       return [key, message] as const
     }),
@@ -62,7 +62,7 @@
         functionName: 'withdraw',
         args: [
           {
-            feeReceiver: $currentAccount.address,
+            feeReceiver: $currentAccount!.address,
             proof: verifiable,
           },
         ],
@@ -74,7 +74,7 @@
       }
       // return [verifiable.address, contractCalldata]
     })
-  $: multicallAddress = $chain.contracts.multicall3.address
+  $: multicallAddress = $chain?.contracts?.multicall3?.address
   $: calldata =
     selected.size > 0
       ? encodeFunctionData({

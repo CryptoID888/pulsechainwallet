@@ -91,6 +91,8 @@ export const api = {
   contact: {
     all: proxy('contact:all'),
     upsert: proxy('contact:upsert'),
+    updateOne: proxy('contact:updateOne'),
+    remove: proxy('contact:remove'),
   },
   proof: {
     all: proxy('proof:all'),

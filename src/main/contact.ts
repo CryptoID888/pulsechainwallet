@@ -10,3 +10,13 @@ handle('contact:upsert', (contact: Contact) => {
   sql.query.run('CONTACT_UPSERT', [contact])
   emit('contacts', sql.query.all('CONTACT_ALL', []))
 })
+
+handle('contact:updateOne', (contact: Contact, name: string, note: string | null) => {
+  sql.query.run('CONTACT_UPDATE_ONE', [{ address: contact.address, name, note }])
+  return sql.query.get('CONTACT_GET', [{ address: contact.address }])
+})
+
+handle('contact:remove', (contact: Contact) => {
+  sql.query.run('CONTACT_REMOVE', [{ address: contact.address }])
+  emit('contacts', sql.query.all('CONTACT_ALL', []))
+})

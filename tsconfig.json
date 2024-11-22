@@ -7,6 +7,10 @@
     "src/preload/*.d.ts",
     "src/common/**/*"
   ],
+  "exclude": [
+    "src/common/indexer/gql",
+    "src/renderer/src/lib/components/Lazy.svelte"
+  ],
   "compilerOptions": {
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,

@@ -15,7 +15,7 @@
 
   const drawerStore = getDrawerStore()
   const list = Object.values(chains)
-  $: currentVisualChain = list.find((c) => +c.id === $chain.id) as VisualChain
+  $: currentVisualChain = list.find((c) => +c.id === $chain?.id) as VisualChain
   let cleanup = () => {}
   const openNetworkSelector = async () => {
     cleanup()
@@ -49,10 +49,9 @@
         type="button"
         class="variant-ghost-primary btn btn-sm py-1 pl-2 pr-0"
         on:click={openNetworkSelector}
-        {disabled}
-      >
+        {disabled}>
         <NetworkImage size={16} chain={currentVisualChain} />
-        <span>{$chain.name}</span>
+        <span>{$chain?.name || ''}</span>
         <span>
           <Icon icon="mdi:chevron-down" class="m-0 flex p-0" height={24} />
         </span>

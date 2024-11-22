@@ -25,11 +25,12 @@
     }
     const update = (val: viem.GetEnsAddressReturnType) => {
       if (cancelled) return
-      address = viem.isAddress(val) ? viem.getAddress(val) : null
+      address = val ? (viem.isAddress(val) ? viem.getAddress(val) : null) : null
       dispatch('change', address)
     }
     const tld = value.slice(-4) as `.${string}`
     const chainId = tldToChainId.get(tld)
+    if (!chainId) return noop
     getAddressFromEns(chainId).then(update)
     return () => {
       cancelled = true
@@ -71,8 +72,7 @@
     bind:value
     placeholder="0x.../.eth/.pls"
     on:input={checkForAddressDerivation}
-    class="input flex w-full"
-  />
+    class="input flex w-full" />
   <div class="flex flex-row items-center gap-2">
     <Copy text={addr} let:copy let:copied>
       <button type="button" class="flex flex-row items-center" on:click={copy}>

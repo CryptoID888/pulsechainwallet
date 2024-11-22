@@ -28,7 +28,7 @@ export type { ReentrancyGuard } from './@openzeppelin/contracts/utils/Reentrancy
 export { ReentrancyGuard__factory } from './factories/@openzeppelin/contracts/utils/ReentrancyGuard__factory'
 export type { IncrementalMerkleTree } from './contracts/IncrementalMerkleTree'
 export { IncrementalMerkleTree__factory } from './factories/contracts/IncrementalMerkleTree__factory'
-export type { IPoseidon } from './contracts/interface/IPoseidon'
+export type { IPoseidon } from './contracts/IPoseidon/IPoseidon'
 export { IPoseidon__factory } from './factories/contracts/interface/IPoseidon__factory'
 export type { PrivacyPool } from './contracts/PrivacyPool'
 export { PrivacyPool__factory } from './factories/contracts/PrivacyPool__factory'

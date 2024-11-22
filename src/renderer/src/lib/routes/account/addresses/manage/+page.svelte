@@ -40,6 +40,7 @@
     badge: number
     type: SeedType
     id: string
+    title: string
   }
 
   let accounts: Account[] = []
@@ -58,12 +59,13 @@
     if (selectedWallet) {
       accounts = $addedAccountsByWalletId[selectedWallet.id] || []
       secretMetadata = $wallets?.[selectedWallet.id]
-      icons = $wallets.map((metadata) => ({
+      icons = $wallets.map<Icon>((metadata) => ({
         badge: $addedAccountsByWalletId[metadata.id]?.length || 0,
         type: metadata.type,
         id: metadata.id,
+        title: metadata.id,
       }))
-      selectedIcon = icons.find((i) => i.id === selectedWallet.id)
+      selectedIcon = icons.find((i) => i.id === selectedWallet.id) || null
     }
   }
 </script>
@@ -97,14 +99,12 @@
       {accounts}
       walletId={selectedWallet.id}
       currentAddress={$currentAccount.address}
-      on:select={selectAddress}
-    />
+      on:select={selectAddress} />
   {:else}
     <Portal target="#sticky-portal">
       <div class="flex w-full bg-primary-50 px-4 py-2">
         <button type="button" class="variant-filled-primary btn w-full" on:click={navToAddAddresses}
-          >Add Addresses</button
-        >
+          >Add Addresses</button>
       </div>
     </Portal>
   {/if}

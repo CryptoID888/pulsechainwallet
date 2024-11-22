@@ -2,7 +2,7 @@
 /* tslint:disable */
 
 import { Contract, Interface, type ContractRunner } from 'ethers'
-import type { IPoseidon, IPoseidonInterface } from '../../../contracts/interface/IPoseidon'
+import type { IPoseidon, IPoseidonInterface } from '../../../contracts/IPoseidon/IPoseidon'
 
 const _abi = [
   {

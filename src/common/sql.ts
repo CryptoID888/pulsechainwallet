@@ -38,6 +38,10 @@ INSERT INTO contact (address, name, note)
 VALUES (@address, @name, @note)
 ON CONFLICT (address)
 DO UPDATE SET name = @name, note = @note`,
+  CONTACT_UPDATE_ONE: /* sql */ `
+UPDATE contact SET name = @name, note = @note
+WHERE address = @address
+RETURNING *`,
   ACCOUNT_GET: /* sql */ `
 SELECT *
 FROM account
@@ -60,6 +64,9 @@ SELECT * FROM contact
 WHERE address = @address`,
   CONTACT_ALL: /* sql */ `
 SELECT * FROM contact`,
+  CONTACT_REMOVE: /* sql */ `
+DELETE FROM contact
+WHERE address = @address`,
   CHAIN_TRANSACTION_INSERT: /* sql */ `
 INSERT INTO chain_transaction (hash, chain_id, action)
 VALUES (@hash, @chain_id, @action)

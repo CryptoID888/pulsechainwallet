@@ -1,10 +1,4 @@
 import { gql } from 'graphql-request'
-import { native } from '$common/pools'
-import type { ChainIds } from '$common/config'
-import { memoizeWithTTL } from '$common/utils'
-import { loopQuery, query } from '$main/indexer'
-import { type Hex } from 'viem'
-import type { Deposit } from '$common/indexer/gql/graphql'
 
 export const queries = {
   STATUS: gql`
@@ -127,18 +121,3 @@ export const queries = {
 }
 
 export type QueryKey = keyof typeof queries
-
-export const allPoolsUnderChainId = memoizeWithTTL(
-  (chainId: ChainIds) => chainId,
-  async (chainId: ChainIds) => {
-    return query('ALL_POOLS_UNDER_ASSET', { chainId, asset: native })
-  },
-  1000 * 60 * 5,
-)
-
-export const allDepositsFromCommitments = async (poolId: Hex, commitments: Hex[]) => {
-  return await loopQuery<Deposit>('DEPOSITS_FROM_COMMITMENTS', 'privacyPools.items.[0].deposits', {
-    poolId,
-    commitments,
-  })
-}

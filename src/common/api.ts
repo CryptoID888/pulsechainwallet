@@ -22,7 +22,7 @@ import type { WalletMetadata, Account } from '$common/wallets'
 import type { NonceData } from '$common/wallets'
 import type { PathTypes } from '$common/path'
 import type { Proof } from '$common/pools'
-import { SQLQueryKeys } from './sql'
+import type { SQLQueryKeys } from './sql'
 
 export interface API {
   'password:logout': () => boolean
@@ -77,7 +77,7 @@ export interface API {
     action: string,
   ) => Hex
   'wallet:estimateGas': (chainId: ChainIds, input: SendTransactionParameters) => bigint
-  'wallet:reveal': (pass: string, secret: Hex, index?: number) => string | boolean | null
+  'wallet:reveal': (pass: string, secret: Hex, index?: number) => string | false | null
 
   'pool:commitmentFromAccountSignature': (account: Account, chainId: ChainIds, poolAddress: Hex) => Hex | null
   'pool:generateProofsAndCache': (
@@ -96,6 +96,8 @@ export interface API {
 
   'contact:all': () => Contact[]
   'contact:upsert': (contact: Contact) => void
+  'contact:updateOne': (contact: Contact, name: string, note: string | null) => Contact | null
+  'contact:remove': (contact: Contact) => void
 
   'proof:all': () => Proof[]
   'proof:allByChainId': (chainId: ChainIds) => Proof[]

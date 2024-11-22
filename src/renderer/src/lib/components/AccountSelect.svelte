@@ -10,7 +10,7 @@
 
   const drawerStore = getDrawerStore()
   const gotoManageAddresses = () => {
-    goto(crumbs.manageAddresses.link)
+    goto(crumbs.manageAddresses.link!)
     drawerStore.close()
   }
 
@@ -41,11 +41,12 @@
       </button>
     </div>
   </div>
-  <AccountList
-    walletId={$config.walletId}
-    currentAddress={current.address}
-    accounts={$addedAccounts}
-    on:select={selectAddress}
-    itemButtons={['copy']}
-  />
+  {#if $config.walletId}
+    <AccountList
+      walletId={$config.walletId}
+      currentAddress={current.address}
+      accounts={$addedAccounts}
+      on:select={selectAddress}
+      itemButtons={['copy']} />
+  {/if}
 </div>

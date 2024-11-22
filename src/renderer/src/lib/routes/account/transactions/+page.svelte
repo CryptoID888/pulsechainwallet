@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import { transactions } from '$lib/transactions'
   import Icon from '@iconify/svelte'
   import { link } from 'svelte-spa-router'
 

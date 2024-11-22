@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Erc20Token } from '$lib/tokens'
+  import type { Erc20Token } from '$common/token'
   import TokenIcon from './TokenIcon.svelte'
 
   export let token!: Erc20Token

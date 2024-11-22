@@ -49,9 +49,8 @@
       on:click|stopPropagation={() =>
         selectContact({
           address: contact.address,
-          name: name,
+          name: name ?? '',
           note: null,
-        })}>Select</button
-    >
+        })}>Select</button>
   </div>
 </div>

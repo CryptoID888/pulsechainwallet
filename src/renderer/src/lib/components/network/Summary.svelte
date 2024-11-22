@@ -14,9 +14,9 @@
 
   let current = 0n
   let previous = 0n
-  $: token = whitelistedERC20.find((token) => token.address === viem.zeroAddress && +token.chain.id === $chain.id)!
+  $: token = whitelistedERC20.find((token) => token.address === viem.zeroAddress && +token.chain.id === $chain?.id)!
   const day = 1000 * 60 * 60 * 24
-  $: blockOffset = BigInt(Math.floor(day / visualChains.chainById.get($chain.id)!.blockTime!))
+  $: blockOffset = BigInt(Math.floor(day / visualChains.chainById.get($chain!.id)!.blockTime!))
 </script>
 
 <div class="flex flex-row items-center opacity-70 hover:opacity-100">
