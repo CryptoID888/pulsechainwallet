@@ -3,12 +3,12 @@ orbs:
   bun-orb: cmgriffing/bun-orb@0.0.29
 
 jobs:
-  build_windows:
-    docker:
-      - image: electronuserland/builder:wine
-    steps:
-      - checkout
-      - run: bun i && bun run build:win
+  # build_windows:
+  #   docker:
+  #     - image: electronuserland/builder:wine
+  #   steps:
+  #     - checkout
+  #     - run: bun i && bun run build:win
 
   build_macos:
     macos:
@@ -26,5 +26,5 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_windows
+      # - build_windows
       - build_macos
