@@ -15,6 +15,7 @@ prebuild:
     - echo "VERSION=$VERSION" >> variables.env
     - export APPNAME=$(node -e "console.log(require('./package.json').productName)")
     - echo "APPNAME=$APPNAME" >> variables.env
+    - bun run build:linux
   artifacts:
     reports:
       dotenv: variables.env
@@ -48,14 +49,14 @@ variables:
 #     paths:
 #       - dist/
 
-build:
-  stage: Build
-  script:
-    - yarn install
-    - yarn build:linux
-  artifacts:
-    paths:
-      - dist/
+# build:
+#   stage: Build
+#   script:
+#     - yarn install
+#     - yarn build:linux
+#   artifacts:
+#     paths:
+#       - dist/
 
 upload:
   stage: Upload
