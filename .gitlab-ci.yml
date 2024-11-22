@@ -1,10 +1,11 @@
 stages:
+  - PreBuild
   - Build
   - Upload
   - Release
 
-build:
-  stage: Build
+prebuild:
+  stage: PreBuild
   image: electronuserland/builder:wine
   before_script:
     - npm i -g bun
@@ -14,7 +15,6 @@ build:
     - echo "VERSION=$VERSION" >> variables.env
     - export APPNAME=$(node -e "console.log(require('./package.json').productName)")
     - echo "APPNAME=$APPNAME" >> variables.env
-    - bun run build:mac
   artifacts:
     reports:
       dotenv: variables.env
@@ -29,6 +29,33 @@ variables:
   WIN_BINARY: '${APPNAME}-${VERSION}.exe'
   PACKAGE_REGISTRY_URL: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APPNAME}/${VERSION}'
   PACKAGE_REGISTRY_URL_YML: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APPNAME}'
+
+# build_macos:
+#   stage: Build
+#   script:
+#     - yarn install
+#     - yarn build:mac
+#   artifacts:
+#     paths:
+#       - dist/
+
+# build_windows:
+#   stage: Build
+#   script:
+#     - yarn install
+#     - yarn build:win
+#   artifacts:
+#     paths:
+#       - dist/
+
+build_linux:
+  stage: Build
+  script:
+    - yarn install
+    - yarn build:linux
+  artifacts:
+    paths:
+      - dist/
 
 upload:
   stage: Upload
