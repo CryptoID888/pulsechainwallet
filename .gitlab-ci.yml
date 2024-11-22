@@ -48,7 +48,7 @@ variables:
 #     paths:
 #       - dist/
 
-build_linux:
+build_lnx:
   stage: Build
   script:
     - yarn install
