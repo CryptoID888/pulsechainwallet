@@ -9,7 +9,6 @@ jobs:
   #   steps:
   #     - checkout
   #     - run: bun i && bun run build:win
-
   build_macos:
     macos:
       xcode: 14.2.0
