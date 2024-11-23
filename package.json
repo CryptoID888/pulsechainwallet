@@ -6,17 +6,6 @@
   "author": "PulseChain",
   "homepage": "https://pulsechain.com",
   "type": "module",
-  "build": {
-    "extraResources": [
-      {
-        "from": "./src/resources/",
-        "to": "resources",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
-  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --fix",
