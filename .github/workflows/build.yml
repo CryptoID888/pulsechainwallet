@@ -17,9 +17,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Install Snapcraft on Linux
-        if: runner.os == 'Linux'
-        run: sudo snap install snapcraft --classic
+      # - name: Install Snapcraft on Linux
+      #   if: runner.os == 'Linux'
+      #   run: sudo snap install snapcraft --classic
 
       - name: Install Dependencies
         env:
