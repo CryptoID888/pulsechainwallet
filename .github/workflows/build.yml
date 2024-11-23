@@ -61,6 +61,6 @@ jobs:
         if: runner.os == 'Windows'
         with:
           files: |
-            **\pulsechainwallet-*.exe
+            **/pulsechainwallet-*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
