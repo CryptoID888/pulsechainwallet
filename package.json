@@ -34,7 +34,10 @@
     "build:unpack": "bun run build && electron-builder --dir",
     "build:win": "bun run build && electron-builder --win",
     "build:mac": "bun run build && electron-builder --mac",
-    "build:linux": "bun run build && electron-builder --linux"
+    "build:linux": "bun run build && electron-builder --linux",
+    "build:Windows": "bun run build:win",
+    "build:macOS": "bun run build:mac",
+    "build:Linux": "bun run build:linux"
   },
   "dependencies": {
     "@castlenine/svelte-qrcode": "^2.3.0",
