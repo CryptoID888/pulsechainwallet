@@ -13,8 +13,10 @@ import '$main/contact'
 import * as indexer from '$main/indexer'
 import '$main/chain/state'
 import '$main/msgboard'
+import * as autoUpdate from '$main/auto-update'
 
 import { main, mainProps } from '$main/window'
+import { config } from '$main/config'
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -31,6 +33,9 @@ async function createWindow(): Promise<void> {
     },
   })
   main.set(mainWindow)
+  if (get(config).autoUpdate) {
+    autoUpdate.start()
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

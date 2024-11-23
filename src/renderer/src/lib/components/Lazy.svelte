@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lazyload } from '$lib/modifiers/lazyload'
+  import { lazyload } from '../modifiers/lazyload'
   export let height = 1
   let className = ''
   let load = false

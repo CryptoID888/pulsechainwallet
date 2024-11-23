@@ -42,6 +42,8 @@ export const feeTypesList = Object.values(feeTypes)
 export type FeeType = (typeof feeTypesList)[number]
 
 export const defaultControllableSettings = {
+  /** enable auto updates */
+  autoUpdate: false,
   /** the delimiter to use between numbers */
   digitGroupSeparator: ',',
   decimalSeparator: '.',

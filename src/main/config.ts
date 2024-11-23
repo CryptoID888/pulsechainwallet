@@ -6,6 +6,7 @@ import type { Key } from '$preload/api'
 import { type Config, defaultConfig } from '$common/config'
 import poolsConfig from '$common/pools-config.json'
 import { emit, handle } from '$main/ipc'
+import * as autoUpdate from '$main/auto-update'
 
 /**
  * The config store
@@ -46,6 +47,13 @@ handle('config:set', <K extends Key, V = K extends '.' ? Partial<Config> : unkno
     const [zeroTh, first, second] = kSplit
     if (zeroTh === 'byChain' && second === 'poolPower') {
       clone = _.set(clone, [zeroTh, first, 'poolByPowerIndex', value], 0)
+    }
+    if (k === 'autoUpdate') {
+      if (value) {
+        autoUpdate.start()
+      } else {
+        autoUpdate.stop()
+      }
     }
     return _.set(clone, k, value)
   })
