@@ -8,6 +8,7 @@ import {
   parseUnits,
   type Hex,
   erc20Abi,
+  erc20Abi_bytes32,
   Block,
   BlockTag,
 } from 'viem'
@@ -149,6 +150,11 @@ handle('state:addressInfo', async (chainId, address) => {
         {
           address,
           abi: erc20Abi,
+          functionName: 'decimals',
+        },
+        {
+          address,
+          abi: erc20Abi_bytes32,
           functionName: 'decimals',
         },
       ],
