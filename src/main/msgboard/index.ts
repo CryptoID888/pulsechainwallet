@@ -449,9 +449,7 @@ handle('msgboard:pool:contents', async (chainId: ChainIds) => {
   const pools = poolsResponse.privacyPools.items
   const poolIds = pools.map((pool) => pool.id)
   const messages = Object.entries(content).filter(([poolId]) => poolIds.includes(poolId))
-  const flattened = _.flatMap(messages, ([, messages]) => [
-    ...Object.values(messages),
-  ]) as unknown as Message[]
+  const flattened = _.flatMap(messages, ([, messages]) => [...Object.values(messages)]) as unknown as Message[]
   const sortedByBlockNumber = _.sortBy(flattened, (m: Message) => {
     return -m.blockNumber
   })
@@ -464,6 +462,17 @@ handle('msgboard:pool:contents', async (chainId: ChainIds) => {
     } = verifyWithdrawal.decode(m.data)
     return parsedCalldata.nullifier
   })
+  // const flattened = _(messages)
+  //   .flatMap(([, messages]: [string, Record<string, Message>]) => Object.values(messages))
+  //   .sortBy([(m: Message) => -m.blockNumber, (m: Message) => m.hash])
+  //   .uniqBy((m: Message) => {
+  //     const {
+  //       args: [parsedCalldata],
+  //     } = verifyWithdrawal.decode(m.data)
+  //     return parsedCalldata.nullifier
+  //   })
+  //   .reverse()
+  //   .value()
 
   return {
     messages: uniq.reverse(),

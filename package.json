@@ -111,5 +111,10 @@
     "vite-plugin-top-level-await-worker": "^1.4.9",
     "vite-plugin-wasm": "^3.3.0",
     "vite-tsconfig-paths": "^5.0.1"
-  }
+  },
+  "trustedDependencies": [
+    "@swc/core",
+    "better-sqlite3-multiple-ciphers",
+    "svelte-preprocess"
+  ]
 }

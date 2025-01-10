@@ -52,6 +52,33 @@ export interface WalletRemoveResult {
   newActiveWallet: Hex | null
 }
 
+/**
+ * Result interface for wallet removal operations
+ * @dev Used to communicate the outcome of a wallet deletion request
+ * @notice This interface ensures consistent response structure across the application
+ */
+export interface WalletRemoveResult {
+  /**
+   * Operation success status
+   * @dev true if wallet was removed, false if operation failed
+   */
+  success: boolean
+
+  /**
+   * List of wallets remaining after removal
+   * @dev Contains metadata for all wallets still in the system
+   * @notice Used to update UI state after wallet removal
+   */
+  remainingWallets: WalletMetadata[]
+
+  /**
+   * Address of wallet that became active after removal
+   * @dev null if no wallets remain or if active wallet wasn't changed
+   * @notice Hex type ensures proper Ethereum address formatting
+   */
+  newActiveWallet: Hex | null
+}
+
 export interface API {
   'password:logout': () => boolean
   'password:login': (pass: string) => boolean
