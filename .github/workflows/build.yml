@@ -6,6 +6,9 @@ jobs:
   release:
     runs-on: ${{ matrix.os }}
 
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     strategy:
       matrix:
         os:
