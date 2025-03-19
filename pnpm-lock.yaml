@@ -122,7 +122,7 @@ importers:
         version: 2.0.0(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
-        version: 1.0.1(@types/node@20.17.24)
+        version: 1.0.1(@types/node@22.13.10)
       '@electron/fuses':
         specifier: ^1.8.0
         version: 1.8.0
@@ -131,7 +131,7 @@ importers:
         version: 9.22.0
       '@graphql-codegen/cli':
         specifier: ^5.0.3
-        version: 5.0.5(@types/node@20.17.24)(encoding@0.1.13)(graphql@16.10.0)(typescript@5.8.2)
+        version: 5.0.5(@types/node@22.13.10)(encoding@0.1.13)(graphql@16.10.0)(typescript@5.8.2)
       '@graphql-codegen/typescript':
         specifier: ^4.1.0
         version: 4.1.5(encoding@0.1.13)(graphql@16.10.0)
@@ -155,7 +155,7 @@ importers:
         version: 0.4.1(tailwindcss@3.4.17)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.1
-        version: 3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24))
+        version: 3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10))
       '@types/better-sqlite3':
         specifier: ^7.6.11
         version: 7.6.12
@@ -166,8 +166,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.16
       '@types/node':
-        specifier: ^20.14.8
-        version: 20.17.24
+        specifier: 22.13.10
+        version: 22.13.10
       '@types/snarkjs':
         specifier: ^0.7.8
         version: 0.7.9
@@ -182,7 +182,7 @@ importers:
         version: 24.13.3(electron-builder-squirrel-windows@24.13.3)
       electron-vite:
         specifier: ^2.3.0
-        version: 2.3.0(@swc/core@1.11.11)(vite@5.4.14(@types/node@20.17.24))
+        version: 2.3.0(@swc/core@1.11.11)(vite@5.4.14(@types/node@22.13.10))
       eslint:
         specifier: ^9.13.0
         version: 9.22.0(jiti@2.4.2)
@@ -227,22 +227,22 @@ importers:
         version: 3.1.1
       vite:
         specifier: ^5.3.1
-        version: 5.4.14(@types/node@20.17.24)
+        version: 5.4.14(@types/node@22.13.10)
       vite-plugin-node-polyfills:
         specifier: ^0.22.0
-        version: 0.22.0(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24))
+        version: 0.22.0(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10))
       vite-plugin-top-level-await:
         specifier: ^1.4.4
-        version: 1.5.0(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24))
+        version: 1.5.0(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10))
       vite-plugin-top-level-await-worker:
         specifier: ^1.4.9
-        version: 1.4.9(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24))
+        version: 1.4.9(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10))
       vite-plugin-wasm:
         specifier: ^3.3.0
-        version: 3.4.1(vite@5.4.14(@types/node@20.17.24))
+        version: 3.4.1(vite@5.4.14(@types/node@22.13.10))
       vite-tsconfig-paths:
         specifier: ^5.0.1
-        version: 5.1.4(typescript@5.8.2)(vite@5.4.14(@types/node@20.17.24))
+        version: 5.1.4(typescript@5.8.2)(vite@5.4.14(@types/node@22.13.10))
 
 packages:
 
@@ -1607,6 +1607,9 @@ packages:
 
   '@types/node@20.17.24':
     resolution: {integrity: sha512-d7fGCyB96w9BnWQrOsJtpyiSaBcAYYr75bnK6ZRjDbql2cGLj/3GsL5OYmLPNq76l7Gf2q4Rv9J2o6h5CrD9sA==}
+
+  '@types/node@22.13.10':
+    resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
 
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
@@ -5266,6 +5269,9 @@ packages:
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
+
   undici@6.21.2:
     resolution: {integrity: sha512-uROZWze0R0itiAKVPsYhFov9LxrPMHLMEQFszeI2gCN6bnIIZ8twzBCJcN2LJrBBLfrP0t1FW0g+JmKVl8Vk1g==}
     engines: {node: '>=18.17'}
@@ -5927,9 +5933,9 @@ snapshots:
     dependencies:
       electron: 31.7.7
 
-  '@electron-toolkit/tsconfig@1.0.1(@types/node@20.17.24)':
+  '@electron-toolkit/tsconfig@1.0.1(@types/node@22.13.10)':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@electron-toolkit/utils@3.0.0(electron@31.7.7)':
     dependencies:
@@ -6493,7 +6499,7 @@ snapshots:
       graphql: 16.10.0
       tslib: 2.6.3
 
-  '@graphql-codegen/cli@5.0.5(@types/node@20.17.24)(encoding@0.1.13)(graphql@16.10.0)(typescript@5.8.2)':
+  '@graphql-codegen/cli@5.0.5(@types/node@22.13.10)(encoding@0.1.13)(graphql@16.10.0)(typescript@5.8.2)':
     dependencies:
       '@babel/generator': 7.26.10
       '@babel/template': 7.26.9
@@ -6504,12 +6510,12 @@ snapshots:
       '@graphql-tools/apollo-engine-loader': 8.0.20(graphql@16.10.0)
       '@graphql-tools/code-file-loader': 8.1.20(graphql@16.10.0)
       '@graphql-tools/git-loader': 8.0.24(graphql@16.10.0)
-      '@graphql-tools/github-loader': 8.0.20(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/github-loader': 8.0.20(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/graphql-file-loader': 8.0.19(graphql@16.10.0)
       '@graphql-tools/json-file-loader': 8.0.18(graphql@16.10.0)
       '@graphql-tools/load': 8.0.19(graphql@16.10.0)
-      '@graphql-tools/prisma-loader': 8.0.17(@types/node@20.17.24)(encoding@0.1.13)(graphql@16.10.0)
-      '@graphql-tools/url-loader': 8.0.31(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/prisma-loader': 8.0.17(@types/node@22.13.10)(encoding@0.1.13)(graphql@16.10.0)
+      '@graphql-tools/url-loader': 8.0.31(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       '@whatwg-node/fetch': 0.10.5
       chalk: 4.1.2
@@ -6517,7 +6523,7 @@ snapshots:
       debounce: 1.2.1
       detect-indent: 6.1.0
       graphql: 16.10.0
-      graphql-config: 5.1.3(@types/node@20.17.24)(graphql@16.10.0)(typescript@5.8.2)
+      graphql-config: 5.1.3(@types/node@22.13.10)(graphql@16.10.0)(typescript@5.8.2)
       inquirer: 8.2.6
       is-glob: 4.0.3
       jiti: 1.21.7
@@ -6727,7 +6733,7 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
-  '@graphql-tools/executor-http@1.3.0(@types/node@20.17.24)(graphql@16.10.0)':
+  '@graphql-tools/executor-http@1.3.0(@types/node@22.13.10)(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/executor-common': 0.0.4(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
@@ -6736,7 +6742,7 @@ snapshots:
       '@whatwg-node/fetch': 0.10.5
       '@whatwg-node/promise-helpers': 1.3.0
       graphql: 16.10.0
-      meros: 1.3.0(@types/node@20.17.24)
+      meros: 1.3.0(@types/node@22.13.10)
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@types/node'
@@ -6775,9 +6781,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@graphql-tools/github-loader@8.0.20(@types/node@20.17.24)(graphql@16.10.0)':
+  '@graphql-tools/github-loader@8.0.20(@types/node@22.13.10)(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/executor-http': 1.3.0(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/executor-http': 1.3.0(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/graphql-tag-pluck': 8.3.19(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       '@whatwg-node/fetch': 0.10.5
@@ -6845,9 +6851,9 @@ snapshots:
       graphql: 16.10.0
       tslib: 2.8.1
 
-  '@graphql-tools/prisma-loader@8.0.17(@types/node@20.17.24)(encoding@0.1.13)(graphql@16.10.0)':
+  '@graphql-tools/prisma-loader@8.0.17(@types/node@22.13.10)(encoding@0.1.13)(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/url-loader': 8.0.31(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/url-loader': 8.0.31(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       '@types/js-yaml': 4.0.9
       '@whatwg-node/fetch': 0.10.5
@@ -6889,10 +6895,10 @@ snapshots:
       graphql: 16.10.0
       tslib: 2.8.1
 
-  '@graphql-tools/url-loader@8.0.31(@types/node@20.17.24)(graphql@16.10.0)':
+  '@graphql-tools/url-loader@8.0.31(@types/node@22.13.10)(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/executor-graphql-ws': 2.0.4(graphql@16.10.0)
-      '@graphql-tools/executor-http': 1.3.0(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/executor-http': 1.3.0(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/executor-legacy-ws': 1.1.17(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       '@graphql-tools/wrap': 10.0.32(graphql@16.10.0)
@@ -7216,26 +7222,26 @@ snapshots:
     dependencies:
       tailwindcss: 3.4.17
 
-  '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24)))(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24))':
+  '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10)))(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24))
+      '@sveltejs/vite-plugin-svelte': 3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10))
       debug: 4.4.0
       svelte: 4.2.19
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24))':
+  '@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24)))(svelte@4.2.19)(vite@5.4.14(@types/node@20.17.24))
+      '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10)))(svelte@4.2.19)(vite@5.4.14(@types/node@22.13.10))
       debug: 4.4.0
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.17
       svelte: 4.2.19
       svelte-hmr: 0.16.0(svelte@4.2.19)
-      vite: 5.4.14(@types/node@20.17.24)
-      vitefu: 0.2.5(vite@5.4.14(@types/node@20.17.24))
+      vite: 5.4.14(@types/node@22.13.10)
+      vitefu: 0.2.5(vite@5.4.14(@types/node@22.13.10))
     transitivePeerDependencies:
       - supports-color
 
@@ -7314,13 +7320,13 @@ snapshots:
 
   '@types/better-sqlite3@7.6.12':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/cacheable-request@6.0.3':
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
       '@types/responselike': 1.0.3
 
   '@types/debug@4.1.12':
@@ -7333,7 +7339,7 @@ snapshots:
 
   '@types/fs-extra@9.0.13':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/http-cache-semantics@4.0.4': {}
 
@@ -7343,7 +7349,7 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/lodash@4.17.16': {}
 
@@ -7353,13 +7359,17 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
+  '@types/node@22.13.10':
+    dependencies:
+      undici-types: 6.20.0
+
   '@types/node@22.7.5':
     dependencies:
       undici-types: 6.19.8
 
   '@types/plist@3.0.5':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
       xmlbuilder: 15.1.1
     optional: true
 
@@ -7367,13 +7377,13 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/snarkjs@0.7.9': {}
 
   '@types/tar@6.1.13':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
       minipass: 4.2.8
 
   '@types/verror@1.10.11':
@@ -7381,11 +7391,11 @@ snapshots:
 
   '@types/ws@8.18.0':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
     optional: true
 
   '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)':
@@ -8646,7 +8656,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron-vite@2.3.0(@swc/core@1.11.11)(vite@5.4.14(@types/node@20.17.24)):
+  electron-vite@2.3.0(@swc/core@1.11.11)(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
       '@babel/core': 7.26.10
       '@babel/plugin-transform-arrow-functions': 7.25.9(@babel/core@7.26.10)
@@ -8654,7 +8664,7 @@ snapshots:
       esbuild: 0.21.5
       magic-string: 0.30.17
       picocolors: 1.1.1
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     optionalDependencies:
       '@swc/core': 1.11.11
     transitivePeerDependencies:
@@ -9466,13 +9476,13 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphql-config@5.1.3(@types/node@20.17.24)(graphql@16.10.0)(typescript@5.8.2):
+  graphql-config@5.1.3(@types/node@22.13.10)(graphql@16.10.0)(typescript@5.8.2):
     dependencies:
       '@graphql-tools/graphql-file-loader': 8.0.19(graphql@16.10.0)
       '@graphql-tools/json-file-loader': 8.0.18(graphql@16.10.0)
       '@graphql-tools/load': 8.0.19(graphql@16.10.0)
       '@graphql-tools/merge': 9.0.24(graphql@16.10.0)
-      '@graphql-tools/url-loader': 8.0.31(@types/node@20.17.24)(graphql@16.10.0)
+      '@graphql-tools/url-loader': 8.0.31(@types/node@22.13.10)(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       cosmiconfig: 8.3.6(typescript@5.8.2)
       graphql: 16.10.0
@@ -10073,9 +10083,9 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  meros@1.3.0(@types/node@20.17.24):
+  meros@1.3.0(@types/node@22.13.10):
     optionalDependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   methods@1.1.2: {}
 
@@ -11561,6 +11571,8 @@ snapshots:
 
   undici-types@6.19.8: {}
 
+  undici-types@6.20.0: {}
+
   undici@6.21.2: {}
 
   unique-filename@2.0.1:
@@ -11678,61 +11690,61 @@ snapshots:
       - utf-8-validate
       - zod
 
-  vite-plugin-node-polyfills@0.22.0(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24)):
+  vite-plugin-node-polyfills@0.22.0(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.36.0)
       node-stdlib-browser: 1.3.1
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     transitivePeerDependencies:
       - rollup
 
-  vite-plugin-top-level-await-worker@1.4.9(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24)):
+  vite-plugin-top-level-await-worker@1.4.9(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
       '@rollup/plugin-virtual': 3.0.2(rollup@4.36.0)
       '@swc/core': 1.11.11
       uuid: 9.0.1
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     transitivePeerDependencies:
       - '@swc/helpers'
       - rollup
 
-  vite-plugin-top-level-await@1.5.0(rollup@4.36.0)(vite@5.4.14(@types/node@20.17.24)):
+  vite-plugin-top-level-await@1.5.0(rollup@4.36.0)(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
       '@rollup/plugin-virtual': 3.0.2(rollup@4.36.0)
       '@swc/core': 1.11.11
       uuid: 10.0.0
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     transitivePeerDependencies:
       - '@swc/helpers'
       - rollup
 
-  vite-plugin-wasm@3.4.1(vite@5.4.14(@types/node@20.17.24)):
+  vite-plugin-wasm@3.4.1(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
 
-  vite-tsconfig-paths@5.1.4(typescript@5.8.2)(vite@5.4.14(@types/node@20.17.24)):
+  vite-tsconfig-paths@5.1.4(typescript@5.8.2)(vite@5.4.14(@types/node@22.13.10)):
     dependencies:
       debug: 4.4.0
       globrex: 0.1.2
       tsconfck: 3.1.5(typescript@5.8.2)
     optionalDependencies:
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@5.4.14(@types/node@20.17.24):
+  vite@5.4.14(@types/node@22.13.10):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.3
       rollup: 4.36.0
     optionalDependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
       fsevents: 2.3.3
 
-  vitefu@0.2.5(vite@5.4.14(@types/node@20.17.24)):
+  vitefu@0.2.5(vite@5.4.14(@types/node@22.13.10)):
     optionalDependencies:
-      vite: 5.4.14(@types/node@20.17.24)
+      vite: 5.4.14(@types/node@22.13.10)
 
   vm-browserify@1.1.2: {}
 
