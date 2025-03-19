@@ -18,7 +18,7 @@
     "clean": "rm -rf src/main/sql/migrations/bundle.json src/renderer/src/lib/svg src/common/indexer/gql",
     "reinstall": "pnpm run clean && pnpm install",
     "postinstall": "electron-builder install-app-deps && pnpm run export-svg && pnpm run codegen",
-    "export-svg": "pnpm tsc ./export-svg.ts",
+    "export-svg": "pnpm tsx ./export-svg.ts",
     "codegen": "pnpm gql-gen generate --config codegen.config.cjs",
     "build:unpack": "pnpm run build && electron-builder --dir",
     "build:win": "pnpm run build && electron-builder --win",
