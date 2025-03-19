@@ -46,23 +46,23 @@ If you suspect the process is truly stuck (no CPU usage for >5 minutes), you can
      del bun.lockb
    ```
 
-4. Try again with verbose logging: `bun install --verbose`
+4. Try again with verbose logging: `pnpm install --verbose`
 
 ### Development
 
 ```bash
-$ bun run dev
+$ pnpm run dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ bun run build:win
+$ pnpm run build:win
 
 # For macOS
-$ bun run build:mac
+$ pnpm run build:mac
 
 # For Linux
-$ bun run build:linux
+$ pnpm run build:linux
 ```

@@ -23,7 +23,7 @@ import type { NonceData } from '$common/wallets'
 import type { PathTypes } from '$common/path'
 import type { Proof } from '$common/pools'
 import type { SQLQueryKeys } from './sql'
-import { AddressMetadata } from './validation'
+import type { AddressMetadata } from './validation'
 
 /**
  * Result interface for wallet removal operations
