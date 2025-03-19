@@ -17,9 +17,7 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - uses: pnpm/action-setup@v4
 
       - name: Install Snapcraft on Linux
         if: runner.os == 'Linux'
