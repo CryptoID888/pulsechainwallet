@@ -6,9 +6,6 @@ jobs:
   release:
     runs-on: ${{ matrix.os }}
 
-    env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
     strategy:
       matrix:
         os:
@@ -37,7 +34,7 @@ jobs:
 
       - name: Install Dependencies
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Build/release Electron app
