@@ -25,8 +25,8 @@ export type ServiceWorkerMessage = {
   chainId: number
   data: string
   category: string
-  hardFactor: string
-  easyFactor: string
+  workMultiplier: string
+  workDivisor: string
 }
 
 export type Tree = {

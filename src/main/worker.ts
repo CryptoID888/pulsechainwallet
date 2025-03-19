@@ -24,9 +24,9 @@ const doWork = async (source: MessagePort, data: types.ServiceWorkerMessage) => 
   // seems like the viem type is slightly different from the one expected by msgboard
   worker = new msgboard.MsgBoard(msgboard.wrap1193(provider as types.MsgboardProvider), {
     difficultyFactor:
-      !data.hardFactor || !data.easyFactor
+      !data.workMultiplier || !data.workDivisor
         ? [...msgboard.getDifficultyFactor()]
-        : [BigInt(data.hardFactor), BigInt(data.easyFactor)],
+        : [BigInt(data.workMultiplier), BigInt(data.workDivisor)],
     eventLoopDelay: 10, // 10ms in event loop break
     breakInterval, // break every 10k iterations
     logger: (method: string, args: unknown[]) => {

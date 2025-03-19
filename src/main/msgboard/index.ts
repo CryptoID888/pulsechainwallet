@@ -105,7 +105,8 @@ const startWork = async (proof: Proof) => {
         leafIndex,
       )
       await transactions.sendWork(poolId, leafIndex, async () => {
-        return await b.add(work.toRLP())
+        const msg = await b.add(work.toRLP())
+        return msg.msgHash
       })
       workCache.delete(key)
     },
@@ -448,34 +449,24 @@ handle('msgboard:pool:contents', async (chainId: ChainIds) => {
   const pools = poolsResponse.privacyPools.items
   const poolIds = pools.map((pool) => pool.id)
   const messages = Object.entries(content).filter(([poolId]) => poolIds.includes(poolId))
-  const flattened = _(messages)
-    /**
-     * Processes and sorts message board entries
-     * @dev Chain of operations that:
-     * 1. Flattens the message map into an array using flatMap
-     *    - Discards the key from [string, Record<string, Message>]
-     *    - Extracts only the Message objects using Object.values
-     * 2. Sorts messages by:
-     *    - Block number (descending) as primary sort
-     *    - Transaction hash as secondary sort
-     * 3. Removes duplicate messages based on transaction hash
-     *
-     * @notice The negative block number (-m.blockNumber) is used to sort in descending order
-     * @notice Lodash's sortBy maintains stable sort order for equal values
-     */
-    .flatMap(([, messages]: [string, Record<string, Message>]) => Object.values(messages))
-    .sortBy([(m: Message) => -m.blockNumber, (m: Message) => m.hash])
-    .uniqBy((m: Message) => {
-      const {
-        args: [parsedCalldata],
-      } = verifyWithdrawal.decode(m.data)
-      return parsedCalldata.nullifier
-    })
-    .reverse()
-    .value()
+  const flattened = _.flatMap(messages, ([, messages]) => [
+    ...Object.values(messages),
+  ]) as unknown as Message[]
+  const sortedByBlockNumber = _.sortBy(flattened, (m: Message) => {
+    return -m.blockNumber
+  })
+  const sortedByHash = _.sortBy(sortedByBlockNumber, (m: Message) => {
+    return m.hash
+  })
+  const uniq = _.uniqBy(sortedByHash, (m: Message) => {
+    const {
+      args: [parsedCalldata],
+    } = verifyWithdrawal.decode(m.data)
+    return parsedCalldata.nullifier
+  })
 
   return {
-    messages: flattened,
+    messages: uniq.reverse(),
     pools,
   }
 })

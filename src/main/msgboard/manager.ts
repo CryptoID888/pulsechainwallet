@@ -48,8 +48,8 @@ export const doWork = async ({
     category,
     chainId,
     data: text,
-    hardFactor: status.hardFactor.toString(),
-    easyFactor: status.easyFactor.toString(),
+    workMultiplier: status.workMultiplier.toString(),
+    workDivisor: status.workDivisor.toString(),
   } as ServiceWorkerMessage
   return {
     board,

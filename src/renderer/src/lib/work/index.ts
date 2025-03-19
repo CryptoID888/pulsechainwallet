@@ -42,8 +42,8 @@ export const doWork = async ({
     rpc: rpcUrl,
     category,
     data: text,
-    hardFactor: status.hardFactor.toString(),
-    easyFactor: status.easyFactor.toString(),
+    workMultiplier: status.workMultiplier.toString(),
+    workDivisor: status.workDivisor.toString(),
   } as ServiceWorkerMessage)
   type Message = {
     data: string
