@@ -36,8 +36,8 @@ importers:
         specifier: ^4.0.2
         version: 4.2.0(svelte@4.2.19)
       '@pulsechain/msgboard':
-        specifier: ^0.0.23
-        version: 0.0.23(typescript@5.8.2)
+        specifier: 0.0.24
+        version: 0.0.24(typescript@5.8.2)
       '@skeletonlabs/skeleton':
         specifier: ^2.10.2
         version: 2.11.0(svelte@4.2.19)
@@ -159,9 +159,6 @@ importers:
       '@types/better-sqlite3':
         specifier: ^7.6.11
         version: 7.6.12
-      '@types/bun':
-        specifier: ^1.1.12
-        version: 1.2.5
       '@types/eslint-config-prettier':
         specifier: ^6.11.3
         version: 6.11.3
@@ -1300,8 +1297,8 @@ packages:
     resolution: {integrity: sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
-  '@pulsechain/msgboard@0.0.23':
-    resolution: {integrity: sha512-NeZwtD/3Q8opthMwwklxtuK8IATGUkGOqIJlsJVTvwHnsQRjU7XPz8iP7sAS4KfBsUjBbelCLfFkZtEwgZ9T0g==}
+  '@pulsechain/msgboard@0.0.24':
+    resolution: {integrity: sha512-xY5k+iRmVJCNOlt8wsE5jKFvU0lBqVr5GsTs97IdsRwVc6gq98lBmQKwrs6697u26UNAqZW2kr+RQskb87Grkg==}
 
   '@repeaterjs/repeater@3.0.6':
     resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
@@ -1575,9 +1572,6 @@ packages:
   '@types/better-sqlite3@7.6.12':
     resolution: {integrity: sha512-fnQmj8lELIj7BSrZQAdBMHEHX8OZLYIHXqAKT1O7tDfLxaINzf00PMjw22r3N/xXh0w/sGHlO6SVaCQ2mj78lg==}
 
-  '@types/bun@1.2.5':
-    resolution: {integrity: sha512-w2OZTzrZTVtbnJew1pdFmgV99H0/L+Pvw+z1P67HaR18MHOzYnTYOi6qzErhK8HyT+DB782ADVPPE92Xu2/Opg==}
-
   '@types/cacheable-request@6.0.3':
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
 
@@ -1637,9 +1631,6 @@ packages:
 
   '@types/ws@8.18.0':
     resolution: {integrity: sha512-8svvI3hMyvN0kKCJMvTJP/x6Y/EoQbepff882wL+Sn5QsXb3etnamgrJq4isrBxSJj5L2AuXcI0+bgkoAXGUJw==}
-
-  '@types/ws@8.5.14':
-    resolution: {integrity: sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==}
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -2099,9 +2090,6 @@ packages:
 
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
-
-  bun-types@1.2.5:
-    resolution: {integrity: sha512-3oO6LVGGRRKI4kHINx5PIdIgnLRb7l/SprhzqXapmoYkFl5m4j6EvALvbDVuuBFaamB46Ap6HCUxIXNLCGy+tg==}
 
   busboy@1.6.0:
     resolution: {integrity: sha512-8SFQbg/0hQ9xy3UNTB0YEnsNBbWfhf7RtnzpL7TkBiTBRfrQ9Fxcnz7VJsleJpyp6rVLvXiuORqjlHi5q+PYuA==}
@@ -7099,7 +7087,7 @@ snapshots:
 
   '@pkgr/core@0.1.1': {}
 
-  '@pulsechain/msgboard@0.0.23(typescript@5.8.2)':
+  '@pulsechain/msgboard@0.0.24(typescript@5.8.2)':
     dependencies:
       bn.js: 5.2.1
       debug: 4.4.0
@@ -7328,10 +7316,6 @@ snapshots:
     dependencies:
       '@types/node': 20.17.24
 
-  '@types/bun@1.2.5':
-    dependencies:
-      bun-types: 1.2.5
-
   '@types/cacheable-request@6.0.3':
     dependencies:
       '@types/http-cache-semantics': 4.0.4
@@ -7396,10 +7380,6 @@ snapshots:
     optional: true
 
   '@types/ws@8.18.0':
-    dependencies:
-      '@types/node': 20.17.24
-
-  '@types/ws@8.5.14':
     dependencies:
       '@types/node': 20.17.24
 
@@ -8004,11 +7984,6 @@ snapshots:
       - supports-color
 
   builtin-status-codes@3.0.0: {}
-
-  bun-types@1.2.5:
-    dependencies:
-      '@types/node': 20.17.24
-      '@types/ws': 8.5.14
 
   busboy@1.6.0:
     dependencies:
