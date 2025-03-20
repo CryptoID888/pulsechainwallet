@@ -1,6 +1,6 @@
 {
   "name": "pulsechainwallet",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "PulseChain Wallet",
   "main": "./out/main/index.js",
   "author": "PulseChain",
