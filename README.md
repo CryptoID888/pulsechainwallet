@@ -12,10 +12,10 @@ An Electron application with Svelte and TypeScript
 
 ```bash
 # Regular install
-$ bun install
+$ pnpm install
 
 # For detailed progress
-$ bun install --verbose
+$ pnpm install --verbose
 ```
 
 > **Note:** Some steps (especially native module compilation) may take several minutes. The `--verbose` flag will show you the detailed progress.
@@ -29,21 +29,21 @@ Common time-consuming steps:
 If you suspect the process is truly stuck (no CPU usage for >5 minutes), you can:
 
 1. Cancel the process (Ctrl+C)
-2. Clear the cache: `bun pm cache clean`
+2. Clear the cache: `pnpm pm cache clean`
 3. Remove existing dependencies and lock files:
 
    ```bash
    # For Unix/Linux/macOS (bash)
      rm -rf node_modules
-     rm bun.lockb
+     rm pnpm-lock.yaml
 
    # For Windows (PowerShell)
      Remove-Item -Recurse -Force node_modules
-     Remove-Item bun.lockb
+     Remove-Item pnpm-lock.yaml
 
    # For Windows (CMD)
      rmdir /s /q node_modules
-     del bun.lockb
+     del pnpm-lock.yaml
    ```
 
 4. Try again with verbose logging: `pnpm install --verbose`

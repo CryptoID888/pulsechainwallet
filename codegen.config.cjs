@@ -22,10 +22,6 @@ module.exports = {
   schema: 'https://pulsechainwallet-indexer.up.railway.app',
   target: 'typescript',
   overwrite: true,
-  // hooks: {
-  //     afterOneFileWrite: ["bun run scripts/resolve-type-conflicts"],
-  // afterAllFileWrite: ["prettier --write"],
-  // },
   generates: {
     './src/common/indexer/gql/': {
       preset: 'client',

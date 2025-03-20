@@ -8,13 +8,13 @@ build:
   image: electronuserland/builder:wine
   before_script:
     - npm i -g pnpm
-    - npm i
+    - pnpm i --frozen-lockfile
   script:
     - export VERSION=$(node -e "console.log(require('./package.json').version)")
     - echo "VERSION=$VERSION" >> variables.env
     - export APPNAME=$(node -e "console.log(require('./package.json').productName)")
     - echo "APPNAME=$APPNAME" >> variables.env
-    - npm run build:linux
+    - pnpm run build:linux
   artifacts:
     reports:
       dotenv: variables.env
