@@ -44,7 +44,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@types/lodash": "4.17.16",
     "@vincjo/datatables": "^1.14.10",
-    "better-sqlite3-multiple-ciphers": "^11.3.0",
+    "better-sqlite3-multiple-ciphers": "11.9.1",
     "brotli-wasm": "2.0.1",
     "concurrently": "^9.0.1",
     "electron-updater": "^6.1.7",
