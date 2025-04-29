@@ -19,8 +19,8 @@ type Options = {
   chainId: ChainIds
   text: string
   cancel?: typeof cancel
-  progress: (work: msgboard.Work) => void
-  complete: (work: msgboard.Work) => void
+  progress: (work: msgboard.Message) => void
+  complete: (work: msgboard.Message) => void
   logger?: (method: string, args: unknown[]) => void
 }
 
@@ -38,7 +38,7 @@ export const doWork = async ({
   let rejected!: () => void
   let cancelled!: boolean
   const provider = new JsonRpcProvider(rpcUrl)
-  const board = new msgboard.MsgBoard(provider, {
+  const board = new msgboard.MsgBoardClient(provider, {
     logger,
   })
   const status = await board.status()
@@ -66,25 +66,23 @@ export const doWork = async ({
         logger: (a: { log: string; args: unknown[] }) => {
           logger?.(a.log, a.args)
         },
-        progress: (msg: msgboard.WorkResultObject) => {
+        progress: (res: msgboard.WorkResult) => {
           if (cancelled) {
             return
           }
-          const work = msgboard.Work.fromObject(msg)
-          progress(work)
+          progress(res.message)
         },
-        complete: (msg: msgboard.WorkResultObject) => {
+        complete: (res: msgboard.WorkResult) => {
           if (cancelled) {
             return
           }
-          const work = msgboard.Work.fromObject(msg)
-          complete(work)
+          complete(res.message)
         },
       } as const
       worker.on('message', (msg) => {
         const { type, work } = msg as {
           type: 'logger' | 'progress' | 'complete'
-          work: msgboard.WorkResultObject
+          work: msgboard.WorkResult
         }
         if (type === 'logger') {
           return eventHandlers.logger(work as unknown as Parameters<typeof eventHandlers.logger>[0])

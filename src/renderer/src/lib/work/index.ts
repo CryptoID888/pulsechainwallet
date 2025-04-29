@@ -15,8 +15,8 @@ type Options = {
   category: string
   text: string
   cancel?: typeof cancel
-  progress: (work: msgboard.Work) => void
-  complete: (work: msgboard.Work) => void
+  progress: (work: msgboard.Message) => void
+  complete: (work: msgboard.Message) => void
   logger?: (method: string, args: unknown[]) => void
 }
 
@@ -33,7 +33,7 @@ export const doWork = async ({
   let rejected!: () => void
   let cancelled!: boolean
   const provider = new JsonRpcProvider(rpcUrl)
-  const worker = new msgboard.MsgBoard(provider, {
+  const worker = new msgboard.MsgBoardClient(provider, {
     logger,
   })
   const status = await worker.status()
@@ -92,7 +92,7 @@ export const doWork = async ({
             throw err
           })
         const handle = (msg: MessageData) => {
-          let work!: msgboard.Work
+          let work!: msgboard.Message
           if (cancelled) return
           console.log('handle', msg)
           resolve(active)
@@ -101,14 +101,14 @@ export const doWork = async ({
             //   addToList(new Log(msg.log))
             //   break
             case 'progress':
-              work = msgboard.Work.fromJSON(msg.progress!)
+              work = msgboard.fromRPCMessage(JSON.parse(msg.progress!) as msgboard.RPCMessage)
               // console.log('progress %o over %oms', work.iterations, work.duration)
               // addToList(new Log(`progress ${work.iterations} over ${work.duration}ms`))
               // lastProgress.update(() => work)
               progress(work)
               break
             case 'complete':
-              work = msgboard.Work.fromJSON(msg.work!)
+              work = msgboard.fromRPCMessage(JSON.parse(msg.work!) as msgboard.RPCMessage)
               unregister()
               complete(work)
               // addToList(new Log(

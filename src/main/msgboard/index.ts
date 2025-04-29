@@ -37,7 +37,7 @@ const board = (chainId: ChainIds) => {
     return
   }
   const provider = getPublicClient(chain)
-  return new msgboard.MsgBoard(msgboard.wrap1193(provider as MsgboardProvider))
+  return new msgboard.MsgBoardClient(msgboard.wrap1193(provider as MsgboardProvider))
 }
 
 const updateWorkStateLog = (pool_id: Hex, leaf_index: number, reason: string) => {
@@ -54,11 +54,11 @@ const startWork = async (proof: Proof) => {
   const chain = chainIdToChain.get(chainId)!
   const rpcUrl = chain.rpcUrls.default.http[0]
   const key = `${chainId}-${poolId}-${leafIndex}`
-  const markWorking = (e: msgboard.Work) => {
+  const markWorking = (e: msgboard.Message) => {
     if (!workCache.has(key)) {
       return
     }
-    log('working pool=%o leaf=%o block=%o nonce=%o', truncateHash(poolId), leafIndex, e.block.number, e.nonce)
+    log('working pool=%o leaf=%o block=%o nonce=%o', truncateHash(poolId), leafIndex, e.blockNumber, e.nonce)
     sql.query.run('MARK_PROOF_AS_WORKING', [
       {
         pool_id: poolId,
@@ -95,18 +95,18 @@ const startWork = async (proof: Proof) => {
         },
       ])
     },
-    complete: async (work: msgboard.Work) => {
+    complete: async (work: msgboard.Message) => {
       log(
         'complete hash=%o@%o nonce=%o pool=%o leaf=%o',
         truncateHash(work.hash),
-        work.block.number,
+        work.blockNumber,
         work.nonce,
         truncateHash(poolId),
         leafIndex,
       )
       await transactions.sendWork(poolId, leafIndex, async () => {
-        const msg = await b.add(work.toRLP())
-        return msg.msgHash
+        const msg = await b.addMessage(msgboard.toRLP(work))
+        return msg
       })
       workCache.delete(key)
     },
