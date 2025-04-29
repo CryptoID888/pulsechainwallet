@@ -9,7 +9,7 @@ import { ChainIds } from '$common/config'
 const port = parentPort
 if (!port) throw new Error('IllegalState')
 
-let worker!: msgboard.MsgBoard
+let worker!: msgboard.MsgBoardClient
 let provider!: PublicClient
 
 const doWork = async (source: MessagePort, data: types.ServiceWorkerMessage) => {
@@ -22,12 +22,11 @@ const doWork = async (source: MessagePort, data: types.ServiceWorkerMessage) => 
   const breakInterval = 10_000n
   // type assertion to avoid the type checker complaining about the provider
   // seems like the viem type is slightly different from the one expected by msgboard
-  worker = new msgboard.MsgBoard(msgboard.wrap1193(provider as types.MsgboardProvider), {
-    difficultyFactor:
+  worker = new msgboard.MsgBoardClient(msgboard.wrap1193(provider as types.MsgboardProvider), {
+    difficultyFactors:
       !data.workMultiplier || !data.workDivisor
-        ? [...msgboard.getDifficultyFactor()]
-        : [BigInt(data.workMultiplier), BigInt(data.workDivisor)],
-    eventLoopDelay: 10, // 10ms in event loop break
+        ? undefined
+        : { workMultiplier: BigInt(data.workMultiplier), workDivisor: BigInt(data.workDivisor) },
     breakInterval, // break every 10k iterations
     logger: (method: string, args: unknown[]) => {
       if (typeof method !== 'string' || (!method.startsWith('eth_') && !method.startsWith('msgboard_'))) {
@@ -50,7 +49,7 @@ const doWork = async (source: MessagePort, data: types.ServiceWorkerMessage) => 
   const id = setInterval(() => {}, Number(breakInterval))
   try {
     const work = await worker.doPoW(data.category, data.data)
-    if (!work.isValid) {
+    if (!work.stats.isValid) {
       // throw it away
       return
     }

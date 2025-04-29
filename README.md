@@ -29,7 +29,7 @@ Common time-consuming steps:
 If you suspect the process is truly stuck (no CPU usage for >5 minutes), you can:
 
 1. Cancel the process (Ctrl+C)
-2. Clear the cache: `pnpm pm cache clean`
+2. Clear the cache: `pnpm cache clean`
 3. Remove existing dependencies and lock files:
 
    ```bash
