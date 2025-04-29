@@ -11,22 +11,22 @@
     "lint": "eslint . --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false --noUnusedLocals false --noUnusedParameters false",
     "svelte-check": "svelte-check --tsconfig ./tsconfig.json",
-    "typecheck": "pnpm run typecheck:node && pnpm run svelte-check",
+    "typecheck": "npm run typecheck:node && npm run svelte-check",
     "start": "electron-vite preview",
     "dev": "electron-vite dev -- --trace-warnings",
-    "build": "pnpm run typecheck && electron-vite build",
+    "build": "npm run typecheck && electron-vite build",
     "clean": "rm -rf src/main/sql/migrations/bundle.json src/renderer/src/lib/svg src/common/indexer/gql",
-    "reinstall": "pnpm run clean && pnpm install",
-    "postinstall": "electron-builder install-app-deps && pnpm run export-svg && pnpm run codegen",
-    "export-svg": "pnpm tsx ./export-svg.ts",
-    "codegen": "pnpm gql-gen generate --config codegen.config.cjs",
-    "build:unpack": "pnpm run build && electron-builder --dir",
-    "build:win": "pnpm run build && electron-builder --win",
-    "build:mac": "pnpm run build && electron-builder --mac",
-    "build:linux": "pnpm run build && electron-builder --linux",
-    "build:Windows": "pnpm run build:win",
-    "build:macOS": "pnpm run build:mac",
-    "build:Linux": "pnpm run build:linux"
+    "reinstall": "npm run clean && npm install",
+    "postinstall": "electron-builder install-app-deps && npm run export-svg && npm run codegen",
+    "export-svg": "tsx ./export-svg.ts",
+    "codegen": "gql-gen generate --config codegen.config.cjs",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux",
+    "build:Windows": "npm run build:win",
+    "build:macOS": "npm run build:mac",
+    "build:Linux": "npm run build:linux"
   },
   "dependencies": {
     "@castlenine/svelte-qrcode": "^2.3.0",
@@ -87,8 +87,8 @@
     "@types/node": "22.13.10",
     "@types/snarkjs": "^0.7.8",
     "autoprefixer": "^10.4.20",
-    "electron": "^36.0.0",
-    "electron-builder": "^24.13.3",
+    "electron": "^35.0.0",
+    "electron-builder": "26.0.12",
     "electron-vite": "^2.3.0",
     "eslint": "^9.13.0",
     "eslint-plugin-svelte": "^2.41.0",
@@ -112,9 +112,8 @@
     "vite-plugin-wasm": "^3.3.0",
     "vite-tsconfig-paths": "^5.0.1"
   },
-  "trustedDependencies": [
-    "@swc/core",
-    "better-sqlite3-multiple-ciphers",
-    "svelte-preprocess"
-  ]
+  "overrides": {
+    "node-abi": "4.4.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
