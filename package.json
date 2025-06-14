@@ -29,6 +29,9 @@
     "build:Linux": "yarn run build:linux"
   },
   "dependencies": {
+    "@capacitor/android": "7.3.0",
+    "@capacitor/cli": "7.3.0",
+    "@capacitor/core": "7.3.0",
     "@castlenine/svelte-qrcode": "^2.3.0",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",

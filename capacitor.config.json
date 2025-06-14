@@ -1,0 +1,5 @@
+{
+  "appId": "pulsechainwallet.app",
+  "appName": "pulsechainwallet",
+  "webDir": "out/renderer"
+}
